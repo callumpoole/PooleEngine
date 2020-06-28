@@ -1,0 +1,1 @@
+target_include_directories(PooleEngine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../include/PooleEngine") #Allow foo_calls_bar.cpp to do #include "foo_calls_bar.h"
