@@ -4,7 +4,7 @@
 
 ### Added Not From Above Template ###
 3rdParty/glfw-3.3.2_full/*
-3rdParty/assimp-master_full/*
+3rdParty/assimp-master/*
 
 ### C++ ###
 # Prerequisites
