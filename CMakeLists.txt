@@ -1,6 +1,5 @@
 #3rd Party
-#add_subdirectory(3rdParty/glfw-3.3.2)
-add_subdirectory(3rdParty/glm-0.9.9.8)
+add_subdirectory(3rdParty/glm)
 #add_subdirectory(3rdParty/assimp-master)
 
 #PooleEngine
@@ -32,7 +31,7 @@ target_link_libraries(PooleEngine PUBLIC "${OPENGL_LIBRARIES}")
 
 target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glfw-3.3.2/include")
 target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glad/include")
-target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glm-0.9.9.8")
+target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glm")
 target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/stb")
 target_link_libraries(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glfw-3.3.2/glfw3.lib")
 
