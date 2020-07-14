@@ -37,4 +37,4 @@ target_link_libraries(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/g
 
 #PooleEngine
 add_subdirectory(src)
-target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include") #Allow main.cpp to do #include "PooleEngine/foo_calls_bar.h"
+target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include") #Allow main.cpp to do #include "PooleEngine/......h"
