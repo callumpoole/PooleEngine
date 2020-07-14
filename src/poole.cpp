@@ -17,8 +17,6 @@ void TestInit()
     };
     //int indicies[]{ 0, 1, 2 };
 
-
-
     //Generate 1 buffer, put the resulting identifier in vertexbuffer
     glGenBuffers(1, &vertexbuffer);
     //The following commands will talk about our 'vertexbuffer' buffer
@@ -45,6 +43,25 @@ void TestTriangle()
     glDisableVertexAttribArray(0);
 }
 
+void TestProcessInputTick(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+}
+
+void TestProcessInputEvent(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/)
+{
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS)
+    {
+        std::cout << "1\n";
+    }
+}
+
+void framebuffer_size_callback(GLFWwindow* /*window*/, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
 PooleEngine::PooleEngine(const char* windowName, glm::uvec2 size)
 {    
     GLFWwindow* window;
@@ -52,15 +69,18 @@ PooleEngine::PooleEngine(const char* windowName, glm::uvec2 size)
     //Initialize the library GLFW
     if (!glfwInit())
     {
-        std::cout << "Failed to Init GLFW" << std::endl;
+        std::cout << "Failed to Init GLFW\n";
         return;
     }
 
     //Create a windowed mode window and its OpenGL context
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     window = glfwCreateWindow(size.x, size.y, windowName, NULL, NULL);
     if (!window)
     {
-        std::cout << "Failed to Create Window" << std::endl;
+        std::cout << "Failed to Create Window\n";
         glfwTerminate();
         return;
     }
@@ -69,22 +89,37 @@ PooleEngine::PooleEngine(const char* windowName, glm::uvec2 size)
 
     //Init Glad
     if (!gladLoadGL()) {
-        std::cout << "Failed to initialize OpenGL context" << std::endl;
+        std::cout << "Failed to initialize OpenGL context\n";
         return;
     }
     if (!GLAD_GL_VERSION_3_0)
     {
-        std::cout << "Open GL version too low!" << std::endl;
+        std::cout << "Open GL version too low!\n";
         return;
     }
 
+    //setup current window size
+    glViewport(0, 0, size.x, size.y);
+    //Listen to resize events
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    //Listen to input events
+    glfwSetKeyCallback(window, TestProcessInputEvent);
+
+    //Init buffers
     TestInit();
 
     //Loop until the user closes the window
     while (!glfwWindowShouldClose(window))
     {
-        //Render here
+        //Get input tick
+        TestProcessInputTick(window);
+
+        //Draw BG
         glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+        //Draw Mesh
         TestTriangle();
 
         //Swap front and back buffers
