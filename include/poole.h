@@ -4,8 +4,12 @@
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 
-class PooleEngine
-{
-public:
-	PooleEngine(const char* windowName, glm::uvec2 size);
-};
+namespace Poole {
+
+	class Engine
+	{
+	public:
+		Engine(const char* windowName, glm::uvec2 size);
+	};
+
+}
