@@ -1,7 +1,7 @@
-#include "poole.h"
+#include "Engine.h"
 #include <iostream>
-#include "rendering/shader_loader.h"
-#include "rendering/shader_literals/shaderLiterals.h"
+#include "Rendering/ShaderLoader.h"
+#include "Rendering/ShaderLiterals/ShaderLiterals.h"
 
 namespace Poole {
 
