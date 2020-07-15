@@ -9,7 +9,7 @@ FILE(GLOB_RECURSE PooleEngine_src_h   		src/*.h)
 FILE(GLOB_RECURSE PooleEngine_src_cpp 		src/*.cpp)
 
 add_library(
-	PooleEngine STATIC
+	PooleEngine SHARED
 
 	#3rd Party
 	3rdParty/glad/include/glad/glad.h
