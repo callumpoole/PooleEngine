@@ -4,9 +4,9 @@ add_subdirectory(3rdParty/glm)
 
 #PooleEngine
 project(PooleEngineProject)
-FILE(GLOB_RECURSE PooleEngine_include_PooleEngine_h 	include/PooleEngine/*.h)
-FILE(GLOB_RECURSE PooleEngine_src_h   			src/*.h)
-FILE(GLOB_RECURSE PooleEngine_src_cpp 			src/*.cpp)
+FILE(GLOB_RECURSE PooleEngine_include_Poole_h 	include/Poole/*.h)
+FILE(GLOB_RECURSE PooleEngine_src_h   		src/*.h)
+FILE(GLOB_RECURSE PooleEngine_src_cpp 		src/*.cpp)
 
 add_library(
 	PooleEngine STATIC
@@ -19,8 +19,8 @@ add_library(
 	
 
 	#PooleEngine
-	include/poole.h
-	${PooleEngine_include_PooleEngine_h}
+	include/Poole.h
+	${PooleEngine_include_Poole_h}
 	${PooleEngine_src_h}
 	${PooleEngine_src_cpp}
 	)
