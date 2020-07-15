@@ -6,7 +6,7 @@
 
 namespace Poole { namespace Rendering {
 
-	std::string readFileIntoString(std::string_view file_path)
+	std::string ReadFileIntoString(std::string_view file_path)
 	{
 		std::string text;
 		std::ifstream stream(file_path.data(), std::ios::in);
@@ -24,7 +24,7 @@ namespace Poole { namespace Rendering {
 		return text;
 	}
 
-	void compileAndCheckShader(GLuint& shaderID, const char* shaderCode, GLint& result, int& infoLogLength)
+	void CompileAndCheckShader(GLuint& shaderID, const char* shaderCode, GLint& result, int& infoLogLength)
 	{
 		glShaderSource(shaderID, 1, &shaderCode, NULL);
 		glCompileShader(shaderID);
@@ -41,7 +41,7 @@ namespace Poole { namespace Rendering {
 	}
 
 	//Source: http://www.opengl-tutorial.org/beginners-tutorials/tutorial-2-the-first-triangle/
-	GLuint loadShaderLiterals(std::string_view vertexShaderCode, std::string_view fragmentShaderCode, std::string_view vertex_file_path, std::string_view fragment_file_path)
+	GLuint LoadShaderLiterals(std::string_view vertexShaderCode, std::string_view fragmentShaderCode, std::string_view vertex_file_path, std::string_view fragment_file_path)
 	{
 		// Create the shaders
 		GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -52,11 +52,11 @@ namespace Poole { namespace Rendering {
 
 		// Compile Vertex Shader
 		printf("Compiling shader : %s\n", vertex_file_path.data());
-		compileAndCheckShader(vertexShaderID, vertexShaderCode.data(), result, infoLogLength);
+		CompileAndCheckShader(vertexShaderID, vertexShaderCode.data(), result, infoLogLength);
 
 		// Compile Fragment Shader
 		printf("Compiling shader : %s\n", fragment_file_path.data());
-		compileAndCheckShader(fragmentShaderID, fragmentShaderCode.data(), result, infoLogLength);
+		CompileAndCheckShader(fragmentShaderID, fragmentShaderCode.data(), result, infoLogLength);
 
 		// Link the program
 		printf("Linking program\n");
@@ -83,11 +83,11 @@ namespace Poole { namespace Rendering {
 		return ProgramID;
 	}
 
-	GLuint loadShaders(std::string_view vertex_file_path, std::string_view fragment_file_path)
+	GLuint LoadShaders(std::string_view vertex_file_path, std::string_view fragment_file_path)
 	{
-		std::string vertexShaderCode = readFileIntoString(vertex_file_path);
-		std::string fragmentShaderCode = readFileIntoString(fragment_file_path);
-		return loadShaderLiterals(vertexShaderCode, fragmentShaderCode, vertex_file_path, fragment_file_path);
+		std::string vertexShaderCode = ReadFileIntoString(vertex_file_path);
+		std::string fragmentShaderCode = ReadFileIntoString(fragment_file_path);
+		return LoadShaderLiterals(vertexShaderCode, fragmentShaderCode, vertex_file_path, fragment_file_path);
 	}
 }}
 

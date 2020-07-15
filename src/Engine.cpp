@@ -114,11 +114,11 @@ namespace Poole {
         TestInit();
 
         // Create and compile our GLSL program from the shaders
-        GLuint programID = Rendering::loadShaderLiterals(
+        GLuint programID = Rendering::LoadShaderLiterals(
             Rendering::ShaderLiterals::currentVertexShader,
             Rendering::ShaderLiterals::currentFragmentShader
         );
-        //GLuint programID = Rendering::loadShaders(
+        //GLuint programID = Rendering::LoadShaders(
         //    R"(D:\Callum\Desktop\PooleEngineSandbox\build\Sandbox\Debug\basic_vertex.vertexshader)", 
         //    R"(D:\Callum\Desktop\PooleEngineSandbox\build\Sandbox\Debug\basic_fragment.fragmentshader)"
         //    "basic_vertex.vertexshader",
