@@ -4,7 +4,7 @@
 #include <stdio.h>
 namespace Poole {
 
-	class Engine
+	class POOLE_API Engine
 	{
 	public:
 		Engine() {}
