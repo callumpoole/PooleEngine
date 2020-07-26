@@ -1,7 +1,6 @@
 #3rd Party
 add_subdirectory(3rdParty/glm)
 add_subdirectory(3rdParty/glfw3)
-#add_subdirectory(3rdParty/assimp-master)
 
 #PooleEngine
 project(PooleEngineProject)
@@ -31,7 +30,6 @@ add_library(
 find_package(OpenGL REQUIRED)
 target_link_libraries(PooleEngine PUBLIC "${OPENGL_LIBRARIES}")
 target_link_libraries(PooleEngine PRIVATE glfw ${GLFW_LIBRARIES})
-#target_link_libraries(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glfw3/glfw3.lib")
 
 target_compile_features(PooleEngine PUBLIC cxx_std_17)
 
