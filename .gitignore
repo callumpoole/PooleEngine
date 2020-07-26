@@ -1,10 +1,9 @@
 # Created by https://www.gitignore.io/api/c++,clion,emacs,cmake
 # Edit at https://www.gitignore.io/?templates=c++,clion,emacs,cmake
 # Sourced from: https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/commit/ff7c23394b85054789e7411e7d8e3c7e481cacc8
-
+ 
 ### Added Not From Above Template ###
-3rdParty/glfw-3.3.2_full/*
-3rdParty/assimp-master/*
+3rd_party/glfw3_full*
 
 ### C++ ###
 # Prerequisites
@@ -34,6 +33,7 @@
 *.la
 *.a
 *.lib
+!3rd_party/glfw3.3-stable/lib/glfw3.lib
 
 # Executables
 *.exe

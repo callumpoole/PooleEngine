@@ -1,6 +1,5 @@
 #3rd Party
-add_subdirectory(3rdParty/glm)
-add_subdirectory(3rdParty/glfw3)
+add_subdirectory(3rd_party/glm)
 
 #PooleEngine
 project(PooleEngineProject)
@@ -12,10 +11,10 @@ add_library(
 	PooleEngine SHARED
 
 	#3rd Party
-	3rdParty/glad/include/glad/glad.h
-	3rdParty/glad/include/KHR/khrplatform.h
-	3rdParty/glad/src/glad.c
-	3rdParty/stb/stb/stb_image.h
+	3rd_party/glad/include/glad/glad.h
+	3rd_party/glad/include/KHR/khrplatform.h
+	3rd_party/glad/src/glad.c
+	3rd_party/stb/stb/stb_image.h
 	
 
 	#PooleEngine
@@ -29,14 +28,14 @@ add_library(
 #3rd Party
 find_package(OpenGL REQUIRED)
 target_link_libraries(PooleEngine PUBLIC "${OPENGL_LIBRARIES}")
-target_link_libraries(PooleEngine PRIVATE glfw ${GLFW_LIBRARIES})
+target_link_libraries(PooleEngine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/glfw3/glfw3.lib")
 
 target_compile_features(PooleEngine PUBLIC cxx_std_17)
 
-target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glfw3/include")
-target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glad/include")
-target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/glm")
-target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/stb")
+target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/glfw3.3-stable/include")
+target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/glad/include")
+target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/glm")
+target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/stb")
 
 
 #PooleEngine
