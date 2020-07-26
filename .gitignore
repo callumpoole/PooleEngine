@@ -3,7 +3,7 @@
 # Sourced from: https://gitlab.version.fz-juelich.de/jupedsim/jpsvis/commit/ff7c23394b85054789e7411e7d8e3c7e481cacc8
  
 ### Added Not From Above Template ###
-3rd_party/glfw3_full*
+3rd_party/glfw3.3_full*
 
 ### C++ ###
 # Prerequisites
@@ -33,7 +33,7 @@
 *.la
 *.a
 *.lib
-!3rd_party/glfw3.3-stable/lib/glfw3.lib
+!3rd_party/glfw3.3/lib/glfw3.lib
 
 # Executables
 *.exe
