@@ -3,7 +3,7 @@ add_subdirectory(3rd_party/glm)
 
 #PooleEngine
 project(PooleEngineProject)
-FILE(GLOB_RECURSE PooleEngine_include_Poole_h 	include/Poole/*.h)
+FILE(GLOB_RECURSE PooleEngine_include_poole_h 	include/poole/*.h)
 FILE(GLOB_RECURSE PooleEngine_src_h   		src/*.h)
 FILE(GLOB_RECURSE PooleEngine_src_cpp 		src/*.cpp)
 
@@ -18,8 +18,8 @@ add_library(
 	
 
 	#PooleEngine
-	include/Poole.h
-	${PooleEngine_include_Poole_h}
+	include/poole.h
+	${PooleEngine_include_poole_h}
 	${PooleEngine_src_h}
 	${PooleEngine_src_cpp}
 	)
@@ -40,4 +40,4 @@ target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_p
 
 #PooleEngine
 add_subdirectory(src)
-target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include") #Allow main.cpp to do #include "PooleEngine/......h"
+target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
