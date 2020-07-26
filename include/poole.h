@@ -1,4 +1,4 @@
 #pragma once
 
-#include "Poole/Engine.h"
-#include "Poole/EntryPoint.h"
+#include "poole/engine.h"
+#include "poole/entry_point.h"

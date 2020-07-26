@@ -1,5 +1,5 @@
 #pragma once
-#include "Core.h"
+#include "core.h"
 #include <string_view>
 
 namespace Poole { namespace Rendering {
