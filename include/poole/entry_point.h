@@ -1,10 +1,10 @@
 #pragma once
 
-extern Poole::Engine* Poole::CreateApplication();
+extern poole::engine* poole::create_application();
 
 int main(int /*argc*/, int* /*argv*/[])
 {
-	auto app = Poole::CreateApplication();
-	app->Run();
+	auto app = poole::create_application();
+	app->run();
 	delete app;
 }
