@@ -3,7 +3,7 @@
 #include "rendering/shader_loader.h"
 #include "rendering/shader_literals/shader_literals.h"
 
-namespace Poole {
+namespace poole {
 
     //This will identify our vertex buffer
     GLuint vertexbuffer; //TEMP
@@ -66,7 +66,7 @@ namespace Poole {
         glViewport(0, 0, width, height);
     }
     
-    Engine::Engine(const char* windowName, glm::uvec2 size)
+    engine::engine(const char* windowName, glm::uvec2 size)
     {    
         GLFWwindow* window;
     

@@ -15,6 +15,8 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/shader_loader.h"
 	"src/rendering/shader_loader.cpp"
 	"src/rendering/shader_literals/shader_literals.h"
+	"src/rendering/renderer.h"
+	"src/rendering/renderer.cpp"
 	)
 
 # Setup Folder Filters for IDE
@@ -45,6 +47,7 @@ add_library(
 	3rd_party/glad/include/KHR/khrplatform.h
 	3rd_party/glad/src/glad.c
 	3rd_party/stb/stb/stb_image.h
+	3rd_party/entt/include/entt/entt.hpp
 	
 
 	#PooleEngine
@@ -62,6 +65,7 @@ target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_p
 target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/glad/include")
 target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/glm")
 target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/stb")
+target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/entt/include")
 
 
 #PooleEngine

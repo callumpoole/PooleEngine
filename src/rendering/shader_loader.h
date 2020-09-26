@@ -2,7 +2,7 @@
 #include "core.h"
 #include <string_view>
 
-namespace Poole { namespace Rendering {
+namespace poole { namespace Rendering {
 
 	GLuint LoadShaders(
 		std::string_view vertex_file_path, 

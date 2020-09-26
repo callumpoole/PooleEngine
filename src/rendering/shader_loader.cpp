@@ -4,7 +4,7 @@
 #include <sstream>
 #include <vector>
 
-namespace Poole { namespace Rendering {
+namespace poole { namespace Rendering {
 
 	std::string ReadFileIntoString(std::string_view file_path)
 	{
