@@ -31,6 +31,8 @@ namespace Poole
 }
 // END MOVE
 
+struct GLFWwindow;
+
 namespace Poole::Rendering {
 
 	class Renderer
@@ -41,10 +43,13 @@ namespace Poole::Rendering {
 		//MeshBasicVertexColor* Submit(const MeshBasicVertexColor& m_mesh);
 		//MeshBasicVertexColor* Submit(MeshBasicVertexColor&& m_mesh);
 
-		static void RenderAll();
+		static void Init();
+		static void Tick(GLFWwindow* window);
 	private:
+		static void RenderAll();
 		static MeshBasicSolidColor* InitLastSumbitted();
 
+		static GLuint m_programID;
 		static std::vector<std::unique_ptr<MeshBasicSolidColor>> m_solidColorMeshes;
 		static std::vector<std::unique_ptr<MeshBasicVertexColor>> m_vertexColorMeshes;
 		static GLuint m_vertexbuffer;
