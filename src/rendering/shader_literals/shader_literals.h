@@ -1,6 +1,6 @@
 #pragma once
 
-namespace poole { namespace Rendering { namespace ShaderLiterals{
+namespace Poole::Rendering::ShaderLiterals {
 
 	//Don't modify
 	const char* basicVertexShader = R"(
@@ -40,4 +40,4 @@ namespace poole { namespace Rendering { namespace ShaderLiterals{
 		}
 	)";
 
-} } }
+}

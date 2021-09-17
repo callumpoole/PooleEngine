@@ -2,17 +2,17 @@
 
 #include "core.h"
 #include <stdio.h>
-namespace poole {
+namespace Poole {
 
-	class POOLE_API engine
+	class POOLE_API Engine
 	{
 	public:
-		engine() {}
-	   	engine(const char* windowName, glm::uvec2 size);
-		virtual ~engine() { }
+		Engine() {}
+	   	Engine(const char* windowName, glm::uvec2 size);
+		virtual ~Engine() { }
 
-		void run() { printf("Run()"); }
+		void Run() { printf("Run()"); }
 	}; 
 
-	engine* create_application();
+	Engine* CreateApplication();
 }

@@ -4,27 +4,29 @@
 #include <sstream>
 #include <vector>
 
-namespace poole { namespace Rendering {
+namespace Poole::Rendering {
 
-	std::string ReadFileIntoString(std::string_view file_path)
+	std::string ReadFileIntoString(std::string_view filePath)
 	{
 		std::string text;
-		std::ifstream stream(file_path.data(), std::ios::in);
-		if (stream.is_open()) {
+		std::ifstream stream(filePath.data(), std::ios::in);
+		if (stream.is_open())
+		{
 			std::stringstream sstr;
 			sstr << stream.rdbuf();
 			text = sstr.str();
 			stream.close();
 		}
-		else {
-			printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", file_path.data());
+		else
+		{
+			printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", filePath.data());
 			getchar();
 			return 0;
 		}
 		return text;
 	}
 
-	void CompileAndCheckShader(GLuint& shaderID, const char* shaderCode, GLint& result, int& infoLogLength)
+	void CompileAndCheckShader(GLuint& shaderID, const char* shaderCode, GLint& result, i32& infoLogLength)
 	{
 		glShaderSource(shaderID, 1, &shaderCode, NULL);
 		glCompileShader(shaderID);
@@ -32,30 +34,30 @@ namespace poole { namespace Rendering {
 		// Check Vertex Shader
 		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
 		glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		if (infoLogLength > 0) {
+		if (infoLogLength > 0)
+		{
 			std::vector<char> shaderErrorMessage(infoLogLength + 1);
 			glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
 			printf("%s\n", &shaderErrorMessage[0]);
-		
 		}
 	}
 
 	//Source: http://www.opengl-tutorial.org/beginners-tutorials/tutorial-2-the-first-triangle/
-	GLuint LoadShaderLiterals(std::string_view vertexShaderCode, std::string_view fragmentShaderCode, std::string_view vertex_file_path, std::string_view fragment_file_path)
+	GLuint LoadShaderLiterals(std::string_view vertexShaderCode, std::string_view fragmentShaderCode, std::string_view vertexFilePath, std::string_view fragmentFilePath)
 	{
 		// Create the shaders
 		GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 		GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
 		GLint result = GL_FALSE;
-		int infoLogLength;
+		i32 infoLogLength;
 
 		// Compile Vertex Shader
-		printf("Compiling shader : %s\n", vertex_file_path.data());
+		printf("Compiling shader : %s\n", vertexFilePath.data());
 		CompileAndCheckShader(vertexShaderID, vertexShaderCode.data(), result, infoLogLength);
 
 		// Compile Fragment Shader
-		printf("Compiling shader : %s\n", fragment_file_path.data());
+		printf("Compiling shader : %s\n", fragmentFilePath.data());
 		CompileAndCheckShader(fragmentShaderID, fragmentShaderCode.data(), result, infoLogLength);
 
 		// Link the program
@@ -68,7 +70,8 @@ namespace poole { namespace Rendering {
 		// Check the program
 		glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
 		glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		if (infoLogLength > 0) {
+		if (infoLogLength > 0)
+		{
 			std::vector<char> ProgramErrorMessage(infoLogLength + 1);
 			glGetProgramInfoLog(ProgramID, infoLogLength, NULL, &ProgramErrorMessage[0]);
 			printf("%s\n", &ProgramErrorMessage[0]);
@@ -83,11 +86,11 @@ namespace poole { namespace Rendering {
 		return ProgramID;
 	}
 
-	GLuint LoadShaders(std::string_view vertex_file_path, std::string_view fragment_file_path)
+	GLuint LoadShaders(std::string_view vertexFilePath, std::string_view fragmentFilePath)
 	{
-		std::string vertexShaderCode = ReadFileIntoString(vertex_file_path);
-		std::string fragmentShaderCode = ReadFileIntoString(fragment_file_path);
-		return LoadShaderLiterals(vertexShaderCode, fragmentShaderCode, vertex_file_path, fragment_file_path);
+		const std::string vertexShaderCode = ReadFileIntoString(vertexFilePath);
+		const std::string fragmentShaderCode = ReadFileIntoString(fragmentFilePath);
+		return LoadShaderLiterals(vertexShaderCode, fragmentShaderCode, vertexFilePath, fragmentFilePath);
 	}
-}}
+}
 

@@ -1,39 +1,40 @@
 #include "engine.h"
 #include <iostream>
+#include "rendering/renderer.h"
 #include "rendering/shader_loader.h"
 #include "rendering/shader_literals/shader_literals.h"
 
-namespace poole {
+namespace Poole {
 
     //This will identify our vertex buffer
-    GLuint vertexbuffer; //TEMP
+    GLuint m_vertexbuffer; //TEMP
     
     void TestInit()
     {
-        GLuint VertexArrayID;
-        glGenVertexArrays(1, &VertexArrayID);
-        glBindVertexArray(VertexArrayID);
+        GLuint vertexArrayID;
+        glGenVertexArrays(1, &vertexArrayID);
+        glBindVertexArray(vertexArrayID);
     
-        glm::vec3 verts[] {
+        glm::vec3 m_verts[] {
             {-0.5f, -0.5f, 0.0f},
             { 0.5f, -0.5f, 0.0f},
             { 0.0f,  0.5f, 0.0f},
         };
-        //int indicies[]{ 0, 1, 2 };
+        //int m_indicies[]{ 0, 1, 2 };
     
-        //Generate 1 buffer, put the resulting identifier in vertexbuffer
-        glGenBuffers(1, &vertexbuffer);
-        //The following commands will talk about our 'vertexbuffer' buffer
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        //Generate 1 buffer, put the resulting identifier in m_vertexbuffer
+        glGenBuffers(1, &m_vertexbuffer);
+        //The following commands will talk about our 'm_vertexbuffer' buffer
+        glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
         //Give our vertices to OpenGL.
-        glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(m_verts), m_verts, GL_STATIC_DRAW);
     }
     
     void TestTriangle()
     {
         //1st attribute buffer : vertices
         glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
         glVertexAttribPointer(
             0,                  //attribute 0. No particular reason for 0, but must match the layout in the shader.
             3,                  //size
@@ -66,10 +67,10 @@ namespace poole {
         glViewport(0, 0, width, height);
     }
     
-    engine::engine(const char* windowName, glm::uvec2 size)
+    Engine::Engine(const char* windowName, glm::uvec2 size)
     {    
         GLFWwindow* window;
-    
+
         //Initialize the library GLFW
         if (!glfwInit())
         {
@@ -111,7 +112,24 @@ namespace poole {
         glfwSetKeyCallback(window, TestProcessInputEvent);
     
         //Init buffers
-        TestInit();
+        //TestInit();
+        Rendering::Renderer::Submit(
+            MeshBasicSolidColor{ 
+                std::vector<Vertex>{
+                    {-0.5f, -0.5f, 0.0f},
+                    { 0.5f, -0.5f, 0.0f},
+                    { 0.0f,  0.5f, 0.0f},
+                } /*inds*/ }
+        );
+
+        Rendering::Renderer::Submit(
+            MeshBasicSolidColor{
+                std::vector<Vertex>{
+                    {-0.75f, -0.75f, 0.0f},
+                    { -0.25f, -0.75f, 0.0f},
+                    { -0.5f,  -0.5f, 0.0f},
+                } /*inds*/ }
+        );
 
         // Create and compile our GLSL program from the shaders
         GLuint programID = Rendering::LoadShaderLiterals(
@@ -139,7 +157,8 @@ namespace poole {
             glUseProgram(programID);
     
             //Draw Mesh
-            TestTriangle();
+            //TestTriangle();
+            Rendering::Renderer::RenderAll();
     
             //Swap front and back buffers
             glfwSwapBuffers(window);
