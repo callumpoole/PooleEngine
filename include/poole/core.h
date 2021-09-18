@@ -27,4 +27,9 @@ using f64 = double_t;
 //Wont be using char8_t, char16_t, char32_t
 using wchar = wchar_t;
 
+using LinearColor3 = glm::vec3;
+using Color3 = glm::uvec3;
+using LinearColor4 = glm::vec4;
+using Color4 = glm::uvec4;
+
 

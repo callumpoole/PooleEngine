@@ -17,6 +17,8 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/shader_literals/shader_literals.h"
 	"src/rendering/renderer.h"
 	"src/rendering/renderer.cpp"
+	"src/rendering/rendering_primitives.h"
+	"src/rendering/rendering_primitives.cpp"
 	"src/input/input.h"
 	"src/input/input.cpp"
 	"src/window/window.h"

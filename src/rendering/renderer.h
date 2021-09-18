@@ -3,33 +3,7 @@
 #include <vector>
 #include <memory>
 #include "core.h"
-
-//TO MOVE: to poole_primitives.h
-namespace Poole 
-{
-	using Color = glm::vec3;
-	using Vertex = glm::vec3;
-	struct VertexWithColor
-	{
-		Vertex position;
-		Color m_color;
-	};
-
-	template<typename TVertex>
-	struct MeshBasic
-	{
-		std::vector<TVertex> m_verts;
-		std::vector<int> m_indicies;
-		GLuint m_vertexbuffer; //#todo: Giving each its own buffer might fragment memory
-	};
-	struct MeshBasicSolidColor
-	{
-		MeshBasic<Vertex> m_mesh;
-		Color m_color;
-	};
-	using MeshBasicVertexColor = MeshBasic<VertexWithColor>;
-}
-// END MOVE
+#include "rendering_primitives.h"
 
 struct GLFWwindow;
 
@@ -38,23 +12,35 @@ namespace Poole::Rendering {
 	class Renderer
 	{
 	public:
-		static MeshBasicSolidColor* Submit(const MeshBasicSolidColor& meshAndColor);
-		static MeshBasicSolidColor* Submit(MeshBasicSolidColor&& meshAndColor);
-		//MeshBasicVertexColor* Submit(const MeshBasicVertexColor& m_mesh);
-		//MeshBasicVertexColor* Submit(MeshBasicVertexColor&& m_mesh);
+		template<typename MeshType>
+		static MeshType* Submit(const MeshType& meshAndColor);
+		template<typename MeshType>
+		static MeshType* Submit(MeshType&& meshAndColor);
 
 		static void Init();
 		static void Tick(GLFWwindow* window);
 	private:
 		static void RenderAll();
-		static MeshBasicSolidColor* InitLastSumbitted();
 
 		static GLuint m_programID;
-		static std::vector<std::unique_ptr<MeshBasicSolidColor>> m_solidColorMeshes;
-		static std::vector<std::unique_ptr<MeshBasicVertexColor>> m_vertexColorMeshes;
+		static std::vector<std::unique_ptr<IMesh>> m_meshes;
 		static GLuint m_vertexbuffer;
-
-		static void RenderObject(MeshBasicSolidColor* meshAndColor);
-		//void RenderObject(MeshBasicVertexColor* m_mesh);
 	};
+
+	//--
+
+	template<typename MeshType>
+	/*static*/ MeshType* Renderer::Submit(const MeshType& meshAndColor)
+	{
+		m_meshes.emplace_back(new MeshType(meshAndColor));
+		m_meshes.back()->Init();
+		return static_cast<MeshType*>(m_meshes.back().get());
+	}
+	template<typename MeshType>
+	/*static*/ MeshType* Renderer::Submit(MeshType&& meshAndColor)
+	{
+		m_meshes.emplace_back(new MeshType(std::move(meshAndColor)));
+		m_meshes.back()->Init();
+		return static_cast<MeshType*>(m_meshes.back().get());
+	}
 }

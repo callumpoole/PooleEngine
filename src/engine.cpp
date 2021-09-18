@@ -1,13 +1,15 @@
 #include "engine.h"
 #include <iostream>
+#include <memory>
 #include "rendering/renderer.h"
+#include "rendering/rendering_primitives.h"
 #include "input/input.h"
 #include "window/window.h"
 
 namespace Poole 
 {
     Engine::Engine(const char* windowName, glm::uvec2 size)
-    {    
+    {
         //Initialize the library GLFW
         if (!glfwInit())
         {
@@ -16,9 +18,14 @@ namespace Poole
         }
 
         GLFWwindow* window = Window::Init(windowName, size);
+        if (!window)
+        {
+            return;
+        }
 
         //Init Glad
-        if (!gladLoadGL()) {
+        if (!gladLoadGL()) 
+        {
             std::cout << "Failed to initialize OpenGL context\n";
             return;
         }
@@ -29,27 +36,21 @@ namespace Poole
         }
 
         Window::SetupPostGlad(window);
-
         Input::Init(window);
         Rendering::Renderer::Init();
 
-        //TEMP Init buffers
-        Rendering::Renderer::Submit(
-            MeshBasicSolidColor{ 
-                std::vector<Vertex>{
-                    {-0.5f, -0.5f, 0.0f},
-                    { 0.5f, -0.5f, 0.0f},
-                    { 0.0f,  0.5f, 0.0f},
-                } /*inds*/ }
-        );
-        Rendering::Renderer::Submit(
-            MeshBasicSolidColor{
-                std::vector<Vertex>{
-                    {-0.75f, -0.75f, 0.0f},
-                    { -0.25f, -0.75f, 0.0f},
-                    { -0.5f,  -0.5f, 0.0f},
-                } /*inds*/ }
-        );
+        //TEMP
+        Rendering::MeshBasicNoIndiciesSolidColor3 mesh;
+        mesh.m_mesh.m_verts = std::vector<Rendering::Vertex>{
+            {-0.5f,  -0.5f,  0.0f},
+            { 0.5f,  -0.5f,  0.0f},
+            { 0.0f,   0.5f,  0.0f},
+            {-0.75f, -0.75f, 0.0f},
+            {-0.25f, -0.75f, 0.0f},
+            {-0.5f,  -0.5f,  0.0f},
+        };
+        Rendering::Renderer::Submit(std::move(mesh));
+
 
         //Loop until the user closes the window
         while (!glfwWindowShouldClose(window))
