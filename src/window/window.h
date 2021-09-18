@@ -12,6 +12,7 @@ namespace Poole
 	public:
 		[[nodiscard]]
 		static GLFWwindow* Init(const char* windowName, glm::uvec2 size);
+		static void SetupPostGlad(GLFWwindow* window);
 		static void Tick();
 		static void Close();
 	private:

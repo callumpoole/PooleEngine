@@ -3,7 +3,7 @@
 
 namespace Poole
 {
-    std::string_view Window::m_windowName = nullptr;
+    std::string_view Window::m_windowName;
     glm::uvec2 Window::m_windowSize = {};
 
     void FramebufferSizeCallback(GLFWwindow* /*window*/, int width, int height)
@@ -33,12 +33,15 @@ namespace Poole
         //Make the window's context current
         glfwMakeContextCurrent(window);
 
+        return window;
+    }
+
+    /*static*/ void Window::SetupPostGlad(GLFWwindow* window)
+    {
         //setup current window size
-        glViewport(0, 0, size.x, size.y);
+        glViewport(0, 0, m_windowSize.x, m_windowSize.y);
         //Listen to resize events
         glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-
-        return window;
     }
 
     /*static*/ void Window::Tick()

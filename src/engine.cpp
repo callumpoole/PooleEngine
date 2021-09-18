@@ -15,6 +15,8 @@ namespace Poole
             return;
         }
 
+        GLFWwindow* window = Window::Init(windowName, size);
+
         //Init Glad
         if (!gladLoadGL()) {
             std::cout << "Failed to initialize OpenGL context\n";
@@ -26,7 +28,8 @@ namespace Poole
             return;
         }
 
-        GLFWwindow* window = Window::Init(windowName, size);
+        Window::SetupPostGlad(window);
+
         Input::Init(window);
         Rendering::Renderer::Init();
 
