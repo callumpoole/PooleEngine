@@ -7,14 +7,30 @@ namespace Poole::Rendering
 {
 	using Vertex = glm::vec3;
 
-	template<typename TLinearColor>
-	struct VertexWithColor
+#pragma warning(disable : 4201) //DISABLE nameless struct/union
+	struct VertexWithColor3
 	{
-		Vertex m_position;
-		TLinearColor m_color;
+		union {
+			struct { f32 x, y, z,    r, g, b; }; //I feel no need for m_ here
+			struct
+			{
+				Vertex m_position;
+				LinearColor3 m_color;
+			};
+		};
 	};
-	using VertexWithColor3 = VertexWithColor<LinearColor3>;
-	using VertexWithColor4 = VertexWithColor<LinearColor4>;
+	struct VertexWithColor4
+	{
+		union {
+			struct { f32 x, y, z,    r, g, b, a; }; //I feel no need for m_ here
+			struct
+			{
+				Vertex m_position;
+				LinearColor4 m_color;
+			};
+		};
+	};
+#pragma warning(default : 4201) //ENABLE nameless struct/union
 
 
 	template<typename TVertex>
@@ -26,7 +42,8 @@ namespace Poole::Rendering
 	template<typename TVertex>
 	struct MeshBasic : public MeshBasicNoIndicies<TVertex>
 	{
-		std::vector<int> m_indicies;
+		std::vector<int> m_indices;
+		GLuint m_elementbuffer; //#todo: Giving each its own buffer might fragment memory
 	};
 
 	template<typename TMesh, typename TLinearColor>
@@ -36,19 +53,21 @@ namespace Poole::Rendering
 		TLinearColor m_color;
 	};
 
+
 	struct IMesh
 	{
 		virtual void Init() {}
-		virtual void Render() {}
+		virtual void Render(GLuint /*programID*/) {}
+		virtual bool UsesUniformColor() { return false; }
 	};
-
 
 	struct MeshBasicNoIndiciesSolidColor3
 		: public MeshBasicSolidColor<MeshBasicNoIndicies<Vertex>, LinearColor3>
 		, public IMesh
 	{
 		virtual void Init() override;
-		virtual void Render() override;
+		virtual void Render(GLuint programID) override;
+		virtual bool UsesUniformColor() override { return true; }
 	};
 
 	struct MeshBasicSolidColor3
@@ -56,12 +75,16 @@ namespace Poole::Rendering
 		, public IMesh
 	{
 		virtual void Init() override;
-		virtual void Render() override;
+		virtual void Render(GLuint programID) override;
+		virtual bool UsesUniformColor() override { return true; }
 	};
 
-
-
-	using MeshBasicNoIndiciesVertexColor3	= MeshBasicNoIndicies<VertexWithColor3>;
-	using MeshBasicVertexColor3				= MeshBasic<VertexWithColor3>;
+	struct MeshBasicVertexColor3
+		: public MeshBasic<VertexWithColor3>
+		, public IMesh
+	{
+		virtual void Init() override;
+		virtual void Render(GLuint programID) override;
+		virtual bool UsesUniformColor() override { return false; }
+	};
 }
-// END MOVE
