@@ -27,57 +27,32 @@ using f64 = double_t;
 //Wont be using char8_t, char16_t, char32_t
 using wchar = wchar_t;
 
-using LinearColor3 = glm::vec3;
-using Color3 = glm::uvec3;
-using LinearColor4 = glm::vec4;
-using Color4 = glm::uvec4;
+using fColor3 = glm::vec3;
+using fColor4 = glm::vec4;
+using uColor3 = glm::uvec3;
+using uColor4 = glm::uvec4;
 
 namespace Colors
 {
-	template<class T> inline constexpr T Red;
-	template<class T> inline constexpr T Green;
-	template<class T> inline constexpr T Blue;
-	template<class T> inline constexpr T Yellow;
-	template<class T> inline constexpr T Cyan;
-	template<class T> inline constexpr T Purple;
-	template<class T> inline constexpr T White;
-	template<class T> inline constexpr T Black;
-	
-	template<> inline constexpr LinearColor3 Red<LinearColor3>		= { 1.0f, 0.0f, 0.0f };
-	template<> inline constexpr LinearColor3 Green<LinearColor3>	= { 0.0f, 1.0f, 0.0f };
-	template<> inline constexpr LinearColor3 Blue<LinearColor3>		= { 0.0f, 0.0f, 1.0f };
-	template<> inline constexpr LinearColor3 Yellow<LinearColor3>	= { 1.0f, 1.0f, 0.0f };
-	template<> inline constexpr LinearColor3 Cyan<LinearColor3>		= { 0.0f, 1.0f, 1.0f };
-	template<> inline constexpr LinearColor3 Purple<LinearColor3>	= { 1.0f, 0.0f, 1.0f };
-	template<> inline constexpr LinearColor3 White<LinearColor3>	= { 1.0f, 1.0f, 1.0f };
-	template<> inline constexpr LinearColor3 Black<LinearColor3>	= { 0.0f, 0.0f, 0.0f };
+#define AddColor(Name, R, G, B, A) \
+	template<class T> inline constexpr T Name; \
+	template<> inline constexpr fColor4 Name <fColor4> = { R, G, B, A }; \
+	template<> inline constexpr fColor3 Name <fColor3> = { Name <fColor4> }; \
+	template<> inline constexpr uColor4 Name <uColor4> = { Name <fColor4> * 255.f }; \
+	template<> inline constexpr uColor3 Name <uColor3> = { Name <uColor4> }; 
 
-	template<> inline constexpr LinearColor4 Red<LinearColor4>		= { 1.0f, 0.0f, 0.0f, 0.0f };
-	template<> inline constexpr LinearColor4 Green<LinearColor4>	= { 0.0f, 1.0f, 0.0f, 0.0f };
-	template<> inline constexpr LinearColor4 Blue<LinearColor4>		= { 0.0f, 0.0f, 1.0f, 0.0f };
-	template<> inline constexpr LinearColor4 Yellow<LinearColor4>	= { 1.0f, 1.0f, 0.0f, 0.0f };
-	template<> inline constexpr LinearColor4 Cyan<LinearColor4>		= { 0.0f, 1.0f, 1.0f, 0.0f };
-	template<> inline constexpr LinearColor4 Purple<LinearColor4>	= { 1.0f, 0.0f, 1.0f, 0.0f };
-	template<> inline constexpr LinearColor4 White<LinearColor4>	= { 1.0f, 1.0f, 1.0f, 0.0f };
-	template<> inline constexpr LinearColor4 Black<LinearColor4>	= { 0.0f, 0.0f, 0.0f, 0.0f };
-
-	template<> inline constexpr Color3 Red<Color3>		= { 255, 0, 0 };
-	template<> inline constexpr Color3 Green<Color3>	= { 0, 255, 0 };
-	template<> inline constexpr Color3 Blue<Color3>		= { 0, 0, 255 };
-	template<> inline constexpr Color3 Yellow<Color3>	= { 255, 255, 0 };
-	template<> inline constexpr Color3 Cyan<Color3>		= { 0, 255, 255 };
-	template<> inline constexpr Color3 Purple<Color3>	= { 255, 0, 255 };
-	template<> inline constexpr Color3 White<Color3>	= { 255, 255, 255 };
-	template<> inline constexpr Color3 Black<Color3>	= { 0, 0, 0 };
-
-	template<> inline constexpr Color4 Red<Color4>		= { 255, 0, 0, 0 };
-	template<> inline constexpr Color4 Green<Color4>	= { 0, 255, 0, 0 };
-	template<> inline constexpr Color4 Blue<Color4>		= { 0, 0, 255, 0 };
-	template<> inline constexpr Color4 Yellow<Color4>	= { 255, 255, 0, 0 };
-	template<> inline constexpr Color4 Cyan<Color4>		= { 0, 255, 255, 0 };
-	template<> inline constexpr Color4 Purple<Color4>	= { 255, 0, 255, 0 };
-	template<> inline constexpr Color4 White<Color4>	= { 255, 255, 255, 0 };
-	template<> inline constexpr Color4 Black<Color4>	= { 0, 0, 0, 0 };
+	AddColor(Red,		1.00f, 0.00f, 0.00f, 1.00f);
+	AddColor(Green,		0.00f, 1.00f, 0.00f, 1.00f);
+	AddColor(Blue,		0.00f, 0.00f, 1.00f, 1.00f);
+	AddColor(Yellow,	1.00f, 1.00f, 0.00f, 1.00f);
+	AddColor(Cyan,		0.00f, 1.00f, 1.00f, 1.00f);
+	AddColor(Purple,	1.00f, 0.00f, 1.00f, 1.00f);
+	AddColor(Orange,	1.00f, 0.50f, 0.00f, 1.00f);
+	AddColor(Pink,		1.00f, 0.50f, 0.50f, 1.00f);
+	AddColor(White,		1.00f, 1.00f, 1.00f, 1.00f);
+	AddColor(Grey,		0.50f, 0.50f, 0.50f, 1.00f);
+	AddColor(Black,		0.00f, 0.00f, 0.00f, 1.00f);
+#undef AddColor
 }
 
 

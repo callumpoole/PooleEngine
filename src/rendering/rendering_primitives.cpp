@@ -54,11 +54,11 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_mesh.m_verts.size(), m_mesh.m_verts.data(), GL_STATIC_DRAW);
 		
-		//Generate 1 buffer, put the resulting identifier in m_vertexbuffer
+		//Generate 1 buffer, put the resulting identifier in m_elementbuffer
 		glGenBuffers(1, &m_mesh.m_elementbuffer);
-		//The following commands will talk about our 'm_vertexbuffer' buffer
+		//The following commands will talk about our 'm_elementbuffer' buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh.m_elementbuffer);
-		//Give our vertices to OpenGL.
+		//Give our indices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_mesh.m_indices.size(), m_mesh.m_indices.data(), GL_STATIC_DRAW);
 	}
 	void MeshBasicSolidColor3::Render(GLuint programID)
@@ -127,7 +127,7 @@ namespace Poole::Rendering
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(
 			1,									//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(LinearColor3) / sizeof(f32), //size
+			sizeof(fColor3) / sizeof(f32), //size
 			GL_FLOAT,							//type
 			GL_FALSE,							//normalized?
 			sizeof(VertexWithColor3),			//stride

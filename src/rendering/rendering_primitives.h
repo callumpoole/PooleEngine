@@ -11,23 +11,23 @@ namespace Poole::Rendering
 	struct VertexWithColor3
 	{
 		union {
-			struct { f32 x, y, z,    r, g, b; }; //I feel no need for m_ here
 			struct
 			{
 				Vertex m_position;
-				LinearColor3 m_color;
+				fColor3 m_color;
 			};
+			struct { f32 x, y, z,    r, g, b; }; //I feel no need for m_ here
 		};
 	};
 	struct VertexWithColor4
 	{
 		union {
-			struct { f32 x, y, z,    r, g, b, a; }; //I feel no need for m_ here
 			struct
 			{
 				Vertex m_position;
-				LinearColor4 m_color;
+				fColor4 m_color;
 			};
+			struct { f32 x, y, z,    r, g, b, a; }; //I feel no need for m_ here
 		};
 	};
 #pragma warning(default : 4201) //ENABLE nameless struct/union
@@ -62,7 +62,7 @@ namespace Poole::Rendering
 	};
 
 	struct MeshBasicNoIndiciesSolidColor3
-		: public MeshBasicSolidColor<MeshBasicNoIndicies<Vertex>, LinearColor3>
+		: public MeshBasicSolidColor<MeshBasicNoIndicies<Vertex>, fColor3>
 		, public IMesh
 	{
 		virtual void Init() override;
@@ -71,7 +71,7 @@ namespace Poole::Rendering
 	};
 
 	struct MeshBasicSolidColor3
-		: public MeshBasicSolidColor<MeshBasic<Vertex>, LinearColor3>
+		: public MeshBasicSolidColor<MeshBasic<Vertex>, fColor3>
 		, public IMesh
 	{
 		virtual void Init() override;
