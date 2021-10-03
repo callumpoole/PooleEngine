@@ -11,7 +11,7 @@ namespace Poole
     void TempPassTriangleData()
     {
         Rendering::MeshBasicNoIndiciesSolidColor3 meshNoInd;
-        meshNoInd.m_mesh.m_verts = std::vector<Rendering::Vertex>{
+        meshNoInd.m_verts = std::vector<Rendering::Vertex>{
             {-0.5f,  -0.5f,  0.0f},
             { 0.5f,  -0.5f,  0.0f},
             { 0.0f,   0.5f,  0.0f},
@@ -28,7 +28,7 @@ namespace Poole
         Rendering::Renderer::Submit(std::move(meshNoInd));
 
         Rendering::MeshBasicNoIndiciesSolidColor3 meshNoInd2;
-        meshNoInd2.m_mesh.m_verts = std::vector<Rendering::Vertex>{
+        meshNoInd2.m_verts = std::vector<Rendering::Vertex>{
             //{-0.5f,  -0.5f,  0.0f},
             //{ 0.5f,  -0.5f,  0.0f},
             //{ 0.0f,   0.5f,  0.0f},
@@ -45,7 +45,7 @@ namespace Poole
         Rendering::Renderer::Submit(std::move(meshNoInd2));
 
         Rendering::MeshBasicNoIndiciesSolidColor3 meshNoInd3;
-        meshNoInd3.m_mesh.m_verts = std::vector<Rendering::Vertex>{
+        meshNoInd3.m_verts = std::vector<Rendering::Vertex>{
             //{-0.5f,  -0.5f,  0.0f},
             //{ 0.5f,  -0.5f,  0.0f},
             //{ 0.0f,   0.5f,  0.0f},
@@ -65,7 +65,7 @@ namespace Poole
 
 
         Rendering::MeshBasicSolidColor3 mesh;
-        mesh.m_mesh.m_verts = std::vector<Rendering::Vertex>{
+        mesh.m_verts = std::vector<Rendering::Vertex>{
             {0.9f,   0.3f, 0.0f}, // top right
             {0.9f,  -0.3f, 0.0f}, // bottom right
             {0.6f,  -0.3f, 0.0f}, // bottom left
@@ -76,7 +76,7 @@ namespace Poole
             //{ 0.7f,  0.7f, 0.0f}, // bottom left
             //{ 0.7f,  0.9f, 0.0f}, // top left
         };
-        mesh.m_mesh.m_indices = {
+        mesh.m_indices = {
             0, 1, 3,   // first triangle
             1, 2, 3,    // second triangle
         
@@ -87,7 +87,7 @@ namespace Poole
         Rendering::Renderer::Submit(std::move(mesh));
 
         Rendering::MeshBasicSolidColor3 mesh2;
-        mesh2.m_mesh.m_verts = std::vector<Rendering::Vertex>{
+        mesh2.m_verts = std::vector<Rendering::Vertex>{
             //{0.9f,   0.3f, 0.0f}, // top right
             //{0.9f,  -0.3f, 0.0f}, // bottom right
             //{0.6f,  -0.3f, 0.0f}, // bottom left
@@ -98,7 +98,7 @@ namespace Poole
             { 0.7f,  0.7f, 0.0f}, // bottom left
             { 0.7f,  0.9f, 0.0f}, // top left
         };
-        mesh2.m_mesh.m_indices = {
+        mesh2.m_indices = {
             0, 1, 3,   // first triangle
             1, 2, 3,    // second triangle
 

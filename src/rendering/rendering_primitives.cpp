@@ -9,11 +9,11 @@ namespace Poole::Rendering
 		glBindVertexArray(vertexArrayID);
 
 		//Generate 1 buffer, put the resulting identifier in m_vertexbuffer
-		glGenBuffers(1, &m_mesh.m_vertexbuffer);
+		glGenBuffers(1, &m_vertexbuffer);
 		//The following commands will talk about our 'm_vertexbuffer' buffer
-		glBindBuffer(GL_ARRAY_BUFFER, m_mesh.m_vertexbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		//Give our vertices to OpenGL.
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_mesh.m_verts.size(), m_mesh.m_verts.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 	}
 	void MeshBasicNoIndiciesSolidColor3::Render(GLuint programID)
 	{
@@ -23,7 +23,7 @@ namespace Poole::Rendering
 		GLint Loc = glGetUniformLocation(programID, "uniformColor");
 		glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_mesh.m_vertexbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 
 		//1st attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -36,7 +36,7 @@ namespace Poole::Rendering
 			(void*)0						//array buffer offset
 		);
 		//Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)m_mesh.m_verts.size()); //Starting from vertex 0; N vertices total.
+		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)m_verts.size()); //Starting from vertex 0; N vertices total.
 		glDisableVertexAttribArray(0);
 	}
 
@@ -49,18 +49,18 @@ namespace Poole::Rendering
 		glBindVertexArray(vertexArrayID);
 		
 		//Generate 1 buffer, put the resulting identifier in m_vertexbuffer
-		glGenBuffers(1, &m_mesh.m_vertexbuffer);
+		glGenBuffers(1, &m_vertexbuffer);
 		//The following commands will talk about our 'm_vertexbuffer' buffer
-		glBindBuffer(GL_ARRAY_BUFFER, m_mesh.m_vertexbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		//Give our vertices to OpenGL.
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_mesh.m_verts.size(), m_mesh.m_verts.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 		
 		//Generate 1 buffer, put the resulting identifier in m_elementbuffer
-		glGenBuffers(1, &m_mesh.m_elementbuffer);
+		glGenBuffers(1, &m_elementbuffer);
 		//The following commands will talk about our 'm_elementbuffer' buffer
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh.m_elementbuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
 		//Give our indices to OpenGL.
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_mesh.m_indices.size(), m_mesh.m_indices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
 	void MeshBasicSolidColor3::Render(GLuint programID)
 	{
@@ -70,8 +70,8 @@ namespace Poole::Rendering
 		GLint Loc = glGetUniformLocation(programID, "uniformColor");
 		glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_mesh.m_vertexbuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh.m_elementbuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
 
 		//1st attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -84,7 +84,7 @@ namespace Poole::Rendering
 			(void*)0						//array buffer offset
 		);
 		//Draw the triangle !
-		glDrawElements(GL_TRIANGLES, (GLsizei)m_mesh.m_indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0);
 		glDisableVertexAttribArray(0);
 	}
 
