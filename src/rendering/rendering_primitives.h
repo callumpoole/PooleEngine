@@ -6,7 +6,7 @@
 
 namespace Poole::Rendering
 {
-	using Vertex = glm::vec3;
+	using Vertex = fvec3;
 
 #pragma warning(disable : 4201) //DISABLE nameless struct/union
 	struct VertexWithColor3
@@ -15,7 +15,7 @@ namespace Poole::Rendering
 			struct
 			{
 				Vertex m_position;
-				fColor3 m_color;
+				fcolor3 m_color;
 			};
 			struct { f32 x, y, z,    r, g, b; }; //I feel no need for m_ here
 		};
@@ -26,7 +26,7 @@ namespace Poole::Rendering
 			struct
 			{
 				Vertex m_position;
-				fColor4 m_color;
+				fcolor4 m_color;
 			};
 			struct { f32 x, y, z,    r, g, b, a; }; //I feel no need for m_ here
 		};
@@ -34,62 +34,146 @@ namespace Poole::Rendering
 #pragma warning(default : 4201) //ENABLE nameless struct/union
 
 
+
+
+
+
 	template<typename TVertex>
-	struct MeshBase_HasVerts
+	struct MeshFeature_HasVerts
 	{
 		std::vector<TVertex> m_verts;
 		GLuint m_vertexbuffer; //#todo: Giving each its own buffer might fragment memory
 	};
 
-	struct MeshBase_HasIndicies
+	struct MeshFeature_HasIndicies
 	{
 		std::vector<int> m_indices;
 		GLuint m_elementbuffer; //#todo: Giving each its own buffer might fragment memory
 	};
 
-	struct MeshBase_HasSolidColor_Base {};
+	struct MeshFeature_HasSolidColor_Base {};
 	template<typename TLinearColor>
-	struct MeshBase_HasSolidColor : public MeshBase_HasSolidColor_Base
+	struct MeshBase_FeatureSolidColor 
+		: public MeshFeature_HasSolidColor_Base
+		, virtual public MeshUniformVirtualBase
 	{
+		virtual void InitUniforms() override
+		{ 
+			//m_UniformData.emplace_back(UniformData::EglUniform3f, (const GLchar*)"uniformColor", (std::any)m_color);
+
+			UniformData data;
+			data.m_uniformFunc = UniformData::EglUniform3f;
+			data.m_shaderMemberName = "uniformColor";
+			data.m_value = &m_color;
+			m_UniformData.push_back(std::move(data));
+		}
+
 		TLinearColor m_color;
 	};
 
-	struct MeshBase_HasNormals {}; //TODO
-
-	struct MeshBase_HasUVs {}; //TODO
-
+	struct MeshFeature_HasNormals {}; //TODO
+	struct MeshFeature_HasUVs {}; //TODO
 
 
-	struct IMesh
+
+	struct MeshFeature_HasDynamicPosition_Base {};
+	template<typename TPosition>
+	struct MeshFeature_HasDynamicPosition : public MeshFeature_HasDynamicPosition_Base
 	{
+		TPosition m_position;
+	};
+
+	struct MeshFeature_HasDynamicRotation_Base {};
+	template<typename TRotation>
+	struct MeshFeature_HasDynamicRotation : public MeshFeature_HasDynamicRotation_Base
+	{
+		TRotation m_rotation;
+	};
+
+	struct MeshFeature_HasDynamicScale_Base {};
+	template<typename TScale>
+	struct MeshFeature_HasDynamicScale : public MeshFeature_HasDynamicScale_Base
+	{
+		TScale m_scale;
+	};
+
+
+	struct MeshFeatureCollection_2DTransform
+		: MeshFeature_HasDynamicPosition<fvec2>
+		, MeshFeature_HasDynamicRotation<f32>
+		, MeshFeature_HasDynamicScale<fvec2>
+	{
+	};
+
+
+
+	struct IVirtualMesh
+	{
+		void InternalInit()
+		{
+			Init();
+			InitUniforms();
+		}
+		virtual void InitUniforms() {}
+		virtual void SetUniforms(GLuint programID) {}
 		virtual void Init() {}
-		virtual void Render(GLuint /*programID*/) {}
-		bool UsesUniformColor() const { return dynamic_cast<const MeshBase_HasSolidColor_Base*>(this); }
+		virtual void Render(GLuint programID) {}
+		//#todo: find a way to make this constexpr
+		bool UsesUniformColor() const { return dynamic_cast<const MeshFeature_HasSolidColor_Base*>(this); }
+		bool Uses2DTransform() const { return dynamic_cast<const MeshFeatureCollection_2DTransform*>(this); }
 	};
 
-	struct MeshBasicNoIndiciesSolidColor3
-		: public MeshBase_HasVerts<Vertex>
-		, public MeshBase_HasSolidColor<fColor3>
-		, public IMesh
+	struct MeshUniformVirtualBase 
+		: virtual public IVirtualMesh
+	{
+		struct UniformData {
+			enum EUniformFunction {
+				EglUniform3f
+			};
+			EUniformFunction m_uniformFunc;
+			const GLchar* m_shaderMemberName;
+			void* m_value;
+		};
+		std::vector<UniformData> m_UniformData;
+		virtual void SetUniforms(GLuint programID);
+	};
+
+
+
+
+	struct StaticMeshNoIndiciesSolidColor3
+		: virtual public IVirtualMesh
+		, public MeshFeature_HasVerts<Vertex>
+		, public MeshBase_FeatureSolidColor<fcolor3>
+	{
+		virtual void Init() override;
+		virtual void Render(GLuint programID) override;
+	};
+	struct StaticMeshNoIndiciesSolidColor3_2DTransform
+		: public StaticMeshNoIndiciesSolidColor3
+		, public MeshFeatureCollection_2DTransform
+	{
+		
+	};
+
+
+
+	struct StaticMeshSolidColor3
+		: virtual public IVirtualMesh
+		, public MeshFeature_HasVerts<Vertex>
+		, public MeshFeature_HasIndicies
+		, public MeshBase_FeatureSolidColor<fcolor3>
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programID) override;
 	};
 
-	struct MeshBasicSolidColor3
-		: public MeshBase_HasVerts<Vertex>
-		, public MeshBase_HasIndicies
-		, public MeshBase_HasSolidColor<fColor3>
-		, public IMesh
-	{
-		virtual void Init() override;
-		virtual void Render(GLuint programID) override;
-	};
 
-	struct MeshBasicVertexColor3
-		: public MeshBase_HasVerts<VertexWithColor3>
-		, public MeshBase_HasIndicies
-		, public IMesh
+
+	struct StaticMeshVertexColor3
+		: virtual public IVirtualMesh
+		, public MeshFeature_HasVerts<VertexWithColor3>
+		, public MeshFeature_HasIndicies
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programID) override;

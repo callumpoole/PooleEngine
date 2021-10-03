@@ -2,7 +2,25 @@
 
 namespace Poole::Rendering
 {
-	void MeshBasicNoIndiciesSolidColor3::Init()
+	void MeshUniformVirtualBase::SetUniforms(GLuint programID)
+	{
+		for (const UniformData& uniformData : m_UniformData)
+		{
+			const GLint uniformLocation = glGetUniformLocation(programID, uniformData.m_shaderMemberName);
+
+			switch (uniformData.m_uniformFunc)
+			{
+			case UniformData::EglUniform3f: 
+				fvec3 vec = *static_cast<fvec3*>(uniformData.m_value);
+				glUniform3f(uniformLocation, vec[0], vec[1], vec[2]);
+				break;
+			default: assert(0); break;
+			}
+		}
+	}
+
+
+	void StaticMeshNoIndiciesSolidColor3::Init()
 	{
 		GLuint vertexArrayID;
 		glGenVertexArrays(1, &vertexArrayID);
@@ -15,13 +33,14 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 	}
-	void MeshBasicNoIndiciesSolidColor3::Render(GLuint programID)
+	void StaticMeshNoIndiciesSolidColor3::Render(GLuint programID)
 	{
 		//Use Shader
 		glUseProgram(programID);
 
-		GLint Loc = glGetUniformLocation(programID, "uniformColor");
-		glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
+		SetUniforms(programID);
+		//GLint Loc = glGetUniformLocation(programID, "uniformColor");
+		//glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 
@@ -42,7 +61,7 @@ namespace Poole::Rendering
 
 	//---
 
-	void MeshBasicSolidColor3::Init()
+	void StaticMeshSolidColor3::Init()
 	{
 		GLuint vertexArrayID;
 		glGenVertexArrays(1, &vertexArrayID);
@@ -62,13 +81,14 @@ namespace Poole::Rendering
 		//Give our indices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
-	void MeshBasicSolidColor3::Render(GLuint programID)
+	void StaticMeshSolidColor3::Render(GLuint programID)
 	{
 		//Use Shader
 		glUseProgram(programID);
 
-		GLint Loc = glGetUniformLocation(programID, "uniformColor");
-		glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
+		SetUniforms(programID);
+		//GLint Loc = glGetUniformLocation(programID, "uniformColor");
+		//glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
@@ -90,7 +110,7 @@ namespace Poole::Rendering
 
 	//--
 
-	void MeshBasicVertexColor3::Init()
+	void StaticMeshVertexColor3::Init()
 	{
 		GLuint vertexArrayID;
 		glGenVertexArrays(1, &vertexArrayID);
@@ -110,10 +130,12 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
-	void MeshBasicVertexColor3::Render(GLuint programID)
+	void StaticMeshVertexColor3::Render(GLuint programID)
 	{
 		//Use Shader
 		glUseProgram(programID);
+
+		SetUniforms(programID);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
@@ -133,7 +155,7 @@ namespace Poole::Rendering
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(
 			1,									//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(fColor3) / sizeof(f32),		//size
+			sizeof(fcolor3) / sizeof(f32),		//size
 			GL_FLOAT,							//type
 			GL_FALSE,							//normalized?
 			sizeof(VertexWithColor3),			//stride

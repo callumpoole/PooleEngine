@@ -7,7 +7,7 @@ namespace Poole::Rendering
 {
 	GLuint Renderer::m_shaderProgramID;
 	GLuint Renderer::m_shaderProgramIDuniformColor;
-	std::vector<std::unique_ptr<IMesh>> Renderer::m_meshes;
+	std::vector<std::unique_ptr<IVirtualMesh>> Renderer::m_meshes;
 	GLuint Renderer::m_vertexbuffer;
 
 	void Renderer::Init()
@@ -45,7 +45,7 @@ namespace Poole::Rendering
 
 	void Renderer::RenderAll()
 	{
-		for (std::unique_ptr<IMesh>& ptr : m_meshes)
+		for (std::unique_ptr<IVirtualMesh>& ptr : m_meshes)
 		{
 			ptr->Render(ptr->UsesUniformColor() ? m_shaderProgramIDuniformColor : m_shaderProgramID);
 		}

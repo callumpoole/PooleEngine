@@ -24,7 +24,7 @@ namespace Poole::Rendering {
 
 		static GLuint m_shaderProgramID;
 		static GLuint m_shaderProgramIDuniformColor;
-		static std::vector<std::unique_ptr<IMesh>> m_meshes;
+		static std::vector<std::unique_ptr<IVirtualMesh>> m_meshes;
 		static GLuint m_vertexbuffer;
 	};
 
@@ -34,14 +34,14 @@ namespace Poole::Rendering {
 	/*static*/ MeshType* Renderer::Submit(const MeshType& meshAndColor)
 	{
 		m_meshes.emplace_back(new MeshType(meshAndColor));
-		m_meshes.back()->Init();
-		return static_cast<MeshType*>(m_meshes.back().get());
+		m_meshes.back()->InternalInit();
+		return dynamic_cast<MeshType*>(m_meshes.back().get());
 	}
 	template<typename MeshType>
 	/*static*/ MeshType* Renderer::Submit(MeshType&& meshAndColor)
 	{
 		m_meshes.emplace_back(new MeshType(std::move(meshAndColor)));
-		m_meshes.back()->Init();
-		return static_cast<MeshType*>(m_meshes.back().get());
+		m_meshes.back()->InternalInit();
+		return dynamic_cast<MeshType*>(m_meshes.back().get());
 	}
 }

@@ -24,22 +24,34 @@ using u32 = uint32_t;
 using u64 = uint64_t;
 using f32 = float_t;
 using f64 = double_t;
-//Wont be using char8_t, char16_t, char32_t
+//Wont be using char16_t, char32_t
+using char8 = char8_t;
 using wchar = wchar_t;
 
-using fColor3 = glm::vec3;
-using fColor4 = glm::vec4;
-using uColor3 = glm::uvec3;
-using uColor4 = glm::uvec4;
+using fvec2 = glm::vec2;
+using fvec3 = glm::vec3;
+using fvec4 = glm::vec4;
+using fquat = glm::quat;
+using ivec2 = glm::i32vec2;
+using ivec3 = glm::i32vec3;
+using ivec4 = glm::i32vec4;
+using uvec2 = glm::uvec2;
+using uvec3 = glm::uvec3;
+using uvec4 = glm::uvec4;
+
+using fcolor3 = glm::vec3;
+using fcolor4 = glm::vec4;
+using ucolor3 = glm::uvec3;
+using ucolor4 = glm::uvec4;
 
 namespace Colors
 {
 #define AddColor(Name, R, G, B, A) \
 	template<class T> inline constexpr T Name; \
-	template<> inline constexpr fColor4 Name <fColor4> = { R, G, B, A }; \
-	template<> inline constexpr fColor3 Name <fColor3> = { Name <fColor4> }; \
-	template<> inline constexpr uColor4 Name <uColor4> = { Name <fColor4> * 255.f }; \
-	template<> inline constexpr uColor3 Name <uColor3> = { Name <uColor4> }; 
+	template<> inline constexpr fcolor4 Name <fcolor4> = { R, G, B, A }; \
+	template<> inline constexpr fcolor3 Name <fcolor3> = { Name <fcolor4> }; \
+	template<> inline constexpr ucolor4 Name <ucolor4> = { Name <fcolor4> * 255.f }; \
+	template<> inline constexpr ucolor3 Name <ucolor3> = { Name <ucolor4> }; 
 
 	AddColor(Red,		1.00f, 0.00f, 0.00f, 1.00f);
 	AddColor(Green,		0.00f, 1.00f, 0.00f, 1.00f);
