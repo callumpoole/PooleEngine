@@ -23,9 +23,10 @@ namespace Poole::Rendering
 		GLint Loc = glGetUniformLocation(programID, "uniformColor");
 		glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
 
+		glBindBuffer(GL_ARRAY_BUFFER, m_mesh.m_vertexbuffer);
+
 		//1st attribute buffer : vertices
 		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, m_mesh.m_vertexbuffer);
 		glVertexAttribPointer(
 			0,								//attribute 0. No particular reason for 0, but must match the layout in the shader.
 			sizeof(Vertex) / sizeof(f32),   //size
@@ -69,6 +70,9 @@ namespace Poole::Rendering
 		GLint Loc = glGetUniformLocation(programID, "uniformColor");
 		glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
 
+		glBindBuffer(GL_ARRAY_BUFFER, m_mesh.m_vertexbuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh.m_elementbuffer);
+
 		//1st attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
@@ -80,7 +84,6 @@ namespace Poole::Rendering
 			(void*)0						//array buffer offset
 		);
 		//Draw the triangle !
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_mesh.m_elementbuffer);
 		glDrawElements(GL_TRIANGLES, (GLsizei)m_mesh.m_indices.size(), GL_UNSIGNED_INT, 0);
 		glDisableVertexAttribArray(0);
 	}
@@ -100,9 +103,9 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexWithColor3) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 
-		//Generate 1 buffer, put the resulting identifier in m_vertexbuffer
+		//Generate 1 buffer, put the resulting identifier in m_elementbuffer
 		glGenBuffers(1, &m_elementbuffer);
-		//The following commands will talk about our 'm_vertexbuffer' buffer
+		//The following commands will talk about our 'm_elementbuffer' buffer
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
@@ -111,6 +114,9 @@ namespace Poole::Rendering
 	{
 		//Use Shader
 		glUseProgram(programID);
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
 
 		//0th attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -127,7 +133,7 @@ namespace Poole::Rendering
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(
 			1,									//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(fColor3) / sizeof(f32), //size
+			sizeof(fColor3) / sizeof(f32),		//size
 			GL_FLOAT,							//type
 			GL_FALSE,							//normalized?
 			sizeof(VertexWithColor3),			//stride
@@ -135,8 +141,8 @@ namespace Poole::Rendering
 		);
 
 		//Draw the triangle !
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
 		glDrawElements(GL_TRIANGLES, (GLsizei)m_indices.size(), GL_UNSIGNED_INT, 0);
 		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
 	}
 }
