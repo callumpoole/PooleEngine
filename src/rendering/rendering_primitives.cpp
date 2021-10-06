@@ -2,6 +2,9 @@
 
 namespace Poole::Rendering
 {
+	bool IVirtualMesh::UsesUniformColor() const { return dynamic_cast<const struct MeshFeature_HasSolidColor_Base*>(this); }
+	bool IVirtualMesh::Uses2DTransform() const { return dynamic_cast<const struct MeshFeatureCollection_2DTransform*>(this); }
+
 	void MeshUniformVirtualBase::SetUniforms(GLuint programID)
 	{
 		for (const UniformData& uniformData : m_UniformData)

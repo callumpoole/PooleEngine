@@ -35,7 +35,36 @@ namespace Poole::Rendering
 
 
 
+	struct IVirtualMesh
+	{
+		void InternalInit()
+		{
+			Init();
+			InitUniforms();
+		}
+		virtual void InitUniforms() {}
+		virtual void SetUniforms(GLuint programID) {}
+		virtual void Init() {}
+		virtual void Render(GLuint programID) {}
+		//#todo: find a way to make this constexpr
+		bool UsesUniformColor() const;
+		bool Uses2DTransform() const;
+	};
 
+	struct MeshUniformVirtualBase
+		: virtual public IVirtualMesh
+	{
+		struct UniformData {
+			enum EUniformFunction {
+				EglUniform3f
+			};
+			EUniformFunction m_uniformFunc;
+			const GLchar* m_shaderMemberName;
+			void* m_value;
+		};
+		std::vector<UniformData> m_UniformData;
+		virtual void SetUniforms(GLuint programID);
+	};
 
 
 	template<typename TVertex>
@@ -53,13 +82,13 @@ namespace Poole::Rendering
 
 	struct MeshFeature_HasSolidColor_Base {};
 	template<typename TLinearColor>
-	struct MeshBase_FeatureSolidColor 
+	struct MeshFeature_SolidColor 
 		: public MeshFeature_HasSolidColor_Base
 		, virtual public MeshUniformVirtualBase
 	{
 		virtual void InitUniforms() override
 		{ 
-			//m_UniformData.emplace_back(UniformData::EglUniform3f, (const GLchar*)"uniformColor", (std::any)m_color);
+			//m_UniformData.emplace_back(UniformData::EglUniform3f, (const GLchar*)"uniformColor", &m_color);
 
 			UniformData data;
 			data.m_uniformFunc = UniformData::EglUniform3f;
@@ -107,36 +136,7 @@ namespace Poole::Rendering
 
 
 
-	struct IVirtualMesh
-	{
-		void InternalInit()
-		{
-			Init();
-			InitUniforms();
-		}
-		virtual void InitUniforms() {}
-		virtual void SetUniforms(GLuint programID) {}
-		virtual void Init() {}
-		virtual void Render(GLuint programID) {}
-		//#todo: find a way to make this constexpr
-		bool UsesUniformColor() const { return dynamic_cast<const MeshFeature_HasSolidColor_Base*>(this); }
-		bool Uses2DTransform() const { return dynamic_cast<const MeshFeatureCollection_2DTransform*>(this); }
-	};
 
-	struct MeshUniformVirtualBase 
-		: virtual public IVirtualMesh
-	{
-		struct UniformData {
-			enum EUniformFunction {
-				EglUniform3f
-			};
-			EUniformFunction m_uniformFunc;
-			const GLchar* m_shaderMemberName;
-			void* m_value;
-		};
-		std::vector<UniformData> m_UniformData;
-		virtual void SetUniforms(GLuint programID);
-	};
 
 
 
@@ -144,7 +144,7 @@ namespace Poole::Rendering
 	struct StaticMeshNoIndiciesSolidColor3
 		: virtual public IVirtualMesh
 		, public MeshFeature_HasVerts<Vertex>
-		, public MeshBase_FeatureSolidColor<fcolor3>
+		, public MeshFeature_SolidColor<fcolor3>
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programID) override;
@@ -162,7 +162,7 @@ namespace Poole::Rendering
 		: virtual public IVirtualMesh
 		, public MeshFeature_HasVerts<Vertex>
 		, public MeshFeature_HasIndicies
-		, public MeshBase_FeatureSolidColor<fcolor3>
+		, public MeshFeature_SolidColor<fcolor3>
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programID) override;
