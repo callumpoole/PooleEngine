@@ -24,7 +24,7 @@ namespace Poole::Rendering {
 
 		static GLuint m_shaderProgramID;
 		static GLuint m_shaderProgramIDuniformColor;
-		static std::vector<std::unique_ptr<IVirtualMesh>> m_meshes;
+		static std::vector<std::unique_ptr<IMesh>> m_meshes;
 		static GLuint m_vertexbuffer;
 	};
 

@@ -2,23 +2,13 @@
 
 namespace Poole::Rendering
 {
-	bool IVirtualMesh::UsesUniformColor() const { return dynamic_cast<const struct MeshFeature_HasSolidColor_Base*>(this); }
-	bool IVirtualMesh::Uses2DTransform() const { return dynamic_cast<const struct MeshFeatureCollection_2DTransform*>(this); }
-
-	void MeshUniformVirtualBase::SetUniforms(GLuint programID)
+	bool IMesh::UsesUniformColor() const { return dynamic_cast<const MeshUniform_SolidColorBase*>(this); }
+	bool IMesh::Uses2DTransform() const { return dynamic_cast<const MeshUniformCollection_2DTransform*>(this); }
+	void IMesh::SetUniforms(GLuint programID)
 	{
-		for (const UniformData& uniformData : m_UniformData)
+		if (IMeshUniformCollectorBase* MeshUniformCollector = dynamic_cast<IMeshUniformCollectorBase*>(this))
 		{
-			const GLint uniformLocation = glGetUniformLocation(programID, uniformData.m_shaderMemberName);
-
-			switch (uniformData.m_uniformFunc)
-			{
-			case UniformData::EglUniform3f: 
-				fvec3 vec = *static_cast<fvec3*>(uniformData.m_value);
-				glUniform3f(uniformLocation, vec[0], vec[1], vec[2]);
-				break;
-			default: assert(0); break;
-			}
+			MeshUniformCollector->SetAllUniforms(programID);
 		}
 	}
 
