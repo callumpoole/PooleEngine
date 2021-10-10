@@ -3,12 +3,17 @@
 namespace Poole::Rendering
 {
 	bool IMesh::UsesUniformColor() const { return dynamic_cast<const MeshUniform_SolidColorBase*>(this); }
-	bool IMesh::Uses2DTransform() const { return dynamic_cast<const MeshUniformCollection_2DTransform*>(this); }
-	void IMesh::SetUniforms(GLuint programID)
+	bool IMesh::Uses2DTransform() const 
+	{ 
+		return dynamic_cast<const MeshUniform_DynamicPositionBase*>(this)
+			&& dynamic_cast<const MeshUniform_DynamicRotationBase*>(this)
+			&& dynamic_cast<const MeshUniform_DynamicScaleBase*>(this);
+	}
+	void IMesh::SetUniforms(GLuint programId)
 	{
 		if (IMeshUniformCollectorBase* MeshUniformCollector = dynamic_cast<IMeshUniformCollectorBase*>(this))
 		{
-			MeshUniformCollector->SetAllUniforms(programID);
+			MeshUniformCollector->SetAllUniforms(programId);
 		}
 	}
 
@@ -26,13 +31,13 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshNoIndiciesSolidColor3::Render(GLuint programID)
+	void StaticMeshNoIndiciesSolidColor3::Render(GLuint programId)
 	{
 		//Use Shader
-		glUseProgram(programID);
+		glUseProgram(programId);
 
-		SetUniforms(programID);
-		//GLint Loc = glGetUniformLocation(programID, "uniformColor");
+		SetUniforms(programId);
+		//GLint Loc = glGetUniformLocation(programId, "uniformColor");
 		//glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
@@ -74,13 +79,13 @@ namespace Poole::Rendering
 		//Give our indices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshSolidColor3::Render(GLuint programID)
+	void StaticMeshSolidColor3::Render(GLuint programId)
 	{
 		//Use Shader
-		glUseProgram(programID);
+		glUseProgram(programId);
 
-		SetUniforms(programID);
-		//GLint Loc = glGetUniformLocation(programID, "uniformColor");
+		SetUniforms(programId);
+		//GLint Loc = glGetUniformLocation(programId, "uniformColor");
 		//glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
@@ -123,12 +128,12 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshVertexColor3::Render(GLuint programID)
+	void StaticMeshVertexColor3::Render(GLuint programId)
 	{
 		//Use Shader
-		glUseProgram(programID);
+		glUseProgram(programId);
 
-		SetUniforms(programID);
+		SetUniforms(programId);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);

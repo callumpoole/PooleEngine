@@ -17,7 +17,7 @@ namespace Poole::Rendering
 				Vertex m_position;
 				fcolor3 m_color;
 			};
-			struct { f32 x, y, z,    r, g, b; }; //I feel no need for m_ here
+			struct { f32 x, y, z, r, g, b; }; //I feel no need for m_ here
 		};
 	};
 	struct VertexWithColor4
@@ -28,10 +28,11 @@ namespace Poole::Rendering
 				Vertex m_position;
 				fcolor4 m_color;
 			};
-			struct { f32 x, y, z,    r, g, b, a; }; //I feel no need for m_ here
+			struct { f32 x, y, z, r, g, b, a; }; //I feel no need for m_ here
 		};
 	};
-#pragma warning(default : 4201) //ENABLE nameless struct/union
+#pragma warning(default : 4201) //DEFAULT nameless struct/union
+
 
 	struct IMesh
 	{
@@ -40,70 +41,55 @@ namespace Poole::Rendering
 			Init();
 		}
 		virtual void Init() {}
-		virtual void Render(GLuint programID) {}
-		//#todo: find a way to make this constexpr
+		virtual void Render(GLuint programId) {}
+		//#todo: find a way to make this constexpr / remove it
 		bool UsesUniformColor() const;
 		bool Uses2DTransform() const;
-		void SetUniforms(GLuint programID);
+		void SetUniforms(GLuint programId);
 	};
+
+	//template <typename T>
+	//concept IMesh2 = requires(T& t, const T& tconst) {
+	//	t.InternalInit();
+	//	t.Init();
+	//	t.Render((GLuint)0);
+	//	{ tconst.UsesUniformColor() } -> std::same_as<bool>;
+	//	{ tconst.Uses2DTransform() } -> std::same_as<bool>;
+	//	t.SetUniforms((GLuint)0);
+	//};
 
 
 
 
 	struct IMeshUniformDataBase
 	{
-		virtual void SetInternalUniforms(GLuint programID) { }
+		virtual void SetInternalUniforms(const GLuint programId) { }
+
+		template<typename TFloats> void SetUniform(const GLint uniform, const TFloats f) { assert(0); }
+		template<> void SetUniform(const GLint uniform, const f32 f)   { glUniform1f(uniform, f); }
+		template<> void SetUniform(const GLint uniform, const fvec2 v) { glUniform2f(uniform, v.x, v.y); }
+		template<> void SetUniform(const GLint uniform, const fvec3 v) { glUniform3f(uniform, v.x, v.y, v.z); }
+		template<> void SetUniform(const GLint uniform, const fvec4 v) { glUniform4f(uniform, v.x, v.y, v.z, v.w); }
 	};
 
-	struct MeshUniform_SolidColorBase {};
-	template<typename TLinearColor>
-	struct MeshUniform_SolidColor : public MeshUniform_SolidColorBase, public IMeshUniformDataBase
-	{
-		virtual void SetInternalUniforms(GLuint programID) override
-		{
-			const GLint uniformLocation = glGetUniformLocation(programID, "uniformColor");
-			glUniform3f(uniformLocation, m_color[0], m_color[1], m_color[2]);
-		}
-		TLinearColor m_color;
+#define MakeUniform(Name, UniformName, MemberName)									\
+	struct MeshUniform_##Name##Base {};												\
+	template<typename T>															\
+	struct MeshUniform_##Name														\
+		: public MeshUniform_##Name##Base											\
+		, public IMeshUniformDataBase												\
+	{																				\
+		virtual void SetInternalUniforms(const GLuint programId) override			\
+		{																			\
+			SetUniform(glGetUniformLocation(programId, UniformName), MemberName);	\
+		}																			\
+		T MemberName;																\
 	};
 
-
-
-	struct MeshUniform_DynamicPositionBase {};
-	template<typename TPosition>
-	struct MeshUniform_DynamicPosition : public MeshUniform_DynamicPositionBase, public IMeshUniformDataBase
-	{
-		virtual void SetInternalUniforms(GLuint programID) override
-		{
-			const GLint uniformLocation = glGetUniformLocation(programID, "uniformPosition");
-			glUniform3f(uniformLocation, m_color[0], m_color[1], m_color[2]);
-		}
-		TPosition m_position;
-	};
-
-	struct MeshUniform_DynamicRotationBase {};
-	template<typename TRotation>
-	struct MeshUniform_DynamicRotation : public MeshUniform_DynamicRotationBase, public IMeshUniformDataBase
-	{
-		virtual void SetInternalUniforms(GLuint programID) override
-		{
-			const GLint uniformLocation = glGetUniformLocation(programID, "uniformRotation");
-			glUniform1f(uniformLocation, m_color[0], m_color[1], m_color[2]);
-		}
-		TRotation m_rotation;
-	};
-
-	struct MeshFeature_HasDynamicScale_Base {};
-	template<typename TScale>
-	struct MeshUniform_DynamicScale : public MeshFeature_HasDynamicScale_Base, public IMeshUniformDataBase
-	{
-		virtual void SetInternalUniforms(GLuint programID) override
-		{
-			const GLint uniformLocation = glGetUniformLocation(programID, "uniformScale");
-			glUniform3f(uniformLocation, m_color[0], m_color[1], m_color[2]);
-		}
-		TScale m_scale;
-	};
+	MakeUniform(SolidColor,		 "uniformColor",	m_color);
+	MakeUniform(DynamicPosition, "uniformPosition", m_position);
+	MakeUniform(DynamicRotation, "uniformRotation", m_rotation);
+	MakeUniform(DynamicScale,	 "uniformScale",	m_scale);
 
 
 	#define MeshUniformCollection_2DTransform \
@@ -119,7 +105,7 @@ namespace Poole::Rendering
 
 	struct IMeshUniformCollectorBase
 	{
-		virtual void SetAllUniforms(GLuint programID) {}
+		virtual void SetAllUniforms(GLuint programId) {}
 	};
 
 	template<class ... TDecorators>
@@ -127,11 +113,12 @@ namespace Poole::Rendering
 		: public IMeshUniformCollectorBase
 		, public TDecorators...
 	{
-		static_assert((std::is_base_of<IMeshUniformDataBase, TDecorators>::value && ...), "All TDecorators must inherit from IMeshUniformDataBase struct.");
+		static_assert((std::is_base_of<IMeshUniformDataBase, TDecorators>::value && ...), 
+			"All TDecorators must inherit from IMeshUniformDataBase struct.");
 
-		virtual void SetAllUniforms(GLuint programID) override
+		virtual void SetAllUniforms(GLuint programId) override
 		{
-			(TDecorators::SetInternalUniforms(programID), ...);
+			(TDecorators::SetInternalUniforms(programId), ...);
 		}
 	};
 
@@ -174,16 +161,17 @@ namespace Poole::Rendering
 	struct StaticMeshNoIndiciesSolidColor3
 		: public IMesh
 		, public MeshFeature_HasVerts<Vertex>
-		, public IMeshUniformCollector< MeshUniform_SolidColor<fcolor3> >
+		, public IMeshUniformCollector<MeshUniform_SolidColor<fcolor3>>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programID) override;
+		virtual void Render(GLuint programId) override;
 	};
 	struct StaticMeshNoIndiciesSolidColor3_2DTransform
-		: public StaticMeshNoIndiciesSolidColor3
-		//, public MeshUniformCollection_2DTransform
+		: public IMesh
+		, public MeshFeature_HasVerts<Vertex>
+		, public IMeshUniformCollector<MeshUniform_SolidColor<fcolor3>, MeshUniformCollection_2DTransform>
 	{
-		
+		//TODO
 	};
 
 
@@ -195,7 +183,7 @@ namespace Poole::Rendering
 		, public IMeshUniformCollector< MeshUniform_SolidColor<fcolor3> >
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programID) override;
+		virtual void Render(GLuint programId) override;
 	};
 
 
@@ -206,6 +194,8 @@ namespace Poole::Rendering
 		, public MeshFeature_HasIndicies
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programID) override;
+		virtual void Render(GLuint programId) override;
 	};
 }
+
+

@@ -5,23 +5,31 @@
 
 namespace Poole::Rendering
 {
-	GLuint Renderer::m_shaderProgramID;
-	GLuint Renderer::m_shaderProgramIDuniformColor;
+	GLuint Renderer::m_shaderProgramId;
+	GLuint Renderer::m_shaderProgramIdUniformColor;
+	GLuint Renderer::m_shaderProgramIdTransform2D;
+	GLuint Renderer::m_shaderProgramIdUniformColorTransform2D;
 	std::vector<std::unique_ptr<IMesh>> Renderer::m_meshes;
 	GLuint Renderer::m_vertexbuffer;
 
 	void Renderer::Init()
 	{
 		// Create and compile our GLSL program from the shaders
-		m_shaderProgramID = Rendering::LoadShaderLiterals(
+		m_shaderProgramId = Rendering::LoadShaderLiterals(
 			Rendering::ShaderLiterals::VertexColor::vertexShader,
 			Rendering::ShaderLiterals::VertexColor::fragmentShader
 		);
-
-		// Create and compile our GLSL program from the shaders
-		m_shaderProgramIDuniformColor = Rendering::LoadShaderLiterals(
+		m_shaderProgramIdUniformColor = Rendering::LoadShaderLiterals(
 			Rendering::ShaderLiterals::UniformColor::vertexShader,
 			Rendering::ShaderLiterals::UniformColor::fragmentShader
+		);
+		m_shaderProgramIdTransform2D = Rendering::LoadShaderLiterals(
+			Rendering::ShaderLiterals::VertexColor_Transform2D::vertexShader,
+			Rendering::ShaderLiterals::VertexColor_Transform2D::fragmentShader
+		);
+		m_shaderProgramIdUniformColorTransform2D = Rendering::LoadShaderLiterals(
+			Rendering::ShaderLiterals::UniformColor_Transform2D::vertexShader,
+			Rendering::ShaderLiterals::UniformColor_Transform2D::fragmentShader
 		);
 
 		//m_programID = Rendering::LoadShaders(
@@ -47,7 +55,17 @@ namespace Poole::Rendering
 	{
 		for (std::unique_ptr<IMesh>& ptr : m_meshes)
 		{
-			ptr->Render(ptr->UsesUniformColor() ? m_shaderProgramIDuniformColor : m_shaderProgramID);
+			GLuint programId;
+			if (ptr->Uses2DTransform())
+			{
+				programId = ptr->UsesUniformColor() ? m_shaderProgramIdUniformColorTransform2D : m_shaderProgramIdTransform2D;
+			}
+			else
+			{
+				programId = ptr->UsesUniformColor() ? m_shaderProgramIdUniformColor : m_shaderProgramId;
+			}
+
+			ptr->Render(programId);
 		}
 	}
 }
