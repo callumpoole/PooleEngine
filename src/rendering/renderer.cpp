@@ -9,7 +9,7 @@ namespace Poole::Rendering
 	GLuint Renderer::m_shaderProgramIdUniformColor;
 	GLuint Renderer::m_shaderProgramIdTransform2D;
 	GLuint Renderer::m_shaderProgramIdUniformColorTransform2D;
-	std::vector<std::unique_ptr<IMesh>> Renderer::m_meshes;
+	std::vector<std::unique_ptr<IMeshBase>> Renderer::m_meshes;
 	GLuint Renderer::m_vertexbuffer;
 
 	void Renderer::Init()
@@ -53,7 +53,7 @@ namespace Poole::Rendering
 
 	void Renderer::RenderAll()
 	{
-		for (std::unique_ptr<IMesh>& ptr : m_meshes)
+		for (std::unique_ptr<IMeshBase>& ptr : m_meshes)
 		{
 			GLuint programId;
 			if (ptr->Uses2DTransform())

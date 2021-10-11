@@ -46,7 +46,7 @@ namespace Poole::Rendering
 #pragma warning(default : 4201) //DEFAULT nameless struct/union
 
 
-	struct IMesh
+	struct IMeshBase
 	{
 		void InternalInit() //Could remove if nothing else is needed, Super::Would probably work
 		{
@@ -57,8 +57,25 @@ namespace Poole::Rendering
 		//#todo: find a way to make this constexpr / remove it
 		bool UsesUniformColor() const;
 		bool Uses2DTransform() const;
-		void SetUniforms(GLuint programId);
+		virtual void SetUniforms(GLuint programId) {}
 	};
+
+	template<typename ... TDecorators>
+	struct IMesh 
+		: public IMeshBase
+		, public TDecorators...
+	{
+		static_assert((std::is_base_of<IMeshDecoratorBase, TDecorators>::value && ...),
+			"All TDecorators must inherit from IMeshUniformDataBase struct.");
+
+		virtual void SetUniforms(GLuint programId) override
+		{
+			IMeshBase::SetUniforms(programId); //Super
+			(TDecorators::SetInternalUniforms(programId), ...);
+		}
+	};
+
+
 
 	//template <typename T>
 	//concept IMesh2 = requires(T& t, const T& tconst) {
@@ -73,7 +90,7 @@ namespace Poole::Rendering
 
 
 
-	struct IMeshUniformDataBase
+	struct IMeshDecoratorBase
 	{
 		virtual void SetInternalUniforms(const GLuint programId) { }
 	protected:
@@ -89,11 +106,11 @@ namespace Poole::Rendering
 	template<typename T>															\
 	struct MeshUniform_##Name														\
 		: public MeshUniform_##Name##Base											\
-		, public IMeshUniformDataBase												\
+		, public IMeshDecoratorBase													\
 	{																				\
 		virtual void SetInternalUniforms(const GLuint programId) override			\
 		{																			\
-			IMeshUniformDataBase::SetInternalUniforms(programId); /*Super*/			\
+			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/			\
 			SetUniform(glGetUniformLocation(programId, UniformName), MemberName);	\
 		}																			\
 		T MemberName;																\
@@ -113,54 +130,22 @@ namespace Poole::Rendering
 
 
 
-
-
-
-	struct IMeshUniformCollectorBase
-	{
-		virtual void SetAllUniforms(GLuint programId) {}
-	};
-
-	template<class ... TDecorators>
-	struct IMeshUniformCollector
-		: public IMeshUniformCollectorBase
-		, public TDecorators...
-	{
-		static_assert((std::is_base_of<IMeshUniformDataBase, TDecorators>::value && ...),
-			"All TDecorators must inherit from IMeshUniformDataBase struct.");
-
-		virtual void SetAllUniforms(GLuint programId) override
-		{
-			IMeshUniformCollectorBase::SetAllUniforms(programId); //Super
-			(TDecorators::SetInternalUniforms(programId), ...);
-		}
-	};
-
-
-
-
-
-
-
-
-
-
 	template<typename _TVertex>
-	struct MeshFeature_HasVerts
+	struct MeshFeature_HasVerts : public IMeshDecoratorBase
 	{
 		using TVertex = _TVertex;
 		std::vector<TVertex> m_verts;
 		GLuint m_vertexbuffer; //#todo: Giving each its own buffer might fragment memory
 	};
 
-	struct MeshFeature_HasIndicies
+	struct MeshFeature_HasIndicies : public IMeshDecoratorBase
 	{
 		std::vector<int> m_indices;
 		GLuint m_elementbuffer; //#todo: Giving each its own buffer might fragment memory
 	};
 
-	struct MeshFeature_HasNormals {}; //TODO
-	struct MeshFeature_HasUVs {}; //TODO
+	struct MeshFeature_HasNormals : public IMeshDecoratorBase {}; //TODO
+	struct MeshFeature_HasUVs : public IMeshDecoratorBase {}; //TODO
 
 
 
@@ -174,9 +159,9 @@ namespace Poole::Rendering
 
 	template<class ... TDecorators>
 	struct StaticMeshNoIndiciesSolidColor3
-		: public IMesh
-		, public MeshFeature_HasVerts<Vertex>
-		, public IMeshUniformCollector<MeshUniform_SolidColor<fcolor3>, TDecorators...>
+		: public IMesh<MeshFeature_HasVerts<Vertex>, 
+					   MeshUniform_SolidColor<fcolor3>, 
+					   TDecorators...>
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programId) override;
@@ -190,10 +175,10 @@ namespace Poole::Rendering
 
 	template<class ... TDecorators>
 	struct StaticMeshSolidColor3
-		: public IMesh
-		, public MeshFeature_HasVerts<Vertex>
-		, public MeshFeature_HasIndicies
-		, public IMeshUniformCollector<MeshUniform_SolidColor<fcolor3>, TDecorators...>
+		: public IMesh<MeshFeature_HasVerts<Vertex>,
+					   MeshFeature_HasIndicies,
+					   MeshUniform_SolidColor<fcolor3>, 
+					   TDecorators...>
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programId) override;
@@ -207,10 +192,9 @@ namespace Poole::Rendering
 
 	template<class ... TDecorators>
 	struct StaticMeshVertexColor3
-		: public IMesh
-		, public MeshFeature_HasVerts<VertexWithColor3>
-		, public MeshFeature_HasIndicies
-		, public IMeshUniformCollector<TDecorators...>
+		: public IMesh<MeshFeature_HasVerts<VertexWithColor3>,
+					   MeshFeature_HasIndicies,
+					   TDecorators...>
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programId) override;

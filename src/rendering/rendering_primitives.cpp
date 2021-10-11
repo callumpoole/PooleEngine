@@ -2,19 +2,12 @@
 
 namespace Poole::Rendering
 {
-	bool IMesh::UsesUniformColor() const { return dynamic_cast<const MeshUniform_SolidColorBase*>(this); }
-	bool IMesh::Uses2DTransform() const 
+	bool IMeshBase::UsesUniformColor() const { return dynamic_cast<const MeshUniform_SolidColorBase*>(this); }
+	bool IMeshBase::Uses2DTransform() const 
 	{ 
 		return dynamic_cast<const MeshUniform_DynamicPositionBase*>(this)
 			&& dynamic_cast<const MeshUniform_DynamicRotationBase*>(this)
 			&& dynamic_cast<const MeshUniform_DynamicScaleBase*>(this);
-	}
-	void IMesh::SetUniforms(GLuint programId)
-	{
-		if (IMeshUniformCollectorBase* MeshUniformCollector = dynamic_cast<IMeshUniformCollectorBase*>(this))
-		{
-			MeshUniformCollector->SetAllUniforms(programId);
-		}
 	}
 
 	//---
