@@ -48,15 +48,11 @@ namespace Poole::Rendering
 
 	struct IMeshBase
 	{
-		void InternalInit() //Could remove if nothing else is needed, Super::Would probably work
-		{
-			Init();
-		}
 		virtual void Init() {}
 		virtual void Render(GLuint programId) {}
 		//#todo: find a way to make this constexpr / remove it
-		bool UsesUniformColor() const;
-		bool Uses2DTransform() const;
+		virtual bool UsesUniformColor3() const { return false; }
+		virtual bool Uses2DTransform() const { return false; }
 		virtual void SetUniforms(GLuint programId) {}
 	};
 
@@ -68,6 +64,16 @@ namespace Poole::Rendering
 		static_assert((std::is_base_of<IMeshDecoratorBase, TDecorators>::value && ...),
 			"All TDecorators must inherit from IMeshUniformDataBase struct.");
 
+		virtual bool UsesUniformColor3() const override
+		{
+			return (std::is_base_of<MeshUniform_SolidColor<fcolor3>, TDecorators>::value || ...);
+		}
+		virtual bool Uses2DTransform() const override
+		{
+			return (std::is_base_of<MeshUniform_DynamicPosition<fvec2>, TDecorators>::value || ...)
+				&& (std::is_base_of<MeshUniform_DynamicRotation<f32>, TDecorators>::value || ...)
+				&& (std::is_base_of<MeshUniform_DynamicScale<fvec2>, TDecorators>::value || ...);
+		}
 		virtual void SetUniforms(GLuint programId) override
 		{
 			IMeshBase::SetUniforms(programId); //Super
@@ -82,7 +88,7 @@ namespace Poole::Rendering
 	//	t.InternalInit();
 	//	t.Init();
 	//	t.Render((GLuint)0);
-	//	{ tconst.UsesUniformColor() } -> std::same_as<bool>;
+	//	{ tconst.UsesUniformColor3() } -> std::same_as<bool>;
 	//	{ tconst.Uses2DTransform() } -> std::same_as<bool>;
 	//	t.SetUniforms((GLuint)0);
 	//};
@@ -95,7 +101,7 @@ namespace Poole::Rendering
 		virtual void SetInternalUniforms(const GLuint programId) { }
 	protected:
 		template<typename TFloats> void SetUniform(const GLint uniform, const TFloats f) { assert(0); }
-		template<> void SetUniform(const GLint uniform, const f32 f) { glUniform1f(uniform, f); }
+		template<> void SetUniform(const GLint uniform, const f32 f)   { glUniform1f(uniform, f); }
 		template<> void SetUniform(const GLint uniform, const fvec2 v) { glUniform2f(uniform, v.x, v.y); }
 		template<> void SetUniform(const GLint uniform, const fvec3 v) { glUniform3f(uniform, v.x, v.y, v.z); }
 		template<> void SetUniform(const GLint uniform, const fvec4 v) { glUniform4f(uniform, v.x, v.y, v.z, v.w); }

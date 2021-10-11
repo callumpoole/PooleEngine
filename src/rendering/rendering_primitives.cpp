@@ -2,13 +2,13 @@
 
 namespace Poole::Rendering
 {
-	bool IMeshBase::UsesUniformColor() const { return dynamic_cast<const MeshUniform_SolidColorBase*>(this); }
-	bool IMeshBase::Uses2DTransform() const 
-	{ 
-		return dynamic_cast<const MeshUniform_DynamicPositionBase*>(this)
-			&& dynamic_cast<const MeshUniform_DynamicRotationBase*>(this)
-			&& dynamic_cast<const MeshUniform_DynamicScaleBase*>(this);
-	}
+	//bool IMeshBase::UsesUniformColor3() const { return dynamic_cast<const MeshUniform_SolidColorBase*>(this); }
+	//bool IMeshBase::Uses2DTransform() const 
+	//{ 
+	//	return dynamic_cast<const MeshUniform_DynamicPositionBase*>(this)
+	//		&& dynamic_cast<const MeshUniform_DynamicRotationBase*>(this)
+	//		&& dynamic_cast<const MeshUniform_DynamicScaleBase*>(this);
+	//}
 
 	//---
 

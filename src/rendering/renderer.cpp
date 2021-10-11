@@ -58,11 +58,11 @@ namespace Poole::Rendering
 			GLuint programId;
 			if (ptr->Uses2DTransform())
 			{
-				programId = ptr->UsesUniformColor() ? m_shaderProgramIdUniformColorTransform2D : m_shaderProgramIdTransform2D;
+				programId = ptr->UsesUniformColor3() ? m_shaderProgramIdUniformColorTransform2D : m_shaderProgramIdTransform2D;
 			}
 			else
 			{
-				programId = ptr->UsesUniformColor() ? m_shaderProgramIdUniformColor : m_shaderProgramId;
+				programId = ptr->UsesUniformColor3() ? m_shaderProgramIdUniformColor : m_shaderProgramId;
 			}
 
 			ptr->Render(programId);

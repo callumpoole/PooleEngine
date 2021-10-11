@@ -36,14 +36,14 @@ namespace Poole::Rendering {
 	/*static*/ MeshType* Renderer::Submit(const MeshType& meshAndColor)
 	{
 		m_meshes.emplace_back(new MeshType(meshAndColor));
-		m_meshes.back()->InternalInit();
+		m_meshes.back()->Init();
 		return dynamic_cast<MeshType*>(m_meshes.back().get());
 	}
 	template<typename MeshType>
 	/*static*/ MeshType* Renderer::Submit(MeshType&& meshAndColor)
 	{
 		m_meshes.emplace_back(new MeshType(std::move(meshAndColor)));
-		m_meshes.back()->InternalInit();
+		m_meshes.back()->Init();
 		return dynamic_cast<MeshType*>(m_meshes.back().get());
 	}
 }
