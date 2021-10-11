@@ -9,28 +9,40 @@ namespace Poole::Rendering
 	using Vertex = fvec3;
 
 #pragma warning(disable : 4201) //DISABLE nameless struct/union
-	struct VertexWithColor3
+	template<typename _TVertexPart, typename _TColorPart>
+	struct VertexWithColor{ };
+
+	template<>
+	struct VertexWithColor<Vertex, fcolor3>
 	{
+		using TVertexPart = Vertex;
+		using TColorPart = fcolor3;
 		union {
 			struct
 			{
-				Vertex m_position;
-				fcolor3 m_color;
+				TVertexPart m_position;
+				TColorPart m_color;
 			};
 			struct { f32 x, y, z, r, g, b; }; //I feel no need for m_ here
 		};
 	};
-	struct VertexWithColor4
+	using VertexWithColor3 = VertexWithColor<Vertex, fcolor3>;
+
+	template<>
+	struct VertexWithColor<Vertex, fcolor4>
 	{
+		using TVertexPart = Vertex;
+		using TColorPart = fcolor4;
 		union {
 			struct
 			{
-				Vertex m_position;
-				fcolor4 m_color;
+				TVertexPart m_position;
+				TColorPart m_color;
 			};
 			struct { f32 x, y, z, r, g, b, a; }; //I feel no need for m_ here
 		};
 	};
+	using VertexWithColor4 = VertexWithColor<Vertex, fcolor4>;
 #pragma warning(default : 4201) //DEFAULT nameless struct/union
 
 
@@ -64,7 +76,7 @@ namespace Poole::Rendering
 	struct IMeshUniformDataBase
 	{
 		virtual void SetInternalUniforms(const GLuint programId) { }
-
+	protected:
 		template<typename TFloats> void SetUniform(const GLint uniform, const TFloats f) { assert(0); }
 		template<> void SetUniform(const GLint uniform, const f32 f)   { glUniform1f(uniform, f); }
 		template<> void SetUniform(const GLint uniform, const fvec2 v) { glUniform2f(uniform, v.x, v.y); }
@@ -81,6 +93,7 @@ namespace Poole::Rendering
 	{																				\
 		virtual void SetInternalUniforms(const GLuint programId) override			\
 		{																			\
+			IMeshUniformDataBase::SetInternalUniforms(programId); /*Super*/			\
 			SetUniform(glGetUniformLocation(programId, UniformName), MemberName);	\
 		}																			\
 		T MemberName;																\
@@ -118,6 +131,7 @@ namespace Poole::Rendering
 
 		virtual void SetAllUniforms(GLuint programId) override
 		{
+			IMeshUniformCollectorBase::SetAllUniforms(programId); //Super
 			(TDecorators::SetInternalUniforms(programId), ...);
 		}
 	};
@@ -131,9 +145,10 @@ namespace Poole::Rendering
 
 
 
-	template<typename TVertex>
+	template<typename _TVertex>
 	struct MeshFeature_HasVerts
 	{
+		using TVertex = _TVertex;
 		std::vector<TVertex> m_verts;
 		GLuint m_vertexbuffer; //#todo: Giving each its own buffer might fragment memory
 	};
@@ -165,13 +180,6 @@ namespace Poole::Rendering
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programId) override;
-	};
-	struct StaticMeshNoIndiciesSolidColor3_2DTransform
-		: public IMesh
-		, public MeshFeature_HasVerts<Vertex>
-		, public IMeshUniformCollector<MeshUniform_SolidColor<fcolor3>, MeshUniformCollection_2DTransform>
-	{
-		//TODO
 	};
 
 
