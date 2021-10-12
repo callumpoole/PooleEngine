@@ -119,7 +119,7 @@ namespace Poole::Rendering
 			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/			\
 			SetUniform(glGetUniformLocation(programId, UniformName), MemberName);	\
 		}																			\
-		T MemberName;																\
+		T MemberName{};																\
 	};
 
 	MakeUniform(SolidColor, "uniformColor", m_color);
@@ -135,19 +135,19 @@ namespace Poole::Rendering
 
 
 
-
+	struct MeshFeature_HasVertsBase {};
 	template<typename _TVertex>
-	struct MeshFeature_HasVerts : public IMeshDecoratorBase
+	struct MeshFeature_HasVerts : public MeshFeature_HasVertsBase, public IMeshDecoratorBase
 	{
 		using TVertex = _TVertex;
 		std::vector<TVertex> m_verts;
-		GLuint m_vertexbuffer; //#todo: Giving each its own buffer might fragment memory
+		GLuint m_vertexbuffer = 0; //#todo: Giving each its own buffer might fragment memory
 	};
 
 	struct MeshFeature_HasIndicies : public IMeshDecoratorBase
 	{
 		std::vector<int> m_indices;
-		GLuint m_elementbuffer; //#todo: Giving each its own buffer might fragment memory
+		GLuint m_elementbuffer = 0; //#todo: Giving each its own buffer might fragment memory
 	};
 
 	struct MeshFeature_HasNormals : public IMeshDecoratorBase {}; //TODO

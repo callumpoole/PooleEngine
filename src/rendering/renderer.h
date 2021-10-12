@@ -19,6 +19,11 @@ namespace Poole::Rendering {
 
 		static void Init();
 		static void Tick(GLFWwindow* window);
+
+		static IMeshBase* GetMesh(i32 index) { return m_meshes[index].get(); } //TODO: BoundsCheck
+		template<typename T>
+		static T* GetMesh(i32 index) { return dynamic_cast<T*>(m_meshes[index].get()); } //TODO: BoundsCheck
+
 	private:
 		static void RenderAll();
 

@@ -10,7 +10,7 @@ namespace Poole
 {
     void TempPassTriangleData()
     {
-        Rendering::StaticMeshNoIndiciesSolidColor3 meshNoInd;
+        Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform meshNoInd;
         meshNoInd.m_verts = std::vector<Rendering::Vertex>{
             {-0.5f,  -0.5f,  0.0f},
             { 0.5f,  -0.5f,  0.0f},
@@ -25,13 +25,13 @@ namespace Poole
             //{0.5f,  0.5f,  0.0f},
         };
         meshNoInd.m_color = Colors::Green<fcolor3>;
-
+        meshNoInd.m_position = { 0.f, 0.0f };
         //Rendering::IVirtualMesh* m = &meshNoInd;
 
         Rendering::Renderer::Submit(/*std::move*/meshNoInd);
 
          
-        Rendering::StaticMeshNoIndiciesSolidColor3 meshNoInd2;
+        Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform meshNoInd2;
         meshNoInd2.m_verts = std::vector<Rendering::Vertex>{
             //{-0.5f,  -0.5f,  0.0f},
             //{ 0.5f,  -0.5f,  0.0f},
@@ -48,7 +48,7 @@ namespace Poole
         meshNoInd2.m_color = Colors::Pink<fcolor3>;
         Rendering::Renderer::Submit(std::move(meshNoInd2));
 
-        Rendering::StaticMeshNoIndiciesSolidColor3 meshNoInd3;
+        Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform meshNoInd3;
         meshNoInd3.m_verts = std::vector<Rendering::Vertex>{
             //{-0.5f,  -0.5f,  0.0f},
             //{ 0.5f,  -0.5f,  0.0f},
@@ -68,7 +68,7 @@ namespace Poole
 
 
 
-        Rendering::StaticMeshSolidColor3 mesh;
+        Rendering::StaticMeshSolidColor3_2DTransform mesh;
         mesh.m_verts = std::vector<Rendering::Vertex>{
             {0.9f,   0.3f, 0.0f}, // top right
             {0.9f,  -0.3f, 0.0f}, // bottom right
@@ -90,7 +90,7 @@ namespace Poole
         mesh.m_color = Colors::Red<fcolor3>;
         Rendering::Renderer::Submit(std::move(mesh));
 
-        Rendering::StaticMeshSolidColor3 mesh2;
+        Rendering::StaticMeshSolidColor3_2DTransform mesh2;
         mesh2.m_verts = std::vector<Rendering::Vertex>{
             //{0.9f,   0.3f, 0.0f}, // top right
             //{0.9f,  -0.3f, 0.0f}, // bottom right
@@ -115,7 +115,7 @@ namespace Poole
 
 
 
-        Rendering::StaticMeshVertexColor3 meshWithColor;
+        Rendering::StaticMeshVertexColor3_2DTransform meshWithColor;
         meshWithColor.m_verts = std::vector<Rendering::VertexWithColor3>{
             {Rendering::Vertex{0.3f,   0.3f, 0.0f}, /*top right*/      Colors::Yellow<fcolor3>},
             {Rendering::Vertex{0.3f,  -0.3f, 0.0f}, /*bottom right*/   Colors::Green<fcolor3>},
@@ -136,7 +136,7 @@ namespace Poole
         };
         Rendering::Renderer::Submit(std::move(meshWithColor));
 
-        Rendering::StaticMeshVertexColor3 meshWithColor2;
+        Rendering::StaticMeshVertexColor3_2DTransform meshWithColor2;
         meshWithColor2.m_verts = std::vector<Rendering::VertexWithColor3>{
             //{Rendering::Vertex{0.3f,   0.3f, 0.0f}, /*top right*/      Colors::Yellow<fColor3>},
             //{Rendering::Vertex{0.3f,  -0.3f, 0.0f}, /*bottom right*/   Colors::Green<fColor3>},
@@ -158,7 +158,16 @@ namespace Poole
         Rendering::Renderer::Submit(std::move(meshWithColor2));
     }
 
+    void TempMoveTriangles()
+    {
+        Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform* Mesh =
+            Rendering::Renderer::GetMesh<Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform>(0);
 
+        static float P = 0.f;
+        P += 0.01f;
+
+        Mesh->m_position = { cosf(P), sinf(P) };
+    }
 
 
     Engine::Engine(const char* windowName, glm::uvec2 size)
@@ -199,6 +208,7 @@ namespace Poole
         {
             Input::Tick(window);
             Rendering::Renderer::Tick(window);
+            TempMoveTriangles();
             Window::Tick();
         }
     
