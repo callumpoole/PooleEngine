@@ -4,6 +4,7 @@
 #include <memory>
 #include "core.h"
 #include "rendering_primitives.h"
+#include "shader_loader.h"
 
 struct GLFWwindow;
 
@@ -25,12 +26,16 @@ namespace Poole::Rendering {
 		static T* GetMesh(i32 index) { return dynamic_cast<T*>(m_meshes[index].get()); } //TODO: BoundsCheck
 
 	private:
+		static void LoadShaders();
 		static void RenderAll();
 
-		static GLuint m_shaderProgramId;
-		static GLuint m_shaderProgramIdUniformColor;
-		static GLuint m_shaderProgramIdTransform2D;
-		static GLuint m_shaderProgramIdUniformColorTransform2D;
+		static GLShader m_shaderUniformColor;
+		static GLShader m_shaderVertexColor;
+		static GLShader m_shaderUniformColorTransform2D;
+		static GLShader m_shaderVertexColorTransform2D;
+		static GLShader m_shaderExperimental1;
+		static GLShader m_shaderExperimental2;
+		static GLShader m_shaderExperimental3;
 		static std::vector<std::unique_ptr<IMeshBase>> m_meshes;
 		static GLuint m_vertexbuffer;
 	};

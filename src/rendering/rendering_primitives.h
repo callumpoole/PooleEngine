@@ -64,16 +64,23 @@ namespace Poole::Rendering
 		static_assert((std::is_base_of<IMeshDecoratorBase, TDecorators>::value && ...),
 			"All TDecorators must inherit from IMeshUniformDataBase struct.");
 
+		template<typename T>
+		constexpr bool ContainsDecorator() const
+		{
+			return (std::is_base_of<T, TDecorators>::value || ...);
+		}
+
 		virtual bool UsesUniformColor3() const override
 		{
-			return (std::is_base_of<MeshUniform_SolidColor<fcolor3>, TDecorators>::value || ...);
+			return ContainsDecorator<MeshUniform_SolidColor<fcolor3>>();
 		}
 		virtual bool Uses2DTransform() const override
 		{
-			//return (std::is_base_of<MeshUniform_DynamicPosition<fvec2>, TDecorators>::value || ...)
-			//	&& (std::is_base_of<MeshUniform_DynamicRotation<f32>, TDecorators>::value || ...)
-			//	&& (std::is_base_of<MeshUniform_DynamicScale<fvec2>, TDecorators>::value || ...);
-			return (std::is_base_of<MeshUniform_DynamicTransform<fmat3>, TDecorators>::value || ...);
+			return ContainsDecorator<MeshUniform_DynamicTransform<fmat3>>();
+			//return ContainsDecorator<MeshUniform_DynamicPosition<fvec2>>()
+			//	&& ContainsDecorator<MeshUniform_DynamicRotation<f32>>()
+			//	&& ContainsDecorator<MeshUniform_DynamicScale<fvec2>>()
+			//	&& ContainsDecorator<MeshUniform_DynamicShear<fvec2>>();
 		}
 		virtual void SetUniforms(GLuint programId) override
 		{

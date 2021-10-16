@@ -25,7 +25,6 @@ namespace Poole
             //{0.5f,  0.5f,  0.0f},
         };
         meshNoInd.m_color = Colors::Green<fcolor3>;
-        meshNoInd.m_position = { 0.f, 0.0f };
         //Rendering::IVirtualMesh* m = &meshNoInd;
 
         Rendering::Renderer::Submit(/*std::move*/meshNoInd);

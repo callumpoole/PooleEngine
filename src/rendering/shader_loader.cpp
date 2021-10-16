@@ -3,50 +3,77 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <filesystem>
 
 namespace Poole::Rendering {
 
-	std::string ReadFileIntoString(std::string_view filePath)
+	GLShader::GLShader(std::string_view combinedPath)
 	{
-		//#todo: Use the new C++17 <filesystem>
-		std::string text;
-		std::ifstream stream(filePath.data(), std::ios::in);
-		if (stream.is_open())
+		std::optional<ShaderSource> Source = LoadFromFile(combinedPath);
+		if (Source)
 		{
-			std::stringstream sstr;
-			sstr << stream.rdbuf();
-			text = sstr.str();
-			stream.close();
-		}
-		else
-		{
-			//#todo: consider puts() or external fmt::
-			printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", filePath.data());
-			getchar(); //#todo: is there a better way to keep it open?
-			return ""; //#todo: use std::optional?
-		}
-		return text;
-	}
-
-	void CompileAndCheckShader(const GLuint& shaderID, const char* shaderCode, GLint& result, i32& infoLogLength)
-	{
-		glShaderSource(shaderID, 1, &shaderCode, NULL);
-		glCompileShader(shaderID);
-
-		// Check Vertex Shader
-		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
-		glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		if (infoLogLength > 0)
-		{
-			std::vector<char> shaderErrorMessage(infoLogLength + 1);
-			glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
-			printf("%s\n", &shaderErrorMessage[0]);
+			m_programID = LoadShaderLiterals(Source->vertexShader.c_str(), Source->fragmentShader.c_str());
 		}
 	}
-
-	//Source: http://www.opengl-tutorial.org/beginners-tutorials/tutorial-2-the-first-triangle/
-	GLuint LoadShaderLiterals(std::string_view vertexShaderCode, std::string_view fragmentShaderCode, std::string_view vertexFilePath, std::string_view fragmentFilePath)
+	GLShader::GLShader(std::string_view vertexShaderCode, std::string_view fragmentShaderCode)
 	{
+		m_programID = LoadShaderLiterals(vertexShaderCode.data(), fragmentShaderCode.data());
+	}
+	GLShader::~GLShader()
+	{
+	}
+	
+	std::optional<GLShader::ShaderSource> GLShader::LoadFromFile(std::string_view combinedPath)
+	{
+		namespace fs = std::filesystem;
+
+		fs::path path = fs::absolute(fs::path(combinedPath));
+		if (fs::exists(path))
+		{
+			std::ifstream stream(path, std::ios::in);
+			if (stream.is_open())
+			{
+				std::stringstream ss[2];
+
+				enum class EShaderType
+				{
+					None = -1,
+					Vertex = 0,
+					Fragment = 1
+				};
+
+				std::string line;
+				EShaderType type = EShaderType::None;
+				while (getline(stream, line))
+				{
+					if (line.find("#type") != std::string::npos)
+					{
+						if (line.find("vertex") != std::string::npos)
+							type = EShaderType::Vertex;
+						else if (line.find("fragment") != std::string::npos)
+							type = EShaderType::Fragment;
+					}
+					else if (type != EShaderType::None)
+					{
+						ss[(int)type] << line << '\n';
+					}
+				}
+				stream.close();
+				return ShaderSource{ ss[0].str(), ss[1].str() };
+			}
+		}
+
+		//#todo: consider puts() or external fmt::
+		printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", path.c_str());
+		getchar(); //#todo: is there a better way to keep it open?
+
+		return std::nullopt;
+	}
+
+	GLuint GLShader::LoadShaderLiterals(const char* vertexShaderCode, const char* fragmentShaderCode)
+	{
+		//Source: http://www.opengl-tutorial.org/beginners-tutorials/tutorial-2-the-first-triangle/
+
 		// Create the shaders
 		const GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 		const GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
@@ -55,12 +82,12 @@ namespace Poole::Rendering {
 		i32 infoLogLength = 0;
 
 		// Compile Vertex Shader
-		printf("Compiling shader : %s\n", vertexFilePath.data());
-		CompileAndCheckShader(vertexShaderID, vertexShaderCode.data(), result, infoLogLength);
+		printf("Compiling shader : Vertex\n");
+		CompileAndCheckShader(vertexShaderID, vertexShaderCode, result, infoLogLength);
 
 		// Compile Fragment Shader
-		printf("Compiling shader : %s\n", fragmentFilePath.data());
-		CompileAndCheckShader(fragmentShaderID, fragmentShaderCode.data(), result, infoLogLength);
+		printf("Compiling shader : Fragment\n");
+		CompileAndCheckShader(fragmentShaderID, fragmentShaderCode, result, infoLogLength);
 
 		// Link the program
 		printf("Linking program\n");
@@ -88,11 +115,20 @@ namespace Poole::Rendering {
 		return programID;
 	}
 
-	GLuint LoadShaders(std::string_view vertexFilePath, std::string_view fragmentFilePath)
+	void GLShader::CompileAndCheckShader(const GLuint& shaderID, const char* shaderCode, GLint& result, i32& infoLogLength)
 	{
-		const std::string vertexShaderCode = ReadFileIntoString(vertexFilePath);
-		const std::string fragmentShaderCode = ReadFileIntoString(fragmentFilePath);
-		return LoadShaderLiterals(vertexShaderCode, fragmentShaderCode, vertexFilePath, fragmentFilePath);
+		glShaderSource(shaderID, 1, &shaderCode, NULL);
+		glCompileShader(shaderID);
+
+		// Check Vertex Shader
+		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+		glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+		if (infoLogLength > 0)
+		{
+			std::vector<char> shaderErrorMessage(infoLogLength + 1);
+			glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
+			printf("%s\n", &shaderErrorMessage[0]);
+		}
 	}
 }
 
