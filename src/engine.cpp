@@ -8,18 +8,18 @@
 
 namespace Poole 
 {
-    void TempPassTriangleData()
+    void TestMeshNoIndiciesSolidColor()
     {
         Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform meshNoInd;
         meshNoInd.m_verts = std::vector<Rendering::Vertex>{
             {-0.5f,  -0.5f,  0.0f},
             { 0.5f,  -0.5f,  0.0f},
             { 0.0f,   0.5f,  0.0f},
-        
+
             //{-0.75f, -0.75f, 0.0f},
             //{-0.25f, -0.75f, 0.0f},
             //{-0.5f,  -0.5f,  0.0f},
-            
+
             //{0.75f, 0.75f, 0.0f},
             //{0.25f, 0.75f, 0.0f},
             //{0.5f,  0.5f,  0.0f},
@@ -30,7 +30,7 @@ namespace Poole
 
         Rendering::Renderer::Submit(/*std::move*/meshNoInd);
 
-         
+
         Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform meshNoInd2;
         meshNoInd2.m_verts = std::vector<Rendering::Vertex>{
             //{-0.5f,  -0.5f,  0.0f},
@@ -64,17 +64,16 @@ namespace Poole
         };
         meshNoInd3.m_color = Colors::Cyan<fcolor3>;
         Rendering::Renderer::Submit(std::move(meshNoInd3));
-
-
-
-
+    }
+    void TestMeshSolidColor()
+    {
         Rendering::StaticMeshSolidColor3_2DTransform mesh;
         mesh.m_verts = std::vector<Rendering::Vertex>{
             {0.9f,   0.3f, 0.0f}, // top right
             {0.9f,  -0.3f, 0.0f}, // bottom right
             {0.6f,  -0.3f, 0.0f}, // bottom left
             {0.6f,   0.3f, 0.0f}, // top left
-        
+
             //{ 0.9f,  0.9f, 0.0f}, // top right
             //{ 0.9f,  0.7f, 0.0f}, // bottom right
             //{ 0.7f,  0.7f, 0.0f}, // bottom left
@@ -83,7 +82,7 @@ namespace Poole
         mesh.m_indices = {
             0, 1, 3,   // first triangle
             1, 2, 3,    // second triangle
-        
+
             //4+0, 4+1, 4+3,   // first triangle
             //4+1, 4+2, 4+3    // second triangle
         };
@@ -111,17 +110,16 @@ namespace Poole
         };
         mesh2.m_color = Colors::Orange<fcolor3>;
         Rendering::Renderer::Submit(std::move(mesh2));
-       
-
-
-
+    }
+    void TestMeshVertexColor()
+    {
         Rendering::StaticMeshVertexColor3_2DTransform meshWithColor;
         meshWithColor.m_verts = std::vector<Rendering::VertexWithColor3>{
             {Rendering::Vertex{0.3f,   0.3f, 0.0f}, /*top right*/      Colors::Yellow<fcolor3>},
             {Rendering::Vertex{0.3f,  -0.3f, 0.0f}, /*bottom right*/   Colors::Green<fcolor3>},
             {Rendering::Vertex{-0.3f, -0.3f, 0.0f}, /*bottom left*/    Colors::White<fcolor3>},
             {Rendering::Vertex{-0.3f,  0.3f, 0.0f}, /*top left*/       Colors::Purple<fcolor3>},
-                                                                       
+
             //{Rendering::Vertex{-0.7f,  0.9f, 0.0f}, /*top right*/      Colors::Orange<fColor3>},
             //{Rendering::Vertex{-0.7f,  0.7f, 0.0f}, /*bottom right*/   Colors::Cyan<fColor3>},
             //{Rendering::Vertex{-0.9f,  0.7f, 0.0f}, /*bottom left*/    Colors::Grey<fColor3>}, 
@@ -130,7 +128,7 @@ namespace Poole
         meshWithColor.m_indices = {
             0, 1, 3,   // first triangle
             1, 2, 3,    // second triangle
-        
+
             //4+0, 4+1, 4+3,   // first triangle
             //4+1, 4+2, 4+3    // second triangle
         };
@@ -158,15 +156,25 @@ namespace Poole
         Rendering::Renderer::Submit(std::move(meshWithColor2));
     }
 
+    void TempPassTriangleData()
+    {
+        TestMeshNoIndiciesSolidColor();
+        TestMeshSolidColor();
+        TestMeshVertexColor();
+    }
+
     void TempMoveTriangles()
     {
         Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform* Mesh =
             Rendering::Renderer::GetMesh<Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform>(0);
-
+        
         static float P = 0.f;
         P += 0.01f;
-
-        Mesh->m_position = { cosf(P), sinf(P) };
+        
+        Mesh->m_position = { cosf(P/5)/3, sinf(P/5)/3 };
+        Mesh->m_rotation = P * 0.01f;
+        Mesh->m_scale = { (cosf(P/25)+2) / 2, (cosf(P/25)+2) / 2 };
+        Mesh->m_shear = { 0.1, 0.1 };
     }
 
 

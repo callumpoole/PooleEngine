@@ -7,7 +7,7 @@ namespace Poole::Rendering::ShaderLiterals
 		const char* vertexShader = R"(
 			#version 330 core
 			layout(location = 0) in vec3 inPosition;
-			void main(){
+			void main() {
 			  gl_Position.xyz = inPosition;
 			  gl_Position.w = 1.0;
 			}
@@ -16,7 +16,7 @@ namespace Poole::Rendering::ShaderLiterals
 			#version 330 core
 			uniform vec3 uniformColor;
 			out vec3 color;
-			void main(){
+			void main() {
 			  color = uniformColor;
 			}
 		)";
@@ -29,7 +29,7 @@ namespace Poole::Rendering::ShaderLiterals
 			layout(location = 0) in vec3 inPosition;
 			layout(location = 1) in vec3 inColor;
 			out vec3 theColor;
-			void main(){
+			void main() {
 			  gl_Position.xyz = inPosition;
 			  gl_Position.w = 1.0;
 			  theColor = inColor;
@@ -50,11 +50,9 @@ namespace Poole::Rendering::ShaderLiterals
 		const char* vertexShader = R"(
 			#version 330 core
 			layout(location = 0) in vec3 inPosition;
-			uniform vec2 uniformPosition;
-			uniform float uniformRotation;
-			uniform vec2 uniformScale;
-			void main(){
-			  gl_Position.xy = inPosition.xy + uniformPosition.xy;
+			uniform mat3 uniformTransform;
+			void main() {
+			  gl_Position.xyz = uniformTransform * vec3(inPosition.x, inPosition.y, 1);
 			  gl_Position.z = inPosition.z;
 			  gl_Position.w = 1.0;
 			}
@@ -63,7 +61,7 @@ namespace Poole::Rendering::ShaderLiterals
 			#version 330 core
 			uniform vec3 uniformColor;
 			out vec3 color;
-			void main(){
+			void main() {
 			  color = uniformColor;
 			}
 		)";
@@ -75,12 +73,10 @@ namespace Poole::Rendering::ShaderLiterals
 			#version 330 core
 			layout(location = 0) in vec3 inPosition;
 			layout(location = 1) in vec3 inColor;
-			uniform vec2 uniformPosition;
-			uniform float uniformRotation;
-			uniform vec2 uniformScale;
+			uniform mat3 uniformTransform;
 			out vec3 theColor;
-			void main(){
-			  gl_Position.xy = inPosition.xy + uniformPosition.xy;
+			void main() {
+			  gl_Position.xyz = uniformTransform * vec3(inPosition.x, inPosition.y, 1);
 			  gl_Position.z = inPosition.z;
 			  gl_Position.w = 1.0;
 			  theColor = inColor;
@@ -90,7 +86,7 @@ namespace Poole::Rendering::ShaderLiterals
 			#version 330 core
 			in vec3 theColor;
 			out vec3 color;
-			void main(){
+			void main() {
 			  color = theColor;
 			}
 		)";

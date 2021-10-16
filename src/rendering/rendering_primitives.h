@@ -49,11 +49,11 @@ namespace Poole::Rendering
 	struct IMeshBase
 	{
 		virtual void Init() {}
-		virtual void Render(GLuint programId) {}
+		virtual void Render(GLuint /*programId*/) {}
 		//#todo: find a way to make this constexpr / remove it
 		virtual bool UsesUniformColor3() const { return false; }
 		virtual bool Uses2DTransform() const { return false; }
-		virtual void SetUniforms(GLuint programId) {}
+		virtual void SetUniforms(GLuint /*programId*/) {}
 	};
 
 	template<typename ... TDecorators>
@@ -70,9 +70,10 @@ namespace Poole::Rendering
 		}
 		virtual bool Uses2DTransform() const override
 		{
-			return (std::is_base_of<MeshUniform_DynamicPosition<fvec2>, TDecorators>::value || ...)
-				&& (std::is_base_of<MeshUniform_DynamicRotation<f32>, TDecorators>::value || ...)
-				&& (std::is_base_of<MeshUniform_DynamicScale<fvec2>, TDecorators>::value || ...);
+			//return (std::is_base_of<MeshUniform_DynamicPosition<fvec2>, TDecorators>::value || ...)
+			//	&& (std::is_base_of<MeshUniform_DynamicRotation<f32>, TDecorators>::value || ...)
+			//	&& (std::is_base_of<MeshUniform_DynamicScale<fvec2>, TDecorators>::value || ...);
+			return (std::is_base_of<MeshUniform_DynamicTransform<fmat3>, TDecorators>::value || ...);
 		}
 		virtual void SetUniforms(GLuint programId) override
 		{
@@ -98,40 +99,86 @@ namespace Poole::Rendering
 
 	struct IMeshDecoratorBase
 	{
-		virtual void SetInternalUniforms(const GLuint programId) { }
+		virtual void SetInternalUniforms(const GLuint /*programId*/) { }
 	protected:
-		template<typename TFloats> void SetUniform(const GLint uniform, const TFloats f) { assert(0); }
+		template<typename TFloats> void SetUniform(const GLint /*uniform*/, const TFloats /*f*/) { assert(0); }
 		template<> void SetUniform(const GLint uniform, const f32 f)   { glUniform1f(uniform, f); }
 		template<> void SetUniform(const GLint uniform, const fvec2 v) { glUniform2f(uniform, v.x, v.y); }
 		template<> void SetUniform(const GLint uniform, const fvec3 v) { glUniform3f(uniform, v.x, v.y, v.z); }
 		template<> void SetUniform(const GLint uniform, const fvec4 v) { glUniform4f(uniform, v.x, v.y, v.z, v.w); }
+		template<> void SetUniform(const GLint uniform, const fmat2 v) { glUniformMatrix2fv(uniform, 1, GL_TRUE, (const GLfloat*)&v); }
+		template<> void SetUniform(const GLint uniform, const fmat3 v) { glUniformMatrix3fv(uniform, 1, GL_TRUE, (const GLfloat*)&v); }
+		template<> void SetUniform(const GLint uniform, const fmat4 v) { glUniformMatrix4fv(uniform, 1, GL_TRUE, (const GLfloat*)&v); }
 	};
 
-#define MakeUniform(Name, UniformName, MemberName)									\
-	struct MeshUniform_##Name##Base {};												\
-	template<typename T>															\
-	struct MeshUniform_##Name														\
-		: public MeshUniform_##Name##Base											\
-		, public IMeshDecoratorBase													\
-	{																				\
-		virtual void SetInternalUniforms(const GLuint programId) override			\
-		{																			\
-			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/			\
-			SetUniform(glGetUniformLocation(programId, UniformName), MemberName);	\
-		}																			\
-		T MemberName{};																\
+#define MakeUniform(Name, UniformName, MemberName)													\
+	static constexpr const char* MeshUniform_##Name##_Uniform = UniformName;						\
+	struct MeshUniform_##Name##Base {};																\
+	template<typename T>																			\
+	struct MeshUniform_##Name																		\
+		: public MeshUniform_##Name##Base															\
+		, public IMeshDecoratorBase																	\
+	{																								\
+		virtual void SetInternalUniforms(const GLuint programId) override							\
+		{																							\
+			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/							\
+			SetUniform(glGetUniformLocation(programId, MeshUniform_##Name##_Uniform), MemberName);	\
+		}																							\
+		T MemberName{};																				\
 	};
+
+
 
 	MakeUniform(SolidColor, "uniformColor", m_color);
-	MakeUniform(DynamicPosition, "uniformPosition", m_position);
-	MakeUniform(DynamicRotation, "uniformRotation", m_rotation);
-	MakeUniform(DynamicScale, "uniformScale", m_scale);
+	//MakeUniform(DynamicPosition, "uniformPosition", m_position);
+	//MakeUniform(DynamicRotation, "uniformRotation", m_rotation);
+	//MakeUniform(DynamicScale, "uniformScale", m_scale); //Issue is default value is 0s not 1s
+	//MakeUniform(DynamicShear, "uniformShear", m_shear);
+	MakeUniform(DynamicTransform, "uniformTransform", m_transform);
+
+	template<>
+	struct MeshUniform_DynamicTransform<fmat3>
+		: public MeshUniform_DynamicTransformBase
+		, public IMeshDecoratorBase
+	{
+		virtual void SetInternalUniforms(const GLuint programId) override		
+		{																		
+			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/
+
+			const fmat3 Translation = {
+				1, 0, m_position.x,
+				0, 1, m_position.y,
+				0, 0, 1
+			};
+			const fmat3 Rotation = {
+				cosf(m_rotation), -sinf(m_rotation), 0,
+				sinf(m_rotation),  cosf(m_rotation), 0,
+							   0,				  0, 1,
+			};
+			const fmat3 Scale = {
+				m_scale.x,		   0, 0,
+						0, m_scale.y, 0,
+						0,		   0, 1
+			};
+			const fmat3 Shear = {
+				1,		   m_shear.x, 0,
+				m_shear.y,		   1, 0,
+				0,				   0, 1
+			};
+
+			m_transform = Translation * Rotation * Shear * Scale;
+
+			IMeshDecoratorBase::SetUniform(glGetUniformLocation(programId, MeshUniform_DynamicTransform_Uniform), m_transform);
+		}																		
+		fmat3 m_transform{};
+		fvec2 m_position{ 0.f, 0.f };
+		f32 m_rotation = 0;
+		fvec2 m_scale{1.f, 1.f};
+		fvec2 m_shear{0.f, 0.f};
+	};
 
 
-#define MeshUniformCollection_2DTransform \
-		  MeshUniform_DynamicPosition<fvec2> \
-		, MeshUniform_DynamicRotation<f32> \
-		, MeshUniform_DynamicScale<fvec2>
+
 
 
 
@@ -174,7 +221,7 @@ namespace Poole::Rendering
 	};
 
 	struct StaticMeshNoIndiciesSolidColor3_2DTransform
-		: public StaticMeshNoIndiciesSolidColor3<MeshUniformCollection_2DTransform>
+		: public StaticMeshNoIndiciesSolidColor3<MeshUniform_DynamicTransform<fmat3>>
 	{
 	};
 
@@ -191,7 +238,7 @@ namespace Poole::Rendering
 	};
 
 	struct StaticMeshSolidColor3_2DTransform
-		: public StaticMeshSolidColor3<MeshUniformCollection_2DTransform>
+		: public StaticMeshSolidColor3<MeshUniform_DynamicTransform<fmat3>>
 	{
 	};
 
@@ -207,9 +254,10 @@ namespace Poole::Rendering
 	};
 
 	struct StaticMeshVertexColor3_2DTransform
-		: public StaticMeshVertexColor3<MeshUniformCollection_2DTransform>
+		: public StaticMeshVertexColor3<MeshUniform_DynamicTransform<fmat3>>
 	{
 	};
+
 
 
 

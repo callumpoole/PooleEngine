@@ -39,6 +39,10 @@ using uvec2 = glm::uvec2;
 using uvec3 = glm::uvec3;
 using uvec4 = glm::uvec4;
 
+using fmat2 = glm::mat2;
+using fmat3 = glm::mat3;
+using fmat4 = glm::mat4;
+
 using fcolor3 = glm::vec3;
 using fcolor4 = glm::vec4;
 using ucolor3 = glm::uvec3;
