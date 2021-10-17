@@ -21,6 +21,8 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/shaders/Experimental1.shader"
 	"src/rendering/shaders/Experimental2.shader"
 	"src/rendering/shaders/Experimental3.shader"
+	"src/rendering/camera/orthographic_camera.h"
+	"src/rendering/camera/orthographic_camera.cpp"
 	"src/rendering/renderer.h"
 	"src/rendering/renderer.cpp"
 	"src/rendering/rendering_primitives.h"

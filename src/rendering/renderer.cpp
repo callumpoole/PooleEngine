@@ -5,6 +5,7 @@
 
 namespace Poole::Rendering
 {
+	std::unique_ptr<OrthographicCamera> Renderer::m_camera;
 	GLShader Renderer::m_shaderUniformColor;
 	GLShader Renderer::m_shaderVertexColor;
 	GLShader Renderer::m_shaderUniformColorTransform2D;
@@ -17,6 +18,7 @@ namespace Poole::Rendering
 
 	void Renderer::Init()
 	{
+		m_camera = std::make_unique<OrthographicCamera>(-2.f, 2.f, -2.f, 2.f);
 		LoadShaders();
 	}
 	void Renderer::Tick(GLFWwindow* window)
@@ -84,7 +86,8 @@ namespace Poole::Rendering
 				programId = ptr->UsesUniformColor3() ? m_shaderUniformColor.GetProgramID() 
 													 : m_shaderVertexColor.GetProgramID();
 			}
-			ptr->Render(programId);
+
+			ptr->Render(programId, m_camera.get());
 		}
 	}
 }

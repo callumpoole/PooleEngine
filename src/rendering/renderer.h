@@ -5,6 +5,7 @@
 #include "core.h"
 #include "rendering_primitives.h"
 #include "shader_loader.h"
+#include "camera/orthographic_camera.h"
 
 struct GLFWwindow;
 
@@ -29,6 +30,7 @@ namespace Poole::Rendering {
 		static void LoadShaders();
 		static void RenderAll();
 
+		static std::unique_ptr<OrthographicCamera> m_camera;
 		static GLShader m_shaderUniformColor;
 		static GLShader m_shaderVertexColor;
 		static GLShader m_shaderUniformColorTransform2D;

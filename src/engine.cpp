@@ -8,6 +8,19 @@
 
 namespace Poole 
 {
+    void TestMeshNoIndiciesSolidColor2()
+    {
+        Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform meshNoInd;
+        meshNoInd.m_verts = std::vector<Rendering::Vertex>{
+            {-1.f,  -1.f, 0.0f},
+            { 1.f,  -1.f, 0.0f},
+            { 0.f,  1.f,  0.0f},
+        };
+        meshNoInd.m_color = Colors::Green<fcolor3>;
+        Rendering::Renderer::Submit(std::move(meshNoInd));
+    }
+
+
     void TestMeshNoIndiciesSolidColor()
     {
         Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform meshNoInd;
@@ -25,9 +38,7 @@ namespace Poole
             //{0.5f,  0.5f,  0.0f},
         };
         meshNoInd.m_color = Colors::Green<fcolor3>;
-        //Rendering::IVirtualMesh* m = &meshNoInd;
-
-        Rendering::Renderer::Submit(/*std::move*/meshNoInd);
+        Rendering::Renderer::Submit(std::move(meshNoInd));
 
 
         Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform meshNoInd2;
@@ -157,13 +168,15 @@ namespace Poole
 
     void TempPassTriangleData()
     {
-        TestMeshNoIndiciesSolidColor();
-        TestMeshSolidColor();
-        TestMeshVertexColor();
+        TestMeshNoIndiciesSolidColor2();
+        //TestMeshNoIndiciesSolidColor();
+        //TestMeshSolidColor();
+        //TestMeshVertexColor();
     }
 
     void TempMoveTriangles()
     {
+        return;
         Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform* Mesh =
             Rendering::Renderer::GetMesh<Rendering::StaticMeshNoIndiciesSolidColor3_2DTransform>(0);
         

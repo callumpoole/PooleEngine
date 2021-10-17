@@ -3,6 +3,8 @@
 #include "core.h"
 #include <vector>
 #include <type_traits>
+#include "glm/gtc/type_ptr.hpp"
+#include "camera/orthographic_camera.h"
 
 namespace Poole::Rendering
 {
@@ -46,14 +48,40 @@ namespace Poole::Rendering
 #pragma warning(default : 4201) //DEFAULT nameless struct/union
 
 
+
+
+	namespace
+	{
+		template<typename TFloats> void SetUniform(const GLint /*uniform*/, const TFloats /*f*/) { assert(0); }
+		template<> void SetUniform(const GLint uniform, const f32 f) { glUniform1f(uniform, f); }
+		template<> void SetUniform(const GLint uniform, const fvec2 v) { glUniform2f(uniform, v.x, v.y); }
+		template<> void SetUniform(const GLint uniform, const fvec3 v) { glUniform3f(uniform, v.x, v.y, v.z); }
+		template<> void SetUniform(const GLint uniform, const fvec4 v) { glUniform4f(uniform, v.x, v.y, v.z, v.w); }
+		template<> void SetUniform(const GLint uniform, const fmat2 v) { glUniformMatrix2fv(uniform, 1, GL_TRUE, glm::value_ptr(v)); }
+		template<> void SetUniform(const GLint uniform, const fmat3 v) { glUniformMatrix3fv(uniform, 1, GL_TRUE, glm::value_ptr(v)); }
+		template<> void SetUniform(const GLint uniform, const fmat4 v) { glUniformMatrix4fv(uniform, 1, GL_TRUE, glm::value_ptr(v)); }
+
+		template<typename TFloats>
+		void SetUniform(const GLuint programId, const char* uniformName, const TFloats& v)
+		{
+			SetUniform(glGetUniformLocation(programId, uniformName), v);
+		}
+	}
+
+
+
+
 	struct IMeshBase
 	{
 		virtual void Init() {}
-		virtual void Render(GLuint /*programId*/) {}
+		virtual void Render(GLuint /*programId*/, const OrthographicCamera* /*camera*/) {}
 		//#todo: find a way to make this constexpr / remove it
 		virtual bool UsesUniformColor3() const { return false; }
 		virtual bool Uses2DTransform() const { return false; }
-		virtual void SetUniforms(GLuint /*programId*/) {}
+		virtual void SetUniforms(GLuint programId, const OrthographicCamera* camera) 
+		{
+			SetUniform(programId, "u_cameraViewProjection", camera->GetViewProjectionMatrix());
+		}
 	};
 
 	template<typename ... TDecorators>
@@ -82,9 +110,9 @@ namespace Poole::Rendering
 			//	&& ContainsDecorator<MeshUniform_DynamicScale<fvec2>>()
 			//	&& ContainsDecorator<MeshUniform_DynamicShear<fvec2>>();
 		}
-		virtual void SetUniforms(GLuint programId) override
+		virtual void SetUniforms(GLuint programId, const OrthographicCamera* camera) override
 		{
-			IMeshBase::SetUniforms(programId); //Super
+			IMeshBase::SetUniforms(programId, camera); //Super
 			(TDecorators::SetInternalUniforms(programId), ...);
 		}
 	};
@@ -102,22 +130,10 @@ namespace Poole::Rendering
 	//};
 
 
-
-
 	struct IMeshDecoratorBase
 	{
 		virtual void SetInternalUniforms(const GLuint /*programId*/) { }
-	protected:
-		template<typename TFloats> void SetUniform(const GLint /*uniform*/, const TFloats /*f*/) { assert(0); }
-		template<> void SetUniform(const GLint uniform, const f32 f)   { glUniform1f(uniform, f); }
-		template<> void SetUniform(const GLint uniform, const fvec2 v) { glUniform2f(uniform, v.x, v.y); }
-		template<> void SetUniform(const GLint uniform, const fvec3 v) { glUniform3f(uniform, v.x, v.y, v.z); }
-		template<> void SetUniform(const GLint uniform, const fvec4 v) { glUniform4f(uniform, v.x, v.y, v.z, v.w); }
-		template<> void SetUniform(const GLint uniform, const fmat2 v) { glUniformMatrix2fv(uniform, 1, GL_TRUE, (const GLfloat*)&v); }
-		template<> void SetUniform(const GLint uniform, const fmat3 v) { glUniformMatrix3fv(uniform, 1, GL_TRUE, (const GLfloat*)&v); }
-		template<> void SetUniform(const GLint uniform, const fmat4 v) { glUniformMatrix4fv(uniform, 1, GL_TRUE, (const GLfloat*)&v); }
 	};
-
 
 	template<typename T>
 	struct MeshUniform_SolidColor : public IMeshDecoratorBase
@@ -125,15 +141,14 @@ namespace Poole::Rendering
 		virtual void SetInternalUniforms(const GLuint programId) override
 		{
 			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/
-			SetUniform(glGetUniformLocation(programId, "uniformColor"), m_color);
+			SetUniform(programId, "u_Color", m_color);
 		}
 		T m_color{};
 	};
 
 
 	template<typename T>
-	struct MeshUniform_DynamicTransform {}; //Certain Specializations only
-
+	struct MeshUniform_DynamicTransform { }; //Certain Specializations only
 	template<>
 	struct MeshUniform_DynamicTransform<fmat3> : public IMeshDecoratorBase
 	{
@@ -164,7 +179,7 @@ namespace Poole::Rendering
 
 			m_transform = Translation * Rotation * Shear * Scale;
 
-			IMeshDecoratorBase::SetUniform(glGetUniformLocation(programId, "uniformTransform"), m_transform);
+			SetUniform(programId, "u_Transform", m_transform);
 		}																		
 		fmat3 m_transform{};
 		fvec2 m_position{ 0.f, 0.f };
@@ -213,7 +228,7 @@ namespace Poole::Rendering
 					   TDecorators...>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId) override;
+		virtual void Render(GLuint programId, const OrthographicCamera* camera) override;
 	};
 
 	struct StaticMeshNoIndiciesSolidColor3_2DTransform
@@ -230,7 +245,7 @@ namespace Poole::Rendering
 					   TDecorators...>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId) override;
+		virtual void Render(GLuint programId, const OrthographicCamera* camera) override;
 	};
 
 	struct StaticMeshSolidColor3_2DTransform
@@ -246,7 +261,7 @@ namespace Poole::Rendering
 					   TDecorators...>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId) override;
+		virtual void Render(GLuint programId, const OrthographicCamera* camera) override;
 	};
 
 	struct StaticMeshVertexColor3_2DTransform
@@ -274,14 +289,11 @@ namespace Poole::Rendering
 		glBufferData(GL_ARRAY_BUFFER, sizeof(TVertex) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 	}
 	template<class ... TDecorators>
-	void StaticMeshNoIndiciesSolidColor3<TDecorators...>::Render(GLuint programId)
+	void StaticMeshNoIndiciesSolidColor3<TDecorators...>::Render(GLuint programId, const OrthographicCamera* camera)
 	{
 		//Use Shader
 		glUseProgram(programId);
-
-		SetUniforms(programId);
-		//GLint Loc = glGetUniformLocation(programId, "uniformColor");
-		//glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
+		SetUniforms(programId, camera);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 
@@ -325,14 +337,11 @@ namespace Poole::Rendering
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
 	template<class ... TDecorators>
-	void StaticMeshSolidColor3<TDecorators...>::Render(GLuint programId)
+	void StaticMeshSolidColor3<TDecorators...>::Render(GLuint programId, const OrthographicCamera* camera)
 	{
 		//Use Shader
 		glUseProgram(programId);
-
-		SetUniforms(programId);
-		//GLint Loc = glGetUniformLocation(programId, "uniformColor");
-		//glUniform3f(Loc, m_color.r, m_color.g, m_color.b);
+		SetUniforms(programId, camera);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
@@ -376,12 +385,11 @@ namespace Poole::Rendering
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
 	template<class ... TDecorators>
-	void StaticMeshVertexColor3<TDecorators...>::Render(GLuint programId)
+	void StaticMeshVertexColor3<TDecorators...>::Render(GLuint programId, const OrthographicCamera* camera)
 	{
 		//Use Shader
 		glUseProgram(programId);
-
-		SetUniforms(programId);
+		SetUniforms(programId, camera);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
