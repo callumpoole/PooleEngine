@@ -74,14 +74,11 @@ namespace Poole::Rendering
 	struct IMeshBase
 	{
 		virtual void Init() {}
-		virtual void Render(GLuint /*programId*/, const OrthographicCamera* /*camera*/) {}
+		virtual void Render(GLuint /*programId*/) {}
 		//#todo: find a way to make this constexpr / remove it
 		virtual bool UsesUniformColor3() const { return false; }
 		virtual bool Uses2DTransform() const { return false; }
-		virtual void SetUniforms(GLuint programId, const OrthographicCamera* camera) 
-		{
-			SetUniform(programId, "u_cameraViewProjection", camera->GetViewProjectionMatrix());
-		}
+		virtual void SetUniforms(GLuint programId);
 	};
 
 	template<typename ... TDecorators>
@@ -110,9 +107,9 @@ namespace Poole::Rendering
 			//	&& ContainsDecorator<MeshUniform_DynamicScale<fvec2>>()
 			//	&& ContainsDecorator<MeshUniform_DynamicShear<fvec2>>();
 		}
-		virtual void SetUniforms(GLuint programId, const OrthographicCamera* camera) override
+		virtual void SetUniforms(GLuint programId) override
 		{
-			IMeshBase::SetUniforms(programId, camera); //Super
+			IMeshBase::SetUniforms(programId); //Super
 			(TDecorators::SetInternalUniforms(programId), ...);
 		}
 	};
@@ -228,7 +225,7 @@ namespace Poole::Rendering
 					   TDecorators...>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId, const OrthographicCamera* camera) override;
+		virtual void Render(GLuint programId) override;
 	};
 
 	struct StaticMeshNoIndiciesSolidColor3_2DTransform
@@ -245,7 +242,7 @@ namespace Poole::Rendering
 					   TDecorators...>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId, const OrthographicCamera* camera) override;
+		virtual void Render(GLuint programId) override;
 	};
 
 	struct StaticMeshSolidColor3_2DTransform
@@ -261,7 +258,7 @@ namespace Poole::Rendering
 					   TDecorators...>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId, const OrthographicCamera* camera) override;
+		virtual void Render(GLuint programId) override;
 	};
 
 	struct StaticMeshVertexColor3_2DTransform
@@ -289,11 +286,11 @@ namespace Poole::Rendering
 		glBufferData(GL_ARRAY_BUFFER, sizeof(TVertex) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 	}
 	template<class ... TDecorators>
-	void StaticMeshNoIndiciesSolidColor3<TDecorators...>::Render(GLuint programId, const OrthographicCamera* camera)
+	void StaticMeshNoIndiciesSolidColor3<TDecorators...>::Render(GLuint programId)
 	{
 		//Use Shader
 		glUseProgram(programId);
-		SetUniforms(programId, camera);
+		SetUniforms(programId);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 
@@ -337,11 +334,11 @@ namespace Poole::Rendering
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
 	template<class ... TDecorators>
-	void StaticMeshSolidColor3<TDecorators...>::Render(GLuint programId, const OrthographicCamera* camera)
+	void StaticMeshSolidColor3<TDecorators...>::Render(GLuint programId)
 	{
 		//Use Shader
 		glUseProgram(programId);
-		SetUniforms(programId, camera);
+		SetUniforms(programId);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
@@ -385,11 +382,11 @@ namespace Poole::Rendering
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
 	template<class ... TDecorators>
-	void StaticMeshVertexColor3<TDecorators...>::Render(GLuint programId, const OrthographicCamera* camera)
+	void StaticMeshVertexColor3<TDecorators...>::Render(GLuint programId)
 	{
 		//Use Shader
 		glUseProgram(programId);
-		SetUniforms(programId, camera);
+		SetUniforms(programId);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);

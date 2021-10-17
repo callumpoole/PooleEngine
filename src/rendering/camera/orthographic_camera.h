@@ -19,6 +19,7 @@ namespace Poole
 			f32 top;
 		};
 
+		OrthographicCamera();
 		OrthographicCamera(const Bounds& bounds);
 		OrthographicCamera(float left, float right, float bottom, float top);
 

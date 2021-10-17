@@ -5,7 +5,7 @@
 
 namespace Poole::Rendering
 {
-	std::unique_ptr<OrthographicCamera> Renderer::m_camera;
+	OrthographicCamera Renderer::m_camera;
 	GLShader Renderer::m_shaderUniformColor;
 	GLShader Renderer::m_shaderVertexColor;
 	GLShader Renderer::m_shaderUniformColorTransform2D;
@@ -18,7 +18,7 @@ namespace Poole::Rendering
 
 	void Renderer::Init()
 	{
-		m_camera = std::make_unique<OrthographicCamera>(-2.f, 2.f, -2.f, 2.f);
+		//m_camera.GetBounds();
 		LoadShaders();
 	}
 	void Renderer::Tick(GLFWwindow* window)
@@ -60,15 +60,15 @@ namespace Poole::Rendering
 		m_shaderVertexColorTransform2D = Rendering::GLShader(
 			"../../poole_engine/src/rendering/shaders/VertexColor2DTransform.shader"
 		);
-		m_shaderExperimental1 = Rendering::GLShader(
-			"../../poole_engine/src/rendering/shaders/Experimental1.shader"
-		);
-		m_shaderExperimental2 = Rendering::GLShader(
-			"../../poole_engine/src/rendering/shaders/Experimental2.shader"
-		);
-		m_shaderExperimental3 = Rendering::GLShader(
-			"../../poole_engine/src/rendering/shaders/Experimental3.shader"
-		);
+		//m_shaderExperimental1 = Rendering::GLShader(
+		//	"../../poole_engine/src/rendering/shaders/Experimental1.shader"
+		//);
+		//m_shaderExperimental2 = Rendering::GLShader(
+		//	"../../poole_engine/src/rendering/shaders/Experimental2.shader"
+		//);
+		//m_shaderExperimental3 = Rendering::GLShader(
+		//	"../../poole_engine/src/rendering/shaders/Experimental3.shader"
+		//);
 	}
 
 	void Renderer::RenderAll()
@@ -87,7 +87,7 @@ namespace Poole::Rendering
 													 : m_shaderVertexColor.GetProgramID();
 			}
 
-			ptr->Render(programId, m_camera.get());
+			ptr->Render(programId);
 		}
 	}
 }

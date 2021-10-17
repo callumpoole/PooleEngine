@@ -26,11 +26,12 @@ namespace Poole::Rendering {
 		template<typename T>
 		static T* GetMesh(i32 index) { return dynamic_cast<T*>(GetMesh(index)); }
 
+		static const OrthographicCamera& GetCamera() { return m_camera; }
 	private:
 		static void LoadShaders();
 		static void RenderAll();
 
-		static std::unique_ptr<OrthographicCamera> m_camera;
+		static OrthographicCamera m_camera;
 		static GLShader m_shaderUniformColor;
 		static GLShader m_shaderVertexColor;
 		static GLShader m_shaderUniformColorTransform2D;

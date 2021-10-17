@@ -25,8 +25,9 @@ namespace Poole::Rendering {
 	
 	std::optional<GLShader::ShaderSource> GLShader::LoadFromFile(std::string_view combinedPath)
 	{
-		namespace fs = std::filesystem;
+		printf("Loading shader : %s\n", combinedPath.data());
 
+		namespace fs = std::filesystem;
 		fs::path path = fs::absolute(fs::path(combinedPath));
 		if (fs::exists(path))
 		{

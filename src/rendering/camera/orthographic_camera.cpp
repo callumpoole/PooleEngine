@@ -5,6 +5,8 @@
 
 namespace Poole
 {
+	OrthographicCamera::OrthographicCamera() : OrthographicCamera({ -1.f, 1.f, -1.f, 1.f }) {}
+
 	OrthographicCamera::OrthographicCamera(const Bounds& bounds)
 		: m_viewMatrix(1.f)
 	{
