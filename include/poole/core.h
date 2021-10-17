@@ -1,5 +1,10 @@
 #pragma once
 
+#include <optional>
+#include <vector>
+#include <memory>
+#include <string>
+#include <string_view>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"

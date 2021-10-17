@@ -1,8 +1,5 @@
 #pragma once
 #include "core.h"
-#include <string_view>
-#include <string>
-#include <optional>
 
 namespace Poole::Rendering {
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core.h"
-#include <vector>
 #include <type_traits>
 #include "glm/gtc/type_ptr.hpp"
 #include "camera/orthographic_camera.h"

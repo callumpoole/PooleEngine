@@ -3,17 +3,24 @@
 
 namespace Poole
 {
+    std::vector<std::function<void(int width, int height)>> Window::m_OnResize;
     std::string_view Window::m_windowName;
-    glm::uvec2 Window::m_windowSize = {};
+    uvec2 Window::m_windowSize = {};
 
-    void FramebufferSizeCallback(GLFWwindow* /*window*/, int width, int height)
+    void Window::FramebufferSizeCallback(GLFWwindow* /*window*/, int width, int height)
     {
         //#todo: Can't as it's private and this is a free function
-        //Window::m_windowSize = size;
+        Window::m_windowSize = uvec2(width, height);
         glViewport(0, 0, width, height);
+
+        //Broadcast
+        for (auto& Func : m_OnResize)
+        {
+            Func(width, height);
+        }
     }
 
-    /*static*/ GLFWwindow* Window::Init(const char* windowName, glm::uvec2 size)
+    /*static*/ GLFWwindow* Window::Init(const char* windowName, uvec2 size)
     {
         //Create a windowed mode window and its OpenGL context
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -41,7 +48,11 @@ namespace Poole
         //setup current window size
         glViewport(0, 0, m_windowSize.x, m_windowSize.y);
         //Listen to resize events
-        glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+        glfwSetFramebufferSizeCallback(window, 
+            [](GLFWwindow* window, int width, int height)
+            {
+                FramebufferSizeCallback(window, width, height);
+            });
     }
 
     /*static*/ void Window::Tick()

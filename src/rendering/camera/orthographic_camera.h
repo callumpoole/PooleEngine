@@ -4,7 +4,7 @@
 
 #include "core.h"
 
-namespace Poole
+namespace Poole::Rendering
 {
 	//Mostly copied from: https://youtu.be/NjKv-HWstxA
 
@@ -23,6 +23,8 @@ namespace Poole
 		OrthographicCamera(const Bounds& bounds);
 		OrthographicCamera(float left, float right, float bottom, float top);
 
+		void UseCameraSizeWithScale(f32 scale);
+
 		const Bounds& GetBounds() const { return m_bounds; }
 		void SetBounds(const Bounds& bounds);
 		void SetBounds(float left, float right, float bottom, float top);
@@ -36,9 +38,12 @@ namespace Poole
 		const fmat4& GetViewMatrix() const { return m_viewMatrix; }
 		const fmat4& GetProjectionMatrix() const { return m_projectionMatrix; }
 		const fmat4& GetViewProjectionMatrix() const { return m_viewProjectionMatrix; }
+
+		std::optional<f32> GetAdaptiveCameraScale() const { return m_AdaptiveCameraScale; }
+		void UpdateAdaptiveCamera(int width, int height);
+
 	private:
 		void RecalculateViewMatrix();
-		void RecalculateProjectionMatrix();
 	private:
 		fmat4 m_viewMatrix;
 		fmat4 m_projectionMatrix;
@@ -47,5 +52,6 @@ namespace Poole
 		Bounds m_bounds;
 		fvec3 m_position = {};
 		f32 m_rotation = 0.f;
+		std::optional<f32> m_AdaptiveCameraScale;
 	};
 }

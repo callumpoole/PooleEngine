@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <memory>
 #include "core.h"
 #include "rendering_primitives.h"
 #include "shader_loader.h"
@@ -26,7 +24,7 @@ namespace Poole::Rendering {
 		template<typename T>
 		static T* GetMesh(i32 index) { return dynamic_cast<T*>(GetMesh(index)); }
 
-		static const OrthographicCamera& GetCamera() { return m_camera; }
+		static OrthographicCamera& GetCamera() { return m_camera; }
 	private:
 		static void LoadShaders();
 		static void RenderAll();
