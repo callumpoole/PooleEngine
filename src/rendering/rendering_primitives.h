@@ -118,35 +118,24 @@ namespace Poole::Rendering
 		template<> void SetUniform(const GLint uniform, const fmat4 v) { glUniformMatrix4fv(uniform, 1, GL_TRUE, (const GLfloat*)&v); }
 	};
 
-#define MakeUniform(Name, UniformName, MemberName)													\
-	static constexpr const char* MeshUniform_##Name##_Uniform = UniformName;						\
-	struct MeshUniform_##Name##Base {};																\
-	template<typename T>																			\
-	struct MeshUniform_##Name																		\
-		: public MeshUniform_##Name##Base															\
-		, public IMeshDecoratorBase																	\
-	{																								\
-		virtual void SetInternalUniforms(const GLuint programId) override							\
-		{																							\
-			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/							\
-			SetUniform(glGetUniformLocation(programId, MeshUniform_##Name##_Uniform), MemberName);	\
-		}																							\
-		T MemberName{};																				\
+
+	template<typename T>
+	struct MeshUniform_SolidColor : public IMeshDecoratorBase
+	{
+		virtual void SetInternalUniforms(const GLuint programId) override
+		{
+			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/
+			SetUniform(glGetUniformLocation(programId, "uniformColor"), m_color);
+		}
+		T m_color{};
 	};
 
 
-
-	MakeUniform(SolidColor, "uniformColor", m_color);
-	//MakeUniform(DynamicPosition, "uniformPosition", m_position);
-	//MakeUniform(DynamicRotation, "uniformRotation", m_rotation);
-	//MakeUniform(DynamicScale, "uniformScale", m_scale); //Issue is default value is 0s not 1s
-	//MakeUniform(DynamicShear, "uniformShear", m_shear);
-	MakeUniform(DynamicTransform, "uniformTransform", m_transform);
+	template<typename T>
+	struct MeshUniform_DynamicTransform {}; //Certain Specializations only
 
 	template<>
-	struct MeshUniform_DynamicTransform<fmat3>
-		: public MeshUniform_DynamicTransformBase
-		, public IMeshDecoratorBase
+	struct MeshUniform_DynamicTransform<fmat3> : public IMeshDecoratorBase
 	{
 		virtual void SetInternalUniforms(const GLuint programId) override		
 		{																		
@@ -175,7 +164,7 @@ namespace Poole::Rendering
 
 			m_transform = Translation * Rotation * Shear * Scale;
 
-			IMeshDecoratorBase::SetUniform(glGetUniformLocation(programId, MeshUniform_DynamicTransform_Uniform), m_transform);
+			IMeshDecoratorBase::SetUniform(glGetUniformLocation(programId, "uniformTransform"), m_transform);
 		}																		
 		fmat3 m_transform{};
 		fvec2 m_position{ 0.f, 0.f };

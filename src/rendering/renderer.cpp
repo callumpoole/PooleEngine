@@ -1,6 +1,8 @@
 
 #include "renderer.h"
 
+#include <iostream>
+
 namespace Poole::Rendering
 {
 	GLShader Renderer::m_shaderUniformColor;
@@ -27,6 +29,17 @@ namespace Poole::Rendering
 
 		//Swap front and back buffers
 		glfwSwapBuffers(window);
+	}
+
+	IMeshBase* Renderer::GetMesh(i32 index) 
+	{ 
+		if (index >= 0 && index < m_meshes.size())
+			return m_meshes[index].get();
+		else
+		{
+			std::cerr << "tried to access mesh at index: " << index << "but size is " << m_meshes.size() << ".\n";
+			return nullptr;
+		}
 	}
 
 	void Renderer::LoadShaders()
