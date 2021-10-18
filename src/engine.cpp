@@ -189,8 +189,17 @@ namespace Poole
         Mesh->m_shear = { 0.1, 0.1 };
     }
 
+    Engine::Engine()
+        : m_RunData({ "Unamed Window", uvec2(640, 480) })
+    {
+    }
 
-    Engine::Engine(const char* windowName, glm::uvec2 size)
+    Engine::Engine(const char* windowName, uvec2 size)
+        : m_RunData({ windowName, size })
+    {
+    }
+
+    void Engine::Run()
     {
         //Initialize the library GLFW
         if (!glfwInit())
@@ -199,14 +208,14 @@ namespace Poole
             return;
         }
 
-        GLFWwindow* window = Window::Init(windowName, size);
+        GLFWwindow* window = Window::Init(m_RunData.windowName, m_RunData.size);
         if (!window)
         {
             return;
         }
 
         //Init Glad
-        if (!gladLoadGL()) 
+        if (!gladLoadGL())
         {
             std::cout << "Failed to initialize OpenGL context\n";
             return;
@@ -221,6 +230,8 @@ namespace Poole
         Input::Init(window);
         Rendering::Renderer::Init();
 
+
+        BeginApp();
         TempPassTriangleData();
 
         //Loop until the user closes the window
@@ -228,10 +239,13 @@ namespace Poole
         {
             Input::Tick(window);
             Rendering::Renderer::Tick(window);
-            TempMoveTriangles();
             Window::Tick();
+
+            UpdateApp(0.f);
+            TempMoveTriangles();
         }
-    
+
+        EndApp();
         Window::Close();
     }
 }
