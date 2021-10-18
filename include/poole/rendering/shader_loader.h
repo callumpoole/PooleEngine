@@ -1,16 +1,16 @@
 #pragma once
-#include "core.h"
+#include "poole/core.h"
 
 namespace Poole::Rendering {
 
 	class GLShader
 	{
 	public:
-		GLShader() = default;
-		GLShader(std::string_view combinedPath);
-		GLShader(std::string_view vertexShaderCode, std::string_view fragmentShaderCode);
-		~GLShader();
-		GLuint GetProgramID() const { return m_programID; }
+		 GLShader() = default;
+		 GLShader(std::string_view combinedPath);
+		 GLShader(std::string_view vertexShaderCode, std::string_view fragmentShaderCode);
+		 ~GLShader();
+		 GLuint GetProgramID() const { return m_programID; }
 	private:
 		struct ShaderSource
 		{

@@ -10,10 +10,9 @@
 #include "glm/glm.hpp"
 
 #ifdef _WINDOWS
-	#ifdef PooleEngine_EXPORTS
-		#define POOLE_API __declspec(dllexport)
-	#else
-		#define POOLE_API __declspec(dllimport)
+	#ifndef NOMINMAX
+		// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
+		#define NOMINMAX
 	#endif
 #else
 	#error Other Platforms not supported

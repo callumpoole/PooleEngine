@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core.h"
+#include "poole/core.h"
 #include "rendering_primitives.h"
 #include "shader_loader.h"
 #include "camera/orthographic_camera.h"

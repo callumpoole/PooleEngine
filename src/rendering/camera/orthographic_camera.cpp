@@ -1,9 +1,9 @@
 
-#include "orthographic_camera.h"
+#include "poole/rendering/camera/orthographic_camera.h"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "../../window/window.h"
-#include "../renderer.h"
+#include "poole/rendering/renderer.h"
 
 namespace Poole::Rendering
 {

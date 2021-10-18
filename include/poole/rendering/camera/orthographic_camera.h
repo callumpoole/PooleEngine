@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "core.h"
+#include "poole/core.h"
 
 namespace Poole::Rendering
 {

@@ -4,7 +4,7 @@
 
 namespace Poole {
 
-	class POOLE_API Engine
+	class Engine
 	{
 	public:
 		Engine();

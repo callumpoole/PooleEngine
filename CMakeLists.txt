@@ -12,7 +12,7 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"include/poole/engine.h"
 	"include/poole/entry_point.h"
 	"src/engine.cpp"
-	"src/rendering/shader_loader.h"
+	"include/poole/rendering/shader_loader.h"
 	"src/rendering/shader_loader.cpp"
 	"src/rendering/shaders/UniformColor.shader"
 	"src/rendering/shaders/UniformColor2DTransform.shader"
@@ -21,13 +21,13 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/shaders/Experimental1.shader"
 	"src/rendering/shaders/Experimental2.shader"
 	"src/rendering/shaders/Experimental3.shader"
-	"src/rendering/camera/orthographic_camera.h"
+	"include/poole/rendering/camera/orthographic_camera.h"
 	"src/rendering/camera/orthographic_camera.cpp"
-	"src/rendering/renderer.h"
+	"include/poole/rendering/renderer.h"
 	"src/rendering/renderer.cpp"
-	"src/rendering/rendering_primitives.h"
+	"include/poole/rendering/rendering_primitives.h"
 	"src/rendering/rendering_primitives.cpp"
-	"src/input/input.h"
+	"include/poole/input/input.h"
 	"src/input/input.cpp"
 	"src/window/window.h"
 	"src/window/window.cpp"
@@ -54,7 +54,7 @@ organise_solution_folders()
 project(PooleEngineProject)
 
 add_library(
-	PooleEngine SHARED
+	PooleEngine STATIC
 
 	#3rd Party
 	3rd_party/glad/include/glad/glad.h

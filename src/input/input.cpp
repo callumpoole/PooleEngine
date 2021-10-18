@@ -1,4 +1,4 @@
-#include "input.h"
+#include "poole/input/input.h"
 #include <iostream>
 
 namespace Poole
