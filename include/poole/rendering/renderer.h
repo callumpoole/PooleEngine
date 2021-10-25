@@ -9,9 +9,17 @@ struct GLFWwindow;
 
 namespace Poole::Rendering {
 
+	enum class GraphicsAPI
+	{
+		None,
+		OpenGL,
+	};
+
 	class Renderer
 	{
 	public:
+		static GraphicsAPI s_GraphicsAPI;
+
 		template<typename MeshType>
 		static MeshType* Submit(const MeshType& meshAndColor);
 		template<typename MeshType>

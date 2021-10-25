@@ -27,6 +27,10 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/renderer.cpp"
 	"include/poole/rendering/rendering_primitives.h"
 	"src/rendering/rendering_primitives.cpp"
+	"src/rendering/graphics_api/buffer.h"
+	"src/rendering/graphics_api/buffer.cpp"
+	"src/platform/opengl/opengl_buffer.h"
+	"src/platform/opengl/opengl_buffer.cpp"
 	"include/poole/input/input.h"
 	"src/input/input.cpp"
 	"src/window/window.h"
@@ -85,3 +89,4 @@ target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/3rd_p
 #PooleEngine
 add_subdirectory(src)
 target_include_directories(PooleEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(PooleEngine PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")

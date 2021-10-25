@@ -5,6 +5,8 @@
 
 namespace Poole::Rendering
 {
+	GraphicsAPI Renderer::s_GraphicsAPI = GraphicsAPI::OpenGL;
+
 	OrthographicCamera Renderer::m_camera;
 	GLShader Renderer::m_shaderUniformColor;
 	GLShader Renderer::m_shaderVertexColor;
