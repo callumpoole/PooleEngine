@@ -7,20 +7,20 @@ namespace Poole::Rendering
 {
 	GraphicsAPI Renderer::s_GraphicsAPI = GraphicsAPI::OpenGL;
 
-	OrthographicCamera Renderer::m_camera;
-	GLShader Renderer::m_shaderUniformColor;
-	GLShader Renderer::m_shaderVertexColor;
-	GLShader Renderer::m_shaderUniformColorTransform2D;
-	GLShader Renderer::m_shaderVertexColorTransform2D;
-	GLShader Renderer::m_shaderExperimental1;
-	GLShader Renderer::m_shaderExperimental2;
-	GLShader Renderer::m_shaderExperimental3;
-	std::vector<std::unique_ptr<IMeshBase>> Renderer::m_meshes;
-	GLuint Renderer::m_vertexbuffer;
+	OrthographicCamera Renderer::s_camera;
+	GLShader Renderer::s_shaderUniformColor;
+	GLShader Renderer::s_shaderVertexColor;
+	GLShader Renderer::s_shaderUniformColorTransform2D;
+	GLShader Renderer::s_shaderVertexColorTransform2D;
+	GLShader Renderer::s_shaderExperimental1;
+	GLShader Renderer::s_shaderExperimental2;
+	GLShader Renderer::s_shaderExperimental3;
+	std::vector<std::unique_ptr<IMeshBase>> Renderer::s_meshes;
+	GLuint Renderer::s_vertexBuffer;
 
 	void Renderer::Init()
 	{
-		m_camera.UseCameraSizeWithScale(1.f);
+		s_camera.UseCameraSizeWithScale(1.f);
 		//m_camera.GetBounds();
 		LoadShaders();
 	}
@@ -38,11 +38,13 @@ namespace Poole::Rendering
 
 	IMeshBase* Renderer::GetMesh(i32 index) 
 	{ 
-		if (index >= 0 && index < m_meshes.size())
-			return m_meshes[index].get();
+		if (index >= 0 && index < s_meshes.size())
+		{
+			return s_meshes[index].get();
+		}
 		else
 		{
-			std::cerr << "tried to access mesh at index: " << index << "but size is " << m_meshes.size() << ".\n";
+			std::cerr << "tried to access mesh at index: " << index << "but size is " << s_meshes.size() << ".\n";
 			return nullptr;
 		}
 	}
@@ -51,43 +53,43 @@ namespace Poole::Rendering
 	{
 		//TODO: Fix up working dir / solution dir perhaps. Maybe compile shaders from solution into working DEBUG/
 		// Create and compile our GLSL program from the shaders
-		m_shaderUniformColor = Rendering::GLShader(
+		s_shaderUniformColor = Rendering::GLShader(
 			"../../poole_engine/src/rendering/shaders/UniformColor.shader"
 		);
-		m_shaderVertexColor = Rendering::GLShader(
+		s_shaderVertexColor = Rendering::GLShader(
 			"../../poole_engine/src/rendering/shaders/VertexColor.shader"
 		);
-		m_shaderUniformColorTransform2D = Rendering::GLShader(
+		s_shaderUniformColorTransform2D = Rendering::GLShader(
 			"../../poole_engine/src/rendering/shaders/UniformColor2DTransform.shader"
 		);
-		m_shaderVertexColorTransform2D = Rendering::GLShader(
+		s_shaderVertexColorTransform2D = Rendering::GLShader(
 			"../../poole_engine/src/rendering/shaders/VertexColor2DTransform.shader"
 		);
-		//m_shaderExperimental1 = Rendering::GLShader(
+		//s_shaderExperimental1 = Rendering::GLShader(
 		//	"../../poole_engine/src/rendering/shaders/Experimental1.shader"
 		//);
-		//m_shaderExperimental2 = Rendering::GLShader(
+		//s_shaderExperimental2 = Rendering::GLShader(
 		//	"../../poole_engine/src/rendering/shaders/Experimental2.shader"
 		//);
-		//m_shaderExperimental3 = Rendering::GLShader(
+		//s_shaderExperimental3 = Rendering::GLShader(
 		//	"../../poole_engine/src/rendering/shaders/Experimental3.shader"
 		//);
 	}
 
 	void Renderer::RenderAll()
 	{
-		for (std::unique_ptr<IMeshBase>& ptr : m_meshes)
+		for (std::unique_ptr<IMeshBase>& ptr : s_meshes)
 		{
 			GLuint programId;
 			if (ptr->Uses2DTransform())
 			{
-				programId = ptr->UsesUniformColor3() ? m_shaderUniformColorTransform2D.GetProgramID()
-													 : m_shaderVertexColorTransform2D.GetProgramID();
+				programId = ptr->UsesUniformColor3() ? s_shaderUniformColorTransform2D.GetProgramID()
+													 : s_shaderVertexColorTransform2D.GetProgramID();
 			}
 			else
 			{
-				programId = ptr->UsesUniformColor3() ? m_shaderUniformColor.GetProgramID() 
-													 : m_shaderVertexColor.GetProgramID();
+				programId = ptr->UsesUniformColor3() ? s_shaderUniformColor.GetProgramID() 
+													 : s_shaderVertexColor.GetProgramID();
 			}
 
 			ptr->Render(programId);
