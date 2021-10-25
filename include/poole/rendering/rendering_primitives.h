@@ -7,45 +7,6 @@
 
 namespace Poole::Rendering
 {
-	using Vertex = fvec3;
-
-	template<typename _TVertexPart, typename _TColorPart>
-	struct VertexWithColor { };
-
-	template<>
-	struct VertexWithColor<Vertex, fcolor3>
-	{
-		using TVertexPart = Vertex;
-		using TColorPart = fcolor3;
-		union {
-			struct
-			{
-				TVertexPart m_position;
-				TColorPart m_color;
-			};
-			struct { f32 x, y, z, r, g, b; }; //I feel no need for m_ here
-		};
-	};
-	using VertexWithColor3 = VertexWithColor<Vertex, fcolor3>;
-
-	template<>
-	struct VertexWithColor<Vertex, fcolor4>
-	{
-		using TVertexPart = Vertex;
-		using TColorPart = fcolor4;
-		union {
-			struct
-			{
-				TVertexPart m_position;
-				TColorPart m_color;
-			};
-			struct { f32 x, y, z, r, g, b, a; }; //I feel no need for m_ here
-		};
-	};
-	using VertexWithColor4 = VertexWithColor<Vertex, fcolor4>;
-
-
-
 	static void SetUniform(const GLuint programId, const char* uniformName, const f32 f) { glUniform1f(glGetUniformLocation(programId, uniformName), f); }
 	static void SetUniform(const GLuint programId, const char* uniformName, const fvec2 v) { glUniform2f(glGetUniformLocation(programId, uniformName), v.x, v.y); }
 	static void SetUniform(const GLuint programId, const char* uniformName, const fvec3 v) { glUniform3f(glGetUniformLocation(programId, uniformName), v.x, v.y, v.z); }
@@ -201,7 +162,7 @@ namespace Poole::Rendering
 
 
 	struct StaticMeshNoIndiciesSolidColor3_2DTransform
-		: public IMesh<MeshFeature_HasVerts<Vertex>, 
+		: public IMesh<MeshFeature_HasVerts<fvec3>,
 					   MeshUniform_SolidColor<fvec3>, 
 					   MeshUniform_DynamicTransform<fmat3>>
 	{
@@ -210,7 +171,7 @@ namespace Poole::Rendering
 	};
 
 	struct StaticMeshSolidColor3_2DTransform
-		: public IMesh<MeshFeature_HasVerts<Vertex>,
+		: public IMesh<MeshFeature_HasVerts<fvec3>,
 					   MeshFeature_HasIndicies,
 					   MeshUniform_SolidColor<fvec3>,
 					   MeshUniform_DynamicTransform<fmat3>>
@@ -221,7 +182,7 @@ namespace Poole::Rendering
 
 
 	struct StaticMeshVertexColor3_2DTransform
-		: public IMesh<MeshFeature_HasVerts<VertexWithColor3>,
+		: public IMesh<MeshFeature_HasVerts<Vertex3Color3>,
 					   MeshFeature_HasIndicies,
 					   MeshUniform_DynamicTransform<fmat3>>
 	{

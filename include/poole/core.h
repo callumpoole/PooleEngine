@@ -75,4 +75,22 @@ namespace Colors
 #undef AddColor
 }
 
-
+#define VertexWithColorDefinition(Name, TVertexPart, TColorPart, ...)		\
+	struct Name																\
+	{																		\
+		using TVertex = TVertexPart;										\
+		using TColor = TColorPart;											\
+		union {																\
+			struct															\
+			{																\
+				TVertex m_position;											\
+				TColor m_color;												\
+			};																\
+			struct { f32 __VA_ARGS__; }; /*I feel no need for m_ here */	\
+		};																	\
+	};
+VertexWithColorDefinition(Vertex2Color3, fvec2, fcolor3, x, y,    r, g, b   );
+VertexWithColorDefinition(Vertex2Color4, fvec2, fcolor4, x, y,    r, g, b, a);
+VertexWithColorDefinition(Vertex3Color3, fvec3, fcolor3, x, y, z, r, g, b   );
+VertexWithColorDefinition(Vertex3Color4, fvec3, fcolor4, x, y, z, r, g, b, a);
+#undef VertexWithColorDefinition

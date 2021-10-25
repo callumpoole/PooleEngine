@@ -128,7 +128,7 @@ namespace Poole::Rendering
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
 			0,											//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(TVertex::TVertexPart) / sizeof(f32), //size
+			sizeof(TVertex::TVertex) / sizeof(f32), //size
 			GL_FLOAT,									//type
 			GL_FALSE,									//normalized?
 			sizeof(TVertex),							//stride
@@ -139,11 +139,11 @@ namespace Poole::Rendering
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(
 			1,											//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(TVertex::TColorPart) / sizeof(f32),	//size
+			sizeof(TVertex::TColor) / sizeof(f32),	//size
 			GL_FLOAT,									//type
 			GL_FALSE,									//normalized?
 			sizeof(TVertex),							//stride
-			(char*)(sizeof(TVertex::TVertexPart))		//array buffer offset
+			(char*)(sizeof(TVertex::TVertex))		//array buffer offset
 		);
 
 		//Draw the triangle !
