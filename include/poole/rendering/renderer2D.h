@@ -27,8 +27,8 @@ namespace Poole::Rendering
 	private:
 		struct RenderData
 		{
-			GLuint m_vertexArrayID;
 			class GLShader* m_Shader;
+			class VertexArray* m_VertexArray;
 			class VertexBuffer* m_VertexBuffer;
 			class IndexBuffer* m_IndexBuffer;
 		};

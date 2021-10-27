@@ -1,6 +1,7 @@
 #include "rendering/renderer2D.h"
 
 #include "graphics_api/buffer.h"
+#include "graphics_api/vertex_array.h"
 #include "rendering/renderer.h"
 #include "rendering/camera/orthographic_camera.h"
 
@@ -12,8 +13,8 @@ namespace Poole::Rendering
 	{
 		s_RenderData.m_Shader = &Renderer::s_shaderUniformColorTransform2D;
 
-		glGenVertexArrays(1, &s_RenderData.m_vertexArrayID);
-		glBindVertexArray(s_RenderData.m_vertexArrayID);
+		s_RenderData.m_VertexArray = VertexArray::Create();
+		s_RenderData.m_VertexArray->Bind();
 
 		fvec3 corners[4] =
 		{
@@ -30,12 +31,13 @@ namespace Poole::Rendering
 	void Renderer2D::Shutdown()
 	{
 		//Todo: Automate with unique_ptr (issue is it's private to engine currently)
+		delete s_RenderData.m_VertexArray;
 		delete s_RenderData.m_VertexBuffer;
 		delete s_RenderData.m_IndexBuffer;
 	}
 	void Renderer2D::BeginScene()
 	{
-		glBindVertexArray(s_RenderData.m_vertexArrayID);
+		s_RenderData.m_VertexArray->Bind();
 		s_RenderData.m_Shader->Bind();
 		s_RenderData.m_Shader->SetUniform("u_cameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
 	}
