@@ -10,7 +10,7 @@ namespace Poole::Rendering
 
 	//--
 
-	void StaticMeshNoIndiciesSolidColor3_2DTransform::Init()
+	void StaticMeshNoIndiciesSolidColor4_2DTransform::Init()
 	{
 		GLuint vertexArrayID;
 		glGenVertexArrays(1, &vertexArrayID);
@@ -23,7 +23,7 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ARRAY_BUFFER, sizeof(TVertex) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshNoIndiciesSolidColor3_2DTransform::Render(GLuint programId)
+	void StaticMeshNoIndiciesSolidColor4_2DTransform::Render(GLuint programId)
 	{
 		//Use Shader
 		glUseProgram(programId);
@@ -35,10 +35,10 @@ namespace Poole::Rendering
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
 			0,								//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(TVertex) / sizeof(f32),  //size
+			sizeof(TVertex) / sizeof(f32),  //count
 			GL_FLOAT,						//type
 			GL_FALSE,						//normalized?
-			3 * sizeof(f32),				//stride
+			sizeof(TVertex),				//stride
 			(void*)0						//array buffer offset
 		);
 		//Draw the triangle !
@@ -49,7 +49,7 @@ namespace Poole::Rendering
 
 	//---
 
-	void StaticMeshSolidColor3_2DTransform::Init()
+	void StaticMeshSolidColor4_2DTransform::Init()
 	{
 		GLuint vertexArrayID;
 		glGenVertexArrays(1, &vertexArrayID);
@@ -69,7 +69,7 @@ namespace Poole::Rendering
 		//Give our indices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshSolidColor3_2DTransform::Render(GLuint programId)
+	void StaticMeshSolidColor4_2DTransform::Render(GLuint programId)
 	{
 		//Use Shader
 		glUseProgram(programId);
@@ -82,10 +82,10 @@ namespace Poole::Rendering
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
 			0,								//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(TVertex) / sizeof(f32),  //size
+			sizeof(TVertex) / sizeof(f32),  //count
 			GL_FLOAT,						//type
 			GL_FALSE,						//normalized?
-			0,								//stride
+			sizeof(TVertex),				//stride
 			(void*)0						//array buffer offset
 		);
 		//Draw the triangle !
@@ -95,7 +95,7 @@ namespace Poole::Rendering
 
 	//--
 
-	void StaticMeshVertexColor3_2DTransform::Init()
+	void StaticMeshVertexColor4_2DTransform::Init()
 	{
 		GLuint vertexArrayID;
 		glGenVertexArrays(1, &vertexArrayID);
@@ -115,7 +115,7 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshVertexColor3_2DTransform::Render(GLuint programId)
+	void StaticMeshVertexColor4_2DTransform::Render(GLuint programId)
 	{
 		//Use Shader
 		glUseProgram(programId);
@@ -127,22 +127,22 @@ namespace Poole::Rendering
 		//0th attribute buffer : vertices
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(
-			0,											//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(TVertex::TVertex) / sizeof(f32), //size
-			GL_FLOAT,									//type
-			GL_FALSE,									//normalized?
-			sizeof(TVertex),							//stride
-			(void*)0									//array buffer offset
+			0,										//attribute 0. No particular reason for 0, but must match the layout in the shader.
+			sizeof(TVertex::TVertex) / sizeof(f32), //count
+			GL_FLOAT,								//type
+			GL_FALSE,								//normalized?
+			sizeof(TVertex),						//stride
+			(void*)0								//array buffer offset
 		);
 
 		//1st attribute buffer : color
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(
-			1,											//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			sizeof(TVertex::TColor) / sizeof(f32),	//size
-			GL_FLOAT,									//type
-			GL_FALSE,									//normalized?
-			sizeof(TVertex),							//stride
+			1,										//attribute 0. No particular reason for 0, but must match the layout in the shader.
+			sizeof(TVertex::TColor) / sizeof(f32),	//count
+			GL_FLOAT,								//type
+			GL_FALSE,								//normalized?
+			sizeof(TVertex),						//stride
 			(char*)(sizeof(TVertex::TVertex))		//array buffer offset
 		);
 

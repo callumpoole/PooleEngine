@@ -34,17 +34,6 @@ namespace Poole::Rendering {
 
 		static OrthographicCamera& GetCamera() { return s_camera; }
 
-		
-
-		//static void DrawTriangle(fvec2 p1, fvec2 p2, fvec2 p3, f32 zLayer, fcolor4 color);
-		//static void DrawTriangle(fvec2 p1, fvec2 p2, fvec2 p3, f32 zLayer, fcolor3 color) { DrawTriangle(p1, p2, p3, zLayer, fcolor4(color, 1.f)); }
-		//static void DrawTriangle(Vertex3Color4 p1, Vertex3Color4 p2, Vertex3Color4 p3, f32 zLayer);
-		//static void DrawTriangle(Vertex3Color3 p1, Vertex3Color3 p2, Vertex3Color3 p3, f32 zLayer) { DrawTriangle(p1.ToColor4(), p2.ToColor4(), p3.ToColor4(), zLayer); }
-	private:
-		static void LoadShaders();
-		static void RenderAll();
-
-		static OrthographicCamera s_camera;
 		static GLShader s_shaderUniformColor;
 		static GLShader s_shaderVertexColor;
 		static GLShader s_shaderUniformColorTransform2D;
@@ -52,6 +41,13 @@ namespace Poole::Rendering {
 		static GLShader s_shaderExperimental1;
 		static GLShader s_shaderExperimental2;
 		static GLShader s_shaderExperimental3;
+
+	private:
+		static void LoadShaders();
+		static void RenderAll();
+
+		static OrthographicCamera s_camera;
+
 		static std::vector<std::unique_ptr<IMeshBase>> s_meshes;
 		static GLuint s_vertexBuffer;
 	};

@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "rendering/renderer2D.h"
+
 namespace Poole::Rendering
 {
 	EGraphicsAPI Renderer::s_GraphicsAPI = EGraphicsAPI::OpenGL;
@@ -23,6 +25,8 @@ namespace Poole::Rendering
 		s_camera.UseCameraSizeWithScale(1.f);
 		//m_camera.GetBounds();
 		LoadShaders();
+
+		Renderer2D::Init();
 	}
 	void Renderer::Tick(GLFWwindow* window)
 	{
@@ -83,16 +87,20 @@ namespace Poole::Rendering
 			GLuint programId;
 			if (ptr->Uses2DTransform())
 			{
-				programId = ptr->UsesUniformColor3() ? s_shaderUniformColorTransform2D.GetProgramID()
+				programId = ptr->UsesUniformColor4() ? s_shaderUniformColorTransform2D.GetProgramID()
 													 : s_shaderVertexColorTransform2D.GetProgramID();
 			}
 			else
 			{
-				programId = ptr->UsesUniformColor3() ? s_shaderUniformColor.GetProgramID() 
+				programId = ptr->UsesUniformColor4() ? s_shaderUniformColor.GetProgramID() 
 													 : s_shaderVertexColor.GetProgramID();
 			}
 
 			ptr->Render(programId);
 		}
+
+		Renderer2D::BeginScene();
+		Renderer2D::Render();
+		Renderer2D::EndScene();
 	}
 }

@@ -22,7 +22,7 @@ namespace Poole::Rendering
 		virtual void Init() {}
 		virtual void Render(GLuint /*programId*/) {}
 		//#todo: find a way to make this constexpr / remove it
-		virtual bool UsesUniformColor3() const { return false; }
+		virtual bool UsesUniformColor4() const { return false; }
 		virtual bool Uses2DTransform() const { return false; }
 		virtual void SetUniforms(GLuint programId);
 	};
@@ -41,9 +41,9 @@ namespace Poole::Rendering
 			return (std::is_base_of<T, TDecorators>::value || ...);
 		}
 
-		virtual bool UsesUniformColor3() const override
+		virtual bool UsesUniformColor4() const override
 		{
-			return ContainsDecorator<MeshUniform_SolidColor<fvec3>>();
+			return ContainsDecorator<MeshUniform_SolidColor<fvec4>>();
 		}
 		virtual bool Uses2DTransform() const override
 		{
@@ -161,19 +161,19 @@ namespace Poole::Rendering
 
 
 
-	struct StaticMeshNoIndiciesSolidColor3_2DTransform
+	struct StaticMeshNoIndiciesSolidColor4_2DTransform
 		: public IMesh<MeshFeature_HasVerts<fvec3>,
-					   MeshUniform_SolidColor<fvec3>, 
+					   MeshUniform_SolidColor<fvec4>, 
 					   MeshUniform_DynamicTransform<fmat3>>
 	{
 		virtual void Init() override;
 		virtual void Render(GLuint programId) override;
 	};
 
-	struct StaticMeshSolidColor3_2DTransform
+	struct StaticMeshSolidColor4_2DTransform
 		: public IMesh<MeshFeature_HasVerts<fvec3>,
 					   MeshFeature_HasIndicies,
-					   MeshUniform_SolidColor<fvec3>,
+					   MeshUniform_SolidColor<fvec4>,
 					   MeshUniform_DynamicTransform<fmat3>>
 	{
 		virtual void Init() override;
@@ -181,8 +181,8 @@ namespace Poole::Rendering
 	};
 
 
-	struct StaticMeshVertexColor3_2DTransform
-		: public IMesh<MeshFeature_HasVerts<Vertex3Color3>,
+	struct StaticMeshVertexColor4_2DTransform
+		: public IMesh<MeshFeature_HasVerts<Vertex3Color4>,
 					   MeshFeature_HasIndicies,
 					   MeshUniform_DynamicTransform<fmat3>>
 	{

@@ -101,24 +101,42 @@ namespace Colors
 #define Vertex3Color3Ctr Vertex3Color3(f32 x, f32 y, f32 z, f32 r, f32 g, f32 b)		: x(x), y(y), z(z), r(r), g(g), b(b)	   {}
 #define Vertex2Color4Ctr Vertex2Color4(f32 x, f32 y,		f32 r, f32 g, f32 b, f32 a) : x(x), y(y),		r(r), g(g), b(b), a(a) {}
 #define Vertex2Color3Ctr Vertex2Color3(f32 x, f32 y,		f32 r, f32 g, f32 b)		: x(x), y(y),		r(r), g(g), b(b)	   {}
-#define Vertex3Color3Funcs //Vertex3Color4 ToColor4(f32 a = 1.f) const { return {x, y, z, r, g, b, a}; } Vertex2Color3 ToVertex2()			const { return {x, y,    r, g, b   }; }
-#define Vertex3Color4Funcs //Vertex3Color3 ToColor3()			   const { return {x, y, z, r, g, b   }; } Vertex2Color4 ToVertex2()			const { return {x, y,    r, g, b, a}; }
-#define Vertex2Color3Funcs //Vertex2Color4 ToColor4(f32 a = 1.f) const { return {x, y,    r, g, b, a}; } Vertex3Color3 ToVertex3(f32 z = 0.f) const { return {x, y, z, r, g, b   }; }
-#define Vertex2Color4Funcs //Vertex2Color3 ToColor3()			   const { return {x, y,    r, g, b   }; } Vertex3Color4 ToVertex3(f32 z = 0.f) const { return {x, y, z, r, g, b, a}; }
 
+VertexWithColorDefinition(Vertex3Color4, fvec3, fcolor4, Vertex3Color4Ctr, x, y, z, r, g, b, a);
+VertexWithColorDefinition(Vertex3Color3, fvec3, fcolor3, Vertex3Color3Ctr, x, y, z, r, g, b   );
+VertexWithColorDefinition(Vertex2Color4, fvec2, fcolor4, Vertex2Color4Ctr, x, y,    r, g, b, a);
+VertexWithColorDefinition(Vertex2Color3, fvec2, fcolor3, Vertex2Color3Ctr, x, y,    r, g, b   );
 
-VertexWithColorDefinition(Vertex3Color4, fvec3, fcolor4, Vertex3Color4Ctr Vertex3Color4Funcs, x, y, z, r, g, b, a);
-VertexWithColorDefinition(Vertex3Color3, fvec3, fcolor3, Vertex3Color3Ctr Vertex3Color3Funcs, x, y, z, r, g, b   );
-VertexWithColorDefinition(Vertex2Color4, fvec2, fcolor4, Vertex2Color4Ctr Vertex2Color4Funcs, x, y,    r, g, b, a);
-VertexWithColorDefinition(Vertex2Color3, fvec2, fcolor3, Vertex2Color3Ctr Vertex2Color3Funcs, x, y,    r, g, b   );
-
-#undef Vertex2Color3Funcs
-#undef Vertex2Color4Funcs
-#undef Vertex3Color3Funcs
-#undef Vertex3Color4Funcs
 #undef Vertex2Color3Ctr
 #undef Vertex2Color4Ctr
 #undef Vertex3Color3Ctr
 #undef Vertex3Color4Ctr
 #undef VertexWithColorDefinition
 
+//For: Vertex3Color4
+static Vertex3Color3 ToVertex3Color3(const Vertex3Color4& s) { return {s.x, s.y, s.z, s.r, s.g, s.b     }; }
+static Vertex2Color4 ToVertex2Color4(const Vertex3Color4& s) { return {s.x, s.y,      s.r, s.g, s.b, s.a}; }
+static Vertex2Color3 ToVertex2Color3(const Vertex3Color4& s) { return {s.x, s.y,      s.r, s.g, s.b     }; }
+static Vertex3Color3 ToColor3 (const Vertex3Color4& s) { return ToVertex3Color3(s); }
+static Vertex2Color4 ToVertex2(const Vertex3Color4& s) { return ToVertex2Color4(s); }
+													  
+//For: Vertex3Color3								  
+static Vertex3Color4 ToVertex3Color4(const Vertex3Color3& s, f32 a = 1.f) { return {s.x, s.y, s.z, s.r, s.g, s.b, a}; }
+static Vertex2Color4 ToVertex2Color4(const Vertex3Color3& s, f32 a = 1.f) { return {s.x, s.y,      s.r, s.g, s.b, a}; }
+static Vertex2Color3 ToVertex2Color3(const Vertex3Color3& s)			  { return {s.x, s.y,      s.r, s.g, s.b   }; }
+static Vertex3Color4 ToColor4 (const Vertex3Color3& s, f32 a = 1.f) { return ToVertex3Color4(s, a); }
+static Vertex2Color3 ToVertex2(const Vertex3Color3& s)			    { return ToVertex2Color3(s); }
+
+//For: Vertex2Color4								  
+static Vertex3Color4 ToVertex3Color4(const Vertex2Color4& s, f32 z = 0.f) { return {s.x, s.y, z, s.r, s.g, s.b, s.a}; }
+static Vertex3Color3 ToVertex3Color3(const Vertex2Color4& s, f32 z = 0.f) { return {s.x, s.y, z, s.r, s.g, s.b     }; }
+static Vertex2Color3 ToVertex2Color3(const Vertex2Color4& s)			  { return {s.x, s.y,    s.r, s.g, s.b     }; }
+static Vertex3Color4 ToVertex3(const Vertex2Color4& s, f32 z = 0.f) { return ToVertex3Color4(s, z); }
+static Vertex2Color3 ToColor3 (const Vertex2Color4& s)			    { return ToVertex2Color3(s); }
+													  
+//For: Vertex2Color3								  
+static Vertex3Color4 ToVertex3Color4(const Vertex2Color3& s, f32 z = 0.f, f32 a = 1.f) { return {s.x, s.y, z, s.r, s.g, s.b, a}; }
+static Vertex3Color3 ToVertex3Color3(const Vertex2Color3& s, f32 z = 0.f)			   { return {s.x, s.y, z, s.r, s.g, s.b,  }; }
+static Vertex2Color4 ToVertex2Color4(const Vertex2Color3& s, f32 a = 1.f)			   { return {s.x, s.y,    s.r, s.g, s.b, a}; }
+static Vertex3Color3 ToVertex3(const Vertex2Color3& s, f32 z = 0.f) { return ToVertex3Color3(s, z); }
+static Vertex2Color4 ToColor4 (const Vertex2Color3& s, f32 a = 1.f) { return ToVertex2Color4(s, a); }
