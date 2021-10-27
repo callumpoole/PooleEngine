@@ -105,6 +105,7 @@ namespace Poole::Rendering
 	{
 		using TVertex = _TVertex;
 		std::vector<TVertex> m_verts;
+		GLuint m_vertexArrayID;
 		GLuint m_vertexbuffer = 0; //#todo: Giving each its own buffer might fragment memory
 	};
 

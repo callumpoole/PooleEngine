@@ -41,7 +41,7 @@ namespace Poole::Rendering
 		s_RenderData.m_Shader->Bind();
 		s_RenderData.m_Shader->SetUniform("u_cameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
 	}
-	void Renderer2D::Render()
+	void Renderer2D::RenderScene()
 	{
 		s_RenderData.m_VertexBuffer->Bind();
 		s_RenderData.m_IndexBuffer->Bind();
@@ -57,7 +57,7 @@ namespace Poole::Rendering
 			(void*)0	//array buffer offset
 		);
 		//Draw the triangle !
-		DrawQuad({ 0,0 }, { 0.1f, 0.1f }, Colors::Red<fcolor4>);
+		DrawQuad({ 0, 0 }, { 0.1f, 0.1f }, Colors::Red<fcolor4>);
 		glDrawElements(GL_TRIANGLES, (GLsizei)6, GL_UNSIGNED_INT, 0);
 	}
 	void Renderer2D::EndScene()

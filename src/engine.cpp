@@ -56,7 +56,9 @@ namespace Poole
         while (!glfwWindowShouldClose(window))
         {
             Input::Tick(window);
-            Rendering::Renderer::Tick(window);
+            Rendering::Renderer::BeginScene();
+            Rendering::Renderer::RenderScene();
+            Rendering::Renderer::EndScene(window);
             Window::Tick();
 
             UpdateApp(0.f);

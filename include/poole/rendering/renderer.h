@@ -26,7 +26,9 @@ namespace Poole::Rendering {
 		static MeshType* Submit(MeshType&& meshAndColor);
 
 		static void Init();
-		static void Tick(GLFWwindow* window);
+		static void BeginScene();
+		static void RenderScene();
+		static void EndScene(GLFWwindow* window);
 
 		static IMeshBase* GetMesh(i32 index);
 		template<typename T>
@@ -44,7 +46,6 @@ namespace Poole::Rendering {
 
 	private:
 		static void LoadShaders();
-		static void RenderAll();
 
 		static OrthographicCamera s_camera;
 

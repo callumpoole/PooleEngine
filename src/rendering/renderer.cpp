@@ -28,13 +28,38 @@ namespace Poole::Rendering
 
 		Renderer2D::Init();
 	}
-	void Renderer::Tick(GLFWwindow* window)
+	void Renderer::BeginScene()
 	{
 		//Draw BG
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		RenderAll();
+		Renderer2D::BeginScene();
+	}
+	void Renderer::RenderScene()
+	{
+		Renderer2D::RenderScene(); //TODO: Investigate why this goes black if after the other stuff
+
+		for (std::unique_ptr<IMeshBase>& ptr : s_meshes)
+		{
+			Shader* shader;
+			if (ptr->Uses2DTransform())
+			{
+				shader = ptr->UsesUniformColor4() ? &s_shaderUniformColorTransform2D
+												  : &s_shaderVertexColorTransform2D;
+			}
+			else
+			{
+				shader = ptr->UsesUniformColor4() ? &s_shaderUniformColor
+												  : &s_shaderVertexColor;
+			}
+
+			ptr->Render(*shader);
+		}
+	}
+	void Renderer::EndScene(GLFWwindow* window)
+	{
+		Renderer2D::EndScene();
 
 		//Swap front and back buffers
 		glfwSwapBuffers(window);
@@ -78,29 +103,5 @@ namespace Poole::Rendering
 		//s_shaderExperimental3 = Rendering::GLShader(
 		//	"../../poole_engine/src/rendering/shaders/Experimental3.shader"
 		//);
-	}
-
-	void Renderer::RenderAll()
-	{
-		for (std::unique_ptr<IMeshBase>& ptr : s_meshes)
-		{
-			Shader* shader;
-			if (ptr->Uses2DTransform())
-			{
-				shader = ptr->UsesUniformColor4() ? &s_shaderUniformColorTransform2D
-												  : &s_shaderVertexColorTransform2D;
-			}
-			else
-			{
-				shader = ptr->UsesUniformColor4() ? &s_shaderUniformColor
-													 : &s_shaderVertexColor;
-			}
-
-			ptr->Render(*shader);
-		}
-
-		Renderer2D::BeginScene();
-		Renderer2D::Render();
-		Renderer2D::EndScene();
 	}
 }

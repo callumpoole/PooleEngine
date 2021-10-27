@@ -12,9 +12,8 @@ namespace Poole::Rendering
 
 	void StaticMeshNoIndiciesSolidColor4_2DTransform::Init()
 	{
-		GLuint vertexArrayID;
-		glGenVertexArrays(1, &vertexArrayID);
-		glBindVertexArray(vertexArrayID);
+		glGenVertexArrays(1, &m_vertexArrayID);
+		glBindVertexArray(m_vertexArrayID);
 
 		//Generate 1 buffer, put the resulting identifier in m_vertexbuffer
 		glGenBuffers(1, &m_vertexbuffer);
@@ -25,6 +24,8 @@ namespace Poole::Rendering
 	}
 	void StaticMeshNoIndiciesSolidColor4_2DTransform::Render(Shader& shader)
 	{
+		glBindVertexArray(m_vertexArrayID);
+
 		//Use Shader
 		shader.Bind();
 		SetUniforms(shader);
@@ -51,9 +52,8 @@ namespace Poole::Rendering
 
 	void StaticMeshSolidColor4_2DTransform::Init()
 	{
-		GLuint vertexArrayID;
-		glGenVertexArrays(1, &vertexArrayID);
-		glBindVertexArray(vertexArrayID);
+		glGenVertexArrays(1, &m_vertexArrayID);
+		glBindVertexArray(m_vertexArrayID);
 
 		//Generate 1 buffer, put the resulting identifier in m_vertexbuffer
 		glGenBuffers(1, &m_vertexbuffer);
@@ -71,6 +71,8 @@ namespace Poole::Rendering
 	}
 	void StaticMeshSolidColor4_2DTransform::Render(Shader& shader)
 	{
+		glBindVertexArray(m_vertexArrayID);
+
 		//Use Shader
 		shader.Bind();
 		SetUniforms(shader);
@@ -97,9 +99,8 @@ namespace Poole::Rendering
 
 	void StaticMeshVertexColor4_2DTransform::Init()
 	{
-		GLuint vertexArrayID;
-		glGenVertexArrays(1, &vertexArrayID);
-		glBindVertexArray(vertexArrayID);
+		glGenVertexArrays(1, &m_vertexArrayID);
+		glBindVertexArray(m_vertexArrayID);
 
 		//Generate 1 buffer, put the resulting identifier in m_vertexbuffer
 		glGenBuffers(1, &m_vertexbuffer);
@@ -117,6 +118,8 @@ namespace Poole::Rendering
 	}
 	void StaticMeshVertexColor4_2DTransform::Render(Shader& shader)
 	{
+		glBindVertexArray(m_vertexArrayID);
+
 		//Use Shader
 		shader.Bind();
 		SetUniforms(shader);

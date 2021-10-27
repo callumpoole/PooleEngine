@@ -10,7 +10,7 @@ namespace Poole::Rendering
 		static void Init();
 		static void Shutdown();
 		static void BeginScene();
-		static void Render();
+		static void RenderScene();
 		static void EndScene();
 
 		static void DrawQuad(const fvec2& pos, const fvec2& scale, const fcolor4& color);
