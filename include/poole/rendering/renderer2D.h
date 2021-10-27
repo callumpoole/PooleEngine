@@ -25,14 +25,10 @@ namespace Poole::Rendering
 	private:
 		struct RenderData
 		{
-			struct UniformColorQuad
-			{
-				GLuint m_vertexArrayID;
-				GLuint m_vertexbuffer;
-				GLuint m_elementbuffer;
-				class VertexBuffer* m_VertexBuffer;
-				class IndexBuffer* m_IndexBuffer;
-			} m_UniformQuadData;
+			GLuint m_vertexArrayID;
+			class GLShader* m_Shader;
+			class VertexBuffer* m_VertexBuffer;
+			class IndexBuffer* m_IndexBuffer;
 		};
 		static RenderData s_RenderData;
 	};

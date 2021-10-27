@@ -3,7 +3,6 @@
 #include "graphics_api/buffer.h"
 #include "rendering/renderer.h"
 #include "rendering/camera/orthographic_camera.h"
-#include "glm/gtc/type_ptr.hpp"
 
 namespace Poole::Rendering
 {
@@ -11,39 +10,41 @@ namespace Poole::Rendering
 
 	void Renderer2D::Init()
 	{
-		glGenVertexArrays(1, &s_RenderData.m_UniformQuadData.m_vertexArrayID);
-		glBindVertexArray(s_RenderData.m_UniformQuadData.m_vertexArrayID);
+		s_RenderData.m_Shader = &Renderer::s_shaderUniformColor;
 
-		fvec3 corners[3] =
+		glGenVertexArrays(1, &s_RenderData.m_vertexArrayID);
+		glBindVertexArray(s_RenderData.m_vertexArrayID);
+
+		fvec3 corners[4] =
 		{
-			{-0.5, -0.5, 0.f},
-			{ 0.5, -0.5, 0.f},
-			{-0.5,  0.5, 0.f},
+			{1.2f * -0.5, 1.2f * -0.5, 0.f},
+			{1.2f *  0.5, 1.2f * -0.5, 0.f},
+			{1.2f *  0.5, 1.2f *  0.5, 0.f},
+			{1.2f * -0.5, 1.2f *  0.5, 0.f},
 		};
-		s_RenderData.m_UniformQuadData.m_VertexBuffer = VertexBuffer::Create((f32*)corners, sizeof(corners));
+		s_RenderData.m_VertexBuffer = VertexBuffer::Create((f32*)corners, sizeof(corners));
 
-		u32 indices[3] = { 0, 1, 2 };
-		s_RenderData.m_UniformQuadData.m_IndexBuffer = IndexBuffer::Create(indices, 3);
+		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+		s_RenderData.m_IndexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32));
 	}
 	void Renderer2D::Shutdown()
 	{
 		//Todo: Automate with unique_ptr (issue is it's private to engine currently)
-		delete s_RenderData.m_UniformQuadData.m_VertexBuffer;
-		delete s_RenderData.m_UniformQuadData.m_IndexBuffer;
+		delete s_RenderData.m_VertexBuffer;
+		delete s_RenderData.m_IndexBuffer;
 	}
 	void Renderer2D::BeginScene()
 	{
-		glBindVertexArray(s_RenderData.m_UniformQuadData.m_vertexArrayID);
+		glBindVertexArray(s_RenderData.m_vertexArrayID);
 		//Use Shader
-		glUseProgram(Renderer::s_shaderUniformColor.GetProgramID());
+		glUseProgram(s_RenderData.m_Shader->GetProgramID());
 
-		glUniformMatrix4fv(glGetUniformLocation(Renderer::s_shaderUniformColor.GetProgramID(), "u_cameraViewProjection"), 1, GL_TRUE, glm::value_ptr(Renderer::GetCamera().GetViewProjectionMatrix()));
-		
+		s_RenderData.m_Shader->SetUniform("u_cameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
 	}
 	void Renderer2D::Render()
 	{
-		s_RenderData.m_UniformQuadData.m_VertexBuffer->Bind();
-		s_RenderData.m_UniformQuadData.m_IndexBuffer->Bind();
+		s_RenderData.m_VertexBuffer->Bind();
+		s_RenderData.m_IndexBuffer->Bind();
 
 		//1st attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -57,7 +58,7 @@ namespace Poole::Rendering
 		);
 		//Draw the triangle !
 		DrawQuad({ 0,0 }, { 1,1 }, Colors::Red<fcolor4>);
-		glDrawElements(GL_TRIANGLES, (GLsizei)3, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, (GLsizei)6, GL_UNSIGNED_INT, 0);
 	}
 	void Renderer2D::EndScene()
 	{
@@ -66,7 +67,7 @@ namespace Poole::Rendering
 
 	void Renderer2D::DrawQuad(const fvec2& pos, const fvec2& size, const fcolor4& color)
 	{
-		glUniform4f(glGetUniformLocation(Renderer::s_shaderUniformColor.GetProgramID(), "u_Color"), color.x, color.y, color.z, color.w);
+		glUniform4f(glGetUniformLocation(s_RenderData.m_Shader->GetProgramID(), "u_Color"), color.x, color.y, color.z, color.w);
 	}
 
 	//void Renderer2D::DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color)

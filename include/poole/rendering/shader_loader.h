@@ -3,7 +3,22 @@
 
 namespace Poole::Rendering {
 
-	class GLShader
+	class Shader
+	{
+	public:
+		virtual void Bind() = 0;
+		virtual void Unbind() = 0;
+
+		virtual void SetUniform(const char* uniformName, const f32 f) = 0;
+		virtual void SetUniform(const char* uniformName, const fvec2 v) = 0;
+		virtual void SetUniform(const char* uniformName, const fvec3 v) = 0;
+		virtual void SetUniform(const char* uniformName, const fvec4 v) = 0;
+		virtual void SetUniform(const char* uniformName, const fmat2 v) = 0;
+		virtual void SetUniform(const char* uniformName, const fmat3 v) = 0;
+		virtual void SetUniform(const char* uniformName, const fmat4 v) = 0;
+	};
+
+	class GLShader : public Shader
 	{
 	public:
 		 GLShader() = default;
@@ -11,6 +26,16 @@ namespace Poole::Rendering {
 		 GLShader(std::string_view vertexShaderCode, std::string_view fragmentShaderCode);
 		 ~GLShader();
 		 GLuint GetProgramID() const { return m_programID; }
+
+		 virtual void Bind() override;
+		 virtual void Unbind() override;
+		 virtual void SetUniform(const char* uniformName, const f32 f);
+		 virtual void SetUniform(const char* uniformName, const fvec2 v);
+		 virtual void SetUniform(const char* uniformName, const fvec3 v);
+		 virtual void SetUniform(const char* uniformName, const fvec4 v);
+		 virtual void SetUniform(const char* uniformName, const fmat2 v);
+		 virtual void SetUniform(const char* uniformName, const fmat3 v);
+		 virtual void SetUniform(const char* uniformName, const fmat4 v);
 	private:
 		struct ShaderSource
 		{

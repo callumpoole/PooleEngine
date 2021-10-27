@@ -3,9 +3,9 @@
 
 namespace Poole::Rendering
 {
-	void IMeshBase::SetUniforms(GLuint programId)
+	void IMeshBase::SetUniforms(Shader& shader)
 	{
-		SetUniform(programId, "u_cameraViewProjection", Poole::Rendering::Renderer::GetCamera().GetViewProjectionMatrix());
+		shader.SetUniform("u_cameraViewProjection", Poole::Rendering::Renderer::GetCamera().GetViewProjectionMatrix());
 	}
 
 	//--
@@ -23,11 +23,11 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ARRAY_BUFFER, sizeof(TVertex) * m_verts.size(), m_verts.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshNoIndiciesSolidColor4_2DTransform::Render(GLuint programId)
+	void StaticMeshNoIndiciesSolidColor4_2DTransform::Render(Shader& shader)
 	{
 		//Use Shader
-		glUseProgram(programId);
-		SetUniforms(programId);
+		shader.Bind();
+		SetUniforms(shader);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 
@@ -69,11 +69,11 @@ namespace Poole::Rendering
 		//Give our indices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshSolidColor4_2DTransform::Render(GLuint programId)
+	void StaticMeshSolidColor4_2DTransform::Render(Shader& shader)
 	{
 		//Use Shader
-		glUseProgram(programId);
-		SetUniforms(programId);
+		shader.Bind();
+		SetUniforms(shader);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);
@@ -115,11 +115,11 @@ namespace Poole::Rendering
 		//Give our vertices to OpenGL.
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
 	}
-	void StaticMeshVertexColor4_2DTransform::Render(GLuint programId)
+	void StaticMeshVertexColor4_2DTransform::Render(Shader& shader)
 	{
 		//Use Shader
-		glUseProgram(programId);
-		SetUniforms(programId);
+		shader.Bind();
+		SetUniforms(shader);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexbuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_elementbuffer);

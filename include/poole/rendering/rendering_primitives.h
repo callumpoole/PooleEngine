@@ -2,29 +2,19 @@
 
 #include "poole/core.h"
 #include <type_traits>
-#include "glm/gtc/type_ptr.hpp"
+#include "shader_loader.h"
 #include "camera/orthographic_camera.h"
 
 namespace Poole::Rendering
 {
-	static void SetUniform(const GLuint programId, const char* uniformName, const f32 f) { glUniform1f(glGetUniformLocation(programId, uniformName), f); }
-	static void SetUniform(const GLuint programId, const char* uniformName, const fvec2 v) { glUniform2f(glGetUniformLocation(programId, uniformName), v.x, v.y); }
-	static void SetUniform(const GLuint programId, const char* uniformName, const fvec3 v) { glUniform3f(glGetUniformLocation(programId, uniformName), v.x, v.y, v.z); }
-	static void SetUniform(const GLuint programId, const char* uniformName, const fvec4 v) { glUniform4f(glGetUniformLocation(programId, uniformName), v.x, v.y, v.z, v.w); }
-	static void SetUniform(const GLuint programId, const char* uniformName, const fmat2 v) { glUniformMatrix2fv(glGetUniformLocation(programId, uniformName), 1, GL_TRUE, glm::value_ptr(v)); }
-	static void SetUniform(const GLuint programId, const char* uniformName, const fmat3 v) { glUniformMatrix3fv(glGetUniformLocation(programId, uniformName), 1, GL_TRUE, glm::value_ptr(v)); }
-	static void SetUniform(const GLuint programId, const char* uniformName, const fmat4 v) { glUniformMatrix4fv(glGetUniformLocation(programId, uniformName), 1, GL_TRUE, glm::value_ptr(v)); }
-
-
-
 	struct IMeshBase
 	{
 		virtual void Init() {}
-		virtual void Render(GLuint /*programId*/) {}
+		virtual void Render(Shader& /*shader*/) {}
 		//#todo: find a way to make this constexpr / remove it
 		virtual bool UsesUniformColor4() const { return false; }
 		virtual bool Uses2DTransform() const { return false; }
-		virtual void SetUniforms(GLuint programId);
+		virtual void SetUniforms(Shader& shader);
 	};
 
 	template<typename ... TDecorators>
@@ -49,10 +39,10 @@ namespace Poole::Rendering
 		{
 			return ContainsDecorator<MeshUniform_DynamicTransform<fmat3>>();
 		}
-		virtual void SetUniforms(GLuint programId) override
+		virtual void SetUniforms(Shader& shader) override
 		{
-			IMeshBase::SetUniforms(programId); //Super
-			(TDecorators::SetInternalUniforms(programId), ...);
+			IMeshBase::SetUniforms(shader); //Super
+			(TDecorators::SetInternalUniforms(shader), ...);
 		}
 	};
 
@@ -71,16 +61,16 @@ namespace Poole::Rendering
 
 	struct IMeshDecoratorBase
 	{
-		virtual void SetInternalUniforms(const GLuint /*programId*/) { }
+		virtual void SetInternalUniforms(Shader& /*shader*/) { }
 	};
 
 	template<typename T>
 	struct MeshUniform_SolidColor : public IMeshDecoratorBase
 	{
-		void SetInternalUniforms(const GLuint programId)
+		void SetInternalUniforms(Shader& shader)
 		{
-			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/
-			SetUniform(programId, "u_Color", m_color);
+			IMeshDecoratorBase::SetInternalUniforms(shader); /*Super*/
+			shader.SetUniform("u_Color", m_color);
 		}
 		T m_color{};
 	};
@@ -92,9 +82,9 @@ namespace Poole::Rendering
 	template<>
 	struct MeshUniform_DynamicTransform<fmat3> : public IMeshDecoratorBase
 	{																	
-		void SetInternalUniforms(const GLuint programId)
+		void SetInternalUniforms(Shader& shader)
 		{
-			IMeshDecoratorBase::SetInternalUniforms(programId); /*Super*/
+			IMeshDecoratorBase::SetInternalUniforms(shader); /*Super*/
 
 			const fmat3 Translation = {
 				1, 0, m_position.x,
@@ -119,7 +109,7 @@ namespace Poole::Rendering
 
 			m_transform = Translation * Rotation * Shear * Scale;
 
-			SetUniform(programId, "u_Transform", m_transform);
+			shader.SetUniform("u_Transform", m_transform);
 		}
 		fmat3 m_transform;
 		fvec2 m_position{ 0.f, 0.f };
@@ -167,7 +157,7 @@ namespace Poole::Rendering
 					   MeshUniform_DynamicTransform<fmat3>>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId) override;
+		virtual void Render(Shader& shader) override;
 	};
 
 	struct StaticMeshSolidColor4_2DTransform
@@ -177,7 +167,7 @@ namespace Poole::Rendering
 					   MeshUniform_DynamicTransform<fmat3>>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId) override;
+		virtual void Render(Shader& shader) override;
 	};
 
 
@@ -187,6 +177,6 @@ namespace Poole::Rendering
 					   MeshUniform_DynamicTransform<fmat3>>
 	{
 		virtual void Init() override;
-		virtual void Render(GLuint programId) override;
+		virtual void Render(Shader& shader) override;
 	};
 }

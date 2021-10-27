@@ -84,19 +84,19 @@ namespace Poole::Rendering
 	{
 		for (std::unique_ptr<IMeshBase>& ptr : s_meshes)
 		{
-			GLuint programId;
+			Shader* shader;
 			if (ptr->Uses2DTransform())
 			{
-				programId = ptr->UsesUniformColor4() ? s_shaderUniformColorTransform2D.GetProgramID()
-													 : s_shaderVertexColorTransform2D.GetProgramID();
+				shader = ptr->UsesUniformColor4() ? &s_shaderUniformColorTransform2D
+												  : &s_shaderVertexColorTransform2D;
 			}
 			else
 			{
-				programId = ptr->UsesUniformColor4() ? s_shaderUniformColor.GetProgramID() 
-													 : s_shaderVertexColor.GetProgramID();
+				shader = ptr->UsesUniformColor4() ? &s_shaderUniformColor
+													 : &s_shaderVertexColor;
 			}
 
-			ptr->Render(programId);
+			ptr->Render(*shader);
 		}
 
 		Renderer2D::BeginScene();

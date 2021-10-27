@@ -1,9 +1,8 @@
 #include "poole/rendering/shader_loader.h"
-#include <string>
 #include <fstream>
 #include <sstream>
-#include <vector>
 #include <filesystem>
+#include "glm/gtc/type_ptr.hpp"
 
 namespace Poole::Rendering {
 
@@ -22,7 +21,17 @@ namespace Poole::Rendering {
 	GLShader::~GLShader()
 	{
 	}
-	
+
+	void GLShader::Bind() { glUseProgram(m_programID); }
+	void GLShader::Unbind() { glUseProgram(0); }
+	void GLShader::SetUniform(const char* uniformName, const f32 f) { glUniform1f(glGetUniformLocation(m_programID, uniformName), f); }
+	void GLShader::SetUniform(const char* uniformName, const fvec2 v) { glUniform2f(glGetUniformLocation(m_programID, uniformName), v.x, v.y); }
+	void GLShader::SetUniform(const char* uniformName, const fvec3 v) { glUniform3f(glGetUniformLocation(m_programID, uniformName), v.x, v.y, v.z); }
+	void GLShader::SetUniform(const char* uniformName, const fvec4 v) { glUniform4f(glGetUniformLocation(m_programID, uniformName), v.x, v.y, v.z, v.w); }
+	void GLShader::SetUniform(const char* uniformName, const fmat2 v) { glUniformMatrix2fv(glGetUniformLocation(m_programID, uniformName), 1, GL_TRUE, glm::value_ptr(v)); }
+	void GLShader::SetUniform(const char* uniformName, const fmat3 v) { glUniformMatrix3fv(glGetUniformLocation(m_programID, uniformName), 1, GL_TRUE, glm::value_ptr(v)); }
+	void GLShader::SetUniform(const char* uniformName, const fmat4 v) { glUniformMatrix4fv(glGetUniformLocation(m_programID, uniformName), 1, GL_TRUE, glm::value_ptr(v)); }
+
 	std::optional<GLShader::ShaderSource> GLShader::LoadFromFile(std::string_view combinedPath)
 	{
 		printf("Loading shader : %s\n", combinedPath.data());
