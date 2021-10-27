@@ -52,6 +52,9 @@ using fcolor4 = glm::vec4;
 using ucolor3 = glm::uvec3;
 using ucolor4 = glm::uvec4;
 
+//Effectively escapes , in macros
+#define ARG(...) __VA_ARGS__
+
 namespace Colors
 {
 #define AddColor(Name, R, G, B, A) \
@@ -75,22 +78,47 @@ namespace Colors
 #undef AddColor
 }
 
-#define VertexWithColorDefinition(Name, TVertexPart, TColorPart, ...)		\
-	struct Name																\
-	{																		\
-		using TVertex = TVertexPart;										\
-		using TColor = TColorPart;											\
-		union {																\
-			struct															\
-			{																\
-				TVertex m_position;											\
-				TColor m_color;												\
-			};																\
-			struct { f32 __VA_ARGS__; }; /*I feel no need for m_ here */	\
-		};																	\
+
+#define VertexWithColorDefinition(Name, TVertexPart, TColorPart, Extra, ...)			\
+	struct Name																			\
+	{																					\
+		using TVertex = TVertexPart;													\
+		using TColor = TColorPart;														\
+		Name() = default;																\
+		Name(TVertex position, TColor color) : m_position(position), m_color(color) {}	\
+		Extra																			\
+		union {																			\
+			struct																		\
+			{																			\
+				TVertex m_position;														\
+				TColor m_color;															\
+			};																			\
+			struct { f32 __VA_ARGS__; }; /*I feel no need for m_ here */				\
+		};																				\
 	};
-VertexWithColorDefinition(Vertex2Color3, fvec2, fcolor3, x, y,    r, g, b   );
-VertexWithColorDefinition(Vertex2Color4, fvec2, fcolor4, x, y,    r, g, b, a);
-VertexWithColorDefinition(Vertex3Color3, fvec3, fcolor3, x, y, z, r, g, b   );
-VertexWithColorDefinition(Vertex3Color4, fvec3, fcolor4, x, y, z, r, g, b, a);
+
+#define Vertex3Color4Ctr Vertex3Color4(f32 x, f32 y, f32 z, f32 r, f32 g, f32 b, f32 a) : x(x), y(y), z(z), r(r), g(g), b(b), a(a) {}
+#define Vertex3Color3Ctr Vertex3Color3(f32 x, f32 y, f32 z, f32 r, f32 g, f32 b)		: x(x), y(y), z(z), r(r), g(g), b(b)	   {}
+#define Vertex2Color4Ctr Vertex2Color4(f32 x, f32 y,		f32 r, f32 g, f32 b, f32 a) : x(x), y(y),		r(r), g(g), b(b), a(a) {}
+#define Vertex2Color3Ctr Vertex2Color3(f32 x, f32 y,		f32 r, f32 g, f32 b)		: x(x), y(y),		r(r), g(g), b(b)	   {}
+#define Vertex3Color3Funcs //Vertex3Color4 ToColor4(f32 a = 1.f) const { return {x, y, z, r, g, b, a}; } Vertex2Color3 ToVertex2()			const { return {x, y,    r, g, b   }; }
+#define Vertex3Color4Funcs //Vertex3Color3 ToColor3()			   const { return {x, y, z, r, g, b   }; } Vertex2Color4 ToVertex2()			const { return {x, y,    r, g, b, a}; }
+#define Vertex2Color3Funcs //Vertex2Color4 ToColor4(f32 a = 1.f) const { return {x, y,    r, g, b, a}; } Vertex3Color3 ToVertex3(f32 z = 0.f) const { return {x, y, z, r, g, b   }; }
+#define Vertex2Color4Funcs //Vertex2Color3 ToColor3()			   const { return {x, y,    r, g, b   }; } Vertex3Color4 ToVertex3(f32 z = 0.f) const { return {x, y, z, r, g, b, a}; }
+
+
+VertexWithColorDefinition(Vertex3Color4, fvec3, fcolor4, Vertex3Color4Ctr Vertex3Color4Funcs, x, y, z, r, g, b, a);
+VertexWithColorDefinition(Vertex3Color3, fvec3, fcolor3, Vertex3Color3Ctr Vertex3Color3Funcs, x, y, z, r, g, b   );
+VertexWithColorDefinition(Vertex2Color4, fvec2, fcolor4, Vertex2Color4Ctr Vertex2Color4Funcs, x, y,    r, g, b, a);
+VertexWithColorDefinition(Vertex2Color3, fvec2, fcolor3, Vertex2Color3Ctr Vertex2Color3Funcs, x, y,    r, g, b   );
+
+#undef Vertex2Color3Funcs
+#undef Vertex2Color4Funcs
+#undef Vertex3Color3Funcs
+#undef Vertex3Color4Funcs
+#undef Vertex2Color3Ctr
+#undef Vertex2Color4Ctr
+#undef Vertex3Color3Ctr
+#undef Vertex3Color4Ctr
 #undef VertexWithColorDefinition
+

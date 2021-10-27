@@ -5,7 +5,7 @@
 
 namespace Poole::Rendering
 {
-	GraphicsAPI Renderer::s_GraphicsAPI = GraphicsAPI::OpenGL;
+	EGraphicsAPI Renderer::s_GraphicsAPI = EGraphicsAPI::OpenGL;
 
 	OrthographicCamera Renderer::s_camera;
 	GLShader Renderer::s_shaderUniformColor;

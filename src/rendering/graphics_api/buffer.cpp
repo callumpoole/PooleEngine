@@ -8,8 +8,8 @@ namespace Poole::Rendering
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{
-		case GraphicsAPI::None: assert(false); return nullptr;
-		case GraphicsAPI::OpenGL: return new OpenGL_VertexBuffer(verts, size);
+		case EGraphicsAPI::None: assert(false); return nullptr;
+		case EGraphicsAPI::OpenGL: return new OpenGL_VertexBuffer(verts, size);
 		}
 
 		assert(false);
@@ -20,8 +20,8 @@ namespace Poole::Rendering
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{
-		case GraphicsAPI::None: assert(false); return nullptr;
-		case GraphicsAPI::OpenGL: return new OpenGL_IndexBuffer(indices, count);
+		case EGraphicsAPI::None: assert(false); return nullptr;
+		case EGraphicsAPI::OpenGL: return new OpenGL_IndexBuffer(indices, count);
 		}
 
 		assert(false);
