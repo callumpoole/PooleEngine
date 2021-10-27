@@ -29,6 +29,7 @@ namespace Poole::Rendering {
 
 		 virtual void Bind() override;
 		 virtual void Unbind() override;
+
 		 virtual void SetUniform(const char* uniformName, const f32 f);
 		 virtual void SetUniform(const char* uniformName, const fvec2 v);
 		 virtual void SetUniform(const char* uniformName, const fvec3 v);

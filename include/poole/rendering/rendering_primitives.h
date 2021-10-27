@@ -4,6 +4,7 @@
 #include <type_traits>
 #include "shader_loader.h"
 #include "camera/orthographic_camera.h"
+#include "renderer2D.h"
 
 namespace Poole::Rendering
 {
@@ -85,36 +86,11 @@ namespace Poole::Rendering
 		void SetInternalUniforms(Shader& shader)
 		{
 			IMeshDecoratorBase::SetInternalUniforms(shader); /*Super*/
-
-			const fmat3 Translation = {
-				1, 0, m_position.x,
-				0, 1, m_position.y,
-				0, 0, 1
-			};
-			const fmat3 Rotation = {
-				cosf(m_rotation), -sinf(m_rotation), 0,
-				sinf(m_rotation),  cosf(m_rotation), 0,
-							   0,				  0, 1,
-			};
-			const fmat3 Scale = {
-				m_scale.x,		   0, 0,
-						0, m_scale.y, 0,
-						0,		   0, 1
-			};
-			const fmat3 Shear = {
-				1,		   m_shear.x, 0,
-				m_shear.y,		   1, 0,
-				0,				   0, 1
-			};
-
-			m_transform = Translation * Rotation * Shear * Scale;
-
-			shader.SetUniform("u_Transform", m_transform);
+			shader.SetUniform("u_Transform", Renderer2D::MakeTransformMatrix(m_position, m_scale, m_rotation, m_shear));
 		}
-		fmat3 m_transform;
 		fvec2 m_position{ 0.f, 0.f };
-		f32 m_rotation = 0;
 		fvec2 m_scale{1.f, 1.f};
+		f32 m_rotation = 0;
 		fvec2 m_shear{0.f, 0.f};
 	};
 
