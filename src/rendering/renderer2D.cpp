@@ -5,6 +5,8 @@
 #include "rendering/renderer.h"
 #include "rendering/camera/orthographic_camera.h"
 
+#include "glm/gtc/matrix_transform.hpp"
+
 namespace Poole::Rendering
 {
 	Renderer2D::RenderData Renderer2D::s_RenderData{};
@@ -56,9 +58,6 @@ namespace Poole::Rendering
 			0,			//stride
 			(void*)0	//array buffer offset
 		);
-		//Draw the triangle !
-		DrawQuad({ 0, 0 }, { 0.1f, 0.1f }, Colors::Red<fcolor4>);
-		glDrawElements(GL_TRIANGLES, (GLsizei)6, GL_UNSIGNED_INT, 0);
 	}
 	void Renderer2D::EndScene()
 	{
@@ -69,31 +68,29 @@ namespace Poole::Rendering
 	{
 		s_RenderData.m_Shader->SetUniform("u_Transform", MakeTransformMatrix(pos, scale));
 		s_RenderData.m_Shader->SetUniform("u_Color", color);
+
+		s_RenderData.m_VertexArray->Bind(); 
+		s_RenderData.m_VertexBuffer->Bind(); //Probably unnecessary
+		s_RenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
+		glDrawElements(GL_TRIANGLES, (GLsizei)6, GL_UNSIGNED_INT, 0);
 	}
 
-	fmat3 Renderer2D::MakeTransformMatrix(const fvec2& pos, const fvec2& scale, f32 rotation, const fvec2& shear)
+	
+
+	fmat4 Renderer2D::MakeTransformMatrix(const fvec2& pos, const fvec2& scale, f32 rotation, const fvec2& shear)
 	{
-		const fmat3 Translation = {
-			1, 0, pos.x,
-			0, 1, pos.y,
-			0, 0, 1
+		const fmat4 shearMat = {
+				  1, shear.y, 0, 0,
+			shear.x,       1, 0, 0,
+				  0,       0, 1, 0,
+				  0,       0, 0, 1,
 		};
-		const fmat3 Rotation = {
-			cosf(rotation), -sinf(rotation), 0,
-			sinf(rotation),  cosf(rotation), 0,
-						 0,				  0, 1,
-		};
-		const fmat3 Scale = {
-			scale.x,	   0, 0,
-				  0, scale.y, 0,
-				  0,	   0, 1
-		};
-		const fmat3 Shear = {
-			      1, shear.x, 0,
-			shear.y,       1, 0,
-			      0,       0, 1
-		};
-		return Translation * Rotation * Shear * Scale;
+
+		return
+			glm::translate(fmat4(1.0f), fvec3{ pos.x, pos.y, 0.f }) *
+			glm::rotate(fmat4(1.0f), rotation, fvec3{0,0,1}) *
+			shearMat *
+			glm::scale(fmat4(1.0f), fvec3{ scale.x, scale.y, 1.f });
 	}
 
 	//void Renderer2D::DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color)
