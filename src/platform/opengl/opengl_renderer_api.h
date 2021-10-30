@@ -10,6 +10,8 @@ namespace Poole::Rendering
 	public:
 		OpenGL_RendererAPI() = default;
 
+		virtual void SetClearColor(const fcolor4& color) override;
+		virtual void Clear() override;
 		virtual void DrawIndexed(u32 count) override;
 	};
 }

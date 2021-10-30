@@ -10,8 +10,10 @@ namespace Poole::Rendering
 		virtual ~RendererAPI() {}
 		static RendererAPI* GetOrCreate();
 
+		virtual void SetClearColor(const fcolor4& color) = 0;
+		virtual void Clear() = 0;
 		virtual void DrawIndexed(u32 count) = 0;
 	};
 
-	#define GetRendererAPI() RendererAPI::GetOrCreate()
+	static inline RendererAPI* GetRendererAPI() { return RendererAPI::GetOrCreate(); }
 }

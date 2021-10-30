@@ -10,13 +10,23 @@
 
 namespace Poole::Rendering
 {
-	Renderer2D::RenderData Renderer2D::s_RenderData{};
+	namespace 
+	{
+		struct RenderData
+		{
+			GLShader* m_Shader;
+			std::unique_ptr<VertexArray> m_VertexArray;
+			std::unique_ptr<VertexBuffer> m_VertexBuffer;
+			std::unique_ptr<IndexBuffer> m_IndexBuffer;
+		};
+		static RenderData s_RenderData;
+	}
 
 	void Renderer2D::Init()
 	{
 		s_RenderData.m_Shader = &Renderer::s_shaderUniformColorTransform2D;
 
-		s_RenderData.m_VertexArray = VertexArray::Create();
+		s_RenderData.m_VertexArray.reset(VertexArray::Create());
 		s_RenderData.m_VertexArray->Bind();
 
 		fvec3 corners[4] =
@@ -26,17 +36,14 @@ namespace Poole::Rendering
 			{ 1,  1, 0.f},
 			{-1,  1, 0.f},
 		};
-		s_RenderData.m_VertexBuffer = VertexBuffer::Create((f32*)corners, sizeof(corners));
+		s_RenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
 
 		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-		s_RenderData.m_IndexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32));
+		s_RenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
 	}
 	void Renderer2D::Shutdown()
 	{
-		//Todo: Automate with unique_ptr (issue is it's private to engine currently)
-		delete s_RenderData.m_VertexArray;
-		delete s_RenderData.m_VertexBuffer;
-		delete s_RenderData.m_IndexBuffer;
+
 	}
 	void Renderer2D::BeginScene()
 	{

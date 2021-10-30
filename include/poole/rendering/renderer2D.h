@@ -20,7 +20,7 @@ namespace Poole::Rendering
 		}
 		 
 		static fmat4 MakeTransformMatrix(const ftransform2D& transform);
-		static fmat4 MakeTransformMatrix(const fvec2& pos, const fvec2& scale = fvec2(1), f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		static fmat4 MakeTransformMatrix(const fvec2& pos, const fvec2& scale, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
 		{
 			return MakeTransformMatrix({ pos, scale, rotation, shear });
 		}
@@ -32,14 +32,5 @@ namespace Poole::Rendering
 		//static void DrawTriangle(Vertex3Color3 p1, Vertex3Color3 p2, Vertex3Color3 p3);
 		//static void DrawTriangle(Vertex2Color4 p1, Vertex2Color4 p2, Vertex2Color4 p3, f32 zLayer = 0.f);
 		//static void DrawTriangle(Vertex2Color3 p1, Vertex2Color3 p2, Vertex2Color3 p3, f32 zLayer = 0.f);
-	private:
-		struct RenderData
-		{
-			class GLShader* m_Shader;
-			class VertexArray* m_VertexArray;
-			class VertexBuffer* m_VertexBuffer;
-			class IndexBuffer* m_IndexBuffer;
-		};
-		static RenderData s_RenderData;
 	};
 }

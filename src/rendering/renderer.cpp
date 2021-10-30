@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "rendering/renderer2D.h"
+#include "rendering/graphics_api/renderer_api.h"
 
 namespace Poole::Rendering
 {
@@ -31,8 +32,8 @@ namespace Poole::Rendering
 	void Renderer::BeginScene()
 	{
 		//Draw BG
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		GetRendererAPI()->SetClearColor({ 0.2f, 0.3f, 0.3f, 1.0f });
+		GetRendererAPI()->Clear();
 
 		Renderer2D::BeginScene();
 	}
@@ -82,26 +83,15 @@ namespace Poole::Rendering
 	{
 		//TODO: Fix up working dir / solution dir perhaps. Maybe compile shaders from solution into working DEBUG/
 		// Create and compile our GLSL program from the shaders
-		s_shaderUniformColor = Rendering::GLShader(
-			"../../poole_engine/src/rendering/shaders/UniformColor.shader"
-		);
-		s_shaderVertexColor = Rendering::GLShader(
-			"../../poole_engine/src/rendering/shaders/VertexColor.shader"
-		);
-		s_shaderUniformColorTransform2D = Rendering::GLShader(
-			"../../poole_engine/src/rendering/shaders/UniformColor2DTransform.shader"
-		);
-		s_shaderVertexColorTransform2D = Rendering::GLShader(
-			"../../poole_engine/src/rendering/shaders/VertexColor2DTransform.shader"
-		);
-		//s_shaderExperimental1 = Rendering::GLShader(
-		//	"../../poole_engine/src/rendering/shaders/Experimental1.shader"
-		//);
-		//s_shaderExperimental2 = Rendering::GLShader(
-		//	"../../poole_engine/src/rendering/shaders/Experimental2.shader"
-		//);
-		//s_shaderExperimental3 = Rendering::GLShader(
-		//	"../../poole_engine/src/rendering/shaders/Experimental3.shader"
-		//);
+
+		#define shader_path "../../poole_engine/src/rendering/shaders/"
+		s_shaderUniformColor = Rendering::GLShader(shader_path "UniformColor.shader");
+		s_shaderVertexColor = Rendering::GLShader(shader_path "VertexColor.shader");
+		s_shaderUniformColorTransform2D = Rendering::GLShader(shader_path "UniformColor2DTransform.shader");
+		s_shaderVertexColorTransform2D = Rendering::GLShader(shader_path "VertexColor2DTransform.shader");
+		//s_shaderExperimental1 = Rendering::GLShader(shader_path "Experimental1.shader");
+		//s_shaderExperimental2 = Rendering::GLShader(shader_path "Experimental2.shader");
+		//s_shaderExperimental3 = Rendering::GLShader(shader_path "Experimental3.shader");
+		#undef shader_path
 	}
 }
