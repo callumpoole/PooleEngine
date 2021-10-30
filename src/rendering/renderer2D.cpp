@@ -3,6 +3,7 @@
 #include "graphics_api/buffer.h"
 #include "graphics_api/vertex_array.h"
 #include "rendering/renderer.h"
+#include "rendering/graphics_api/renderer_api.h"
 #include "rendering/camera/orthographic_camera.h"
 
 #include "glm/gtc/matrix_transform.hpp"
@@ -64,33 +65,36 @@ namespace Poole::Rendering
 		glDisableVertexAttribArray(0);
 	}
 
-	void Renderer2D::DrawQuad(const fvec2& pos, const fvec2& scale, const fcolor4& color)
+	void Renderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
 	{
-		s_RenderData.m_Shader->SetUniform("u_Transform", MakeTransformMatrix(pos, scale));
+		s_RenderData.m_Shader->SetUniform("u_Transform", MakeTransformMatrix(transform));
 		s_RenderData.m_Shader->SetUniform("u_Color", color);
 
 		s_RenderData.m_VertexArray->Bind(); 
 		s_RenderData.m_VertexBuffer->Bind(); //Probably unnecessary
 		s_RenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
-		glDrawElements(GL_TRIANGLES, (GLsizei)6, GL_UNSIGNED_INT, 0);
+
+		GetRendererAPI()->DrawIndexed(6);
 	}
 
 	
 
-	fmat4 Renderer2D::MakeTransformMatrix(const fvec2& pos, const fvec2& scale, f32 rotation, const fvec2& shear)
+	fmat4 Renderer2D::MakeTransformMatrix(const ftransform2D& transform)
 	{
+		//TODO: Optimise, can probably only modify the first 2 rows/columns perhaps
 		const fmat4 shearMat = {
-				  1, shear.y, 0, 0,
-			shear.x,       1, 0, 0,
-				  0,       0, 1, 0,
-				  0,       0, 0, 1,
+							1, transform.shear.y, 0, 0,
+			transform.shear.x,				   1, 0, 0,
+							0,				   0, 1, 0,
+							0,				   0, 0, 1,
 		};
 
+		//TODO: Optimise, put one func inside the next instead of the identity fmat4
 		return
-			glm::translate(fmat4(1.0f), fvec3{ pos.x, pos.y, 0.f }) *
-			glm::rotate(fmat4(1.0f), rotation, fvec3{0,0,1}) *
+			glm::translate(fmat4(1.0f), transform.position) *
+			glm::rotate(fmat4(1.0f), transform.rotation, fvec3{0,0,1}) *
 			shearMat *
-			glm::scale(fmat4(1.0f), fvec3{ scale.x, scale.y, 1.f });
+			glm::scale(fmat4(1.0f), fvec3{ transform.scale.x, transform.scale.y, 1.f });
 	}
 
 	//void Renderer2D::DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color)

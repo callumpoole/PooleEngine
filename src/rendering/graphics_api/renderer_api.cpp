@@ -4,7 +4,7 @@
 
 namespace Poole::Rendering
 {
-	RendererAPI* RendererAPI::Get()
+	RendererAPI* RendererAPI::GetOrCreate()
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{

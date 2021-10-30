@@ -52,6 +52,43 @@ using fcolor4 = glm::vec4;
 using ucolor3 = glm::uvec3;
 using ucolor4 = glm::uvec4;
 
+struct ftransform2D
+{
+	ftransform2D() = default;
+	ftransform2D(const fvec2& position, 
+		const fvec2& scale = fvec2(1.0f), 
+		const f32 rotation = 0, 
+		const fvec2& shear = fvec2(0.0f))
+		: position(fvec3{position.x, position.y, 0.f})
+		, scale(scale)
+		, rotation(rotation)
+		, shear(shear)
+	{}
+	ftransform2D(const fvec2& position,
+		fvec2&& scale = fvec2(1.0f),
+		f32&& rotation = 0,
+		fvec2&& shear = fvec2(0.0f))
+		: position(fvec3{ position.x, position.y, 0.f })
+		, scale(std::move(scale))
+		, rotation(rotation)
+		, shear(std::move(shear))
+	{}
+	ftransform2D(fvec2&& position,
+		fvec2&& scale = fvec2(1.0f),
+		f32&& rotation = 0,
+		fvec2&& shear = fvec2(0.0f))
+		: position(fvec3{ position.x, position.y, 0.f })
+		, scale(std::move(scale))
+		, rotation(rotation)
+		, shear(std::move(shear))
+	{}
+
+	fvec3 position = fvec3(0.0f);
+	fvec2 scale = fvec2(1.0f);
+	f32 rotation = 0;
+	fvec2 shear = fvec2(0.0f);
+};
+
 //Effectively escapes , in macros
 #define ARG(...) __VA_ARGS__
 

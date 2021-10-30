@@ -74,8 +74,10 @@ namespace Poole::Rendering {
 		}
 
 		//#todo: consider puts() or external fmt::
-		printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", path.c_str());
+		printf("Impossible to open %ls. Are you in the right directory ? Don't forget to read the FAQ !\n", path.c_str());
+#pragma warning (disable: 6031)
 		getchar(); //#todo: is there a better way to keep it open?
+#pragma warning (default: 6031)
 
 		return std::nullopt;
 	}

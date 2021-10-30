@@ -9,5 +9,7 @@ namespace Poole::Rendering
 	{
 	public:
 		OpenGL_RendererAPI() = default;
+
+		virtual void DrawIndexed(u32 count) override;
 	};
 }

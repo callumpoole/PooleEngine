@@ -8,6 +8,10 @@ namespace Poole::Rendering
 	{
 	public:
 		virtual ~RendererAPI() {}
-		static RendererAPI* Get();
+		static RendererAPI* GetOrCreate();
+
+		virtual void DrawIndexed(u32 count) = 0;
 	};
+
+	#define GetRendererAPI() RendererAPI::GetOrCreate()
 }
