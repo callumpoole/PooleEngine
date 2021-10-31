@@ -40,57 +40,77 @@ namespace Poole
 		}
 	}
 
-	/*static*/ ivec2 Input::GetMousePosition(ECursorClamping clamping)
+	/*static*/ ivec2 Input::GetMousePosition(bool invertY, ECursorClamping clamping)
 	{
+		const ivec2 windowSize = (ivec2)Window::GetWindowSize();
+
+		auto MaybeInvert = [invertY, windowSize](const ivec2& in) -> ivec2
+		{
+			return invertY ? ivec2{ in.x, windowSize.y - in.y } : in;
+		};
+
 		switch (clamping)
 		{
-		case ECursorClamping::None: 
-			return m_LastMousePos;
 		case ECursorClamping::Clamp:
-			const ivec2 windowSize = (ivec2)Window::GetWindowSize();
-			return { std::clamp(m_LastMousePos.x, 0, windowSize.x),
-					 std::clamp(m_LastMousePos.y, 0, windowSize.y) };
+			return MaybeInvert({ std::clamp(m_LastMousePos.x, 0, windowSize.x),
+								 std::clamp(m_LastMousePos.y, 0, windowSize.y) });
 		case ECursorClamping::LastValidPosition:
-			return m_LastMousePosInWindow;
+			return MaybeInvert(m_LastMousePosInWindow);
 		default:
 			std::cerr << "Unhandled ECursorClamping: " << (u8)clamping << "\n";
-			return m_LastMousePos;
+			[[fallthrough]];
+		case ECursorClamping::None: 
+			return MaybeInvert(m_LastMousePos);
 		}
 	}
 
-	/*static*/ uvec2 Input::GetMousePositionUnsigned(ECursorClamping clamping)
+	/*static*/ uvec2 Input::GetMousePositionUnsigned(bool invertY, ECursorClamping clamping)
 	{
-		const ivec2 i2 = GetMousePosition(clamping);
+		const ivec2 i2 = GetMousePosition(invertY, clamping);
 		return { i2.x < 0 ? 0u : i2.x, i2.y < 0 ? 0u : i2.y };
 	}
 
-	/*static*/ fvec2 Input::GetMousePositionFloat(ECursorClamping clamping, ECursorNormalization norm)
+	/*static*/ fvec2 Input::GetMousePositionFloat(bool invertY, ECursorClamping clamping, ECursorNormalization norm)
 	{
-		const ivec2 i2 = GetMousePosition(clamping);
+		const ivec2 i2 = GetMousePosition(invertY, clamping);
 		const fvec2 abs = { (float)i2.x, (float)i2.y };
 
 		if (norm == ECursorNormalization::Absolute)
 		{
 			return abs;
 		}
-		else if (norm == ECursorNormalization::ZeroToOne || norm == ECursorNormalization::NegativeOneToOne)
-		{
-			const uvec2 windowSizeUnsigned = Window::GetWindowSize();
-			const fvec2 windowSize = { (float)windowSizeUnsigned.x, (float)windowSizeUnsigned.y };
 
-			if (norm == ECursorNormalization::ZeroToOne)
-			{
-				return abs / windowSize;
-			}
-			else //ECursorNormalizedMode::NegativeOneToOne
-			{
-				return ((abs / windowSize) - fvec2(0.5f)) * fvec2(2.f);
-			}
-		}
-		else
+		const uvec2 windowSizeUnsigned = Window::GetWindowSize();
+		const fvec2 windowSize = { (float)windowSizeUnsigned.x, (float)windowSizeUnsigned.y };
+
+		switch (norm)
 		{
-			std::cerr << "Unhandled CursorNormalizedMode: " << (u8)norm << "\n";
-			return abs;
+			case ECursorNormalization::ZeroToOne:
+			case ECursorNormalization::ZeroToOneAspect:
+			{
+				fvec2 out = abs / windowSize;
+				if (norm == ECursorNormalization::ZeroToOneAspect)
+				{
+					out.x *= windowSize.x / windowSize.y;
+				}
+				return out;
+			}
+			case ECursorNormalization::NegativeOneToOne:
+			case ECursorNormalization::NegativeOneToOneAspect:
+			{
+				fvec2 out = ((abs / windowSize) - fvec2(0.5f)) * fvec2(2.f);
+				if (norm == ECursorNormalization::NegativeOneToOneAspect)
+				{
+					out.x *= windowSize.x / windowSize.y;
+				}
+				return out;
+			}
+			case ECursorNormalization::Absolute:
+			default:
+			{
+				std::cerr << "Unhandled CursorNormalizedMode: " << (u8)norm << "\n";
+				return abs;
+			}
 		}
 	}
 }

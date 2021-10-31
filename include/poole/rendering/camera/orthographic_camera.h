@@ -44,6 +44,7 @@ namespace Poole::Rendering
 
 	private:
 		void RecalculateViewMatrix();
+
 	private:
 		fmat4 m_viewMatrix;
 		fmat4 m_projectionMatrix;
