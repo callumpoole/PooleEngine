@@ -3,6 +3,7 @@
 #include <optional>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include <string>
 #include <string_view>
 #include "glad/glad.h"
