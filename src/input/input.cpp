@@ -1,4 +1,6 @@
 #include "poole/input/input.h"
+#include "rendering/renderer.h"
+#include "rendering/camera/orthographic_camera.h"
 #include <iostream>
 #include <window/window.h>
 
@@ -28,6 +30,8 @@ namespace Poole
 			glfwSetWindowShouldClose(window, true);
 		}
 
+		MoveCamera(window);
+
 		//Cache the cursor position this frame
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
@@ -37,6 +41,35 @@ namespace Poole
 			m_LastMousePos.y >= 0 && m_LastMousePos.y <= windowSize.y)
 		{
 			m_LastMousePosInWindow = m_LastMousePos;
+		}
+	}
+
+	void Input::MoveCamera(GLFWwindow* window)
+	{
+		static std::array<bool, 4> keyBools   = { false, false, false, false };
+		constexpr std::array<u16, 4> keyCodes = { GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_UP };
+		constexpr float speed = 0.002f;
+		constexpr std::array<fvec3, 4> keyDirs = { fvec3(-speed,    0.f, 0.f), 
+												   fvec3( speed,    0.f, 0.f), 
+												   fvec3(   0.f, -speed, 0.f),
+												   fvec3(   0.f,  speed, 0.f) };
+
+		for (size_t i = 0; i < 4; i++)
+		{
+			if (glfwGetKey(window, keyCodes[i]) == GLFW_PRESS)
+			{
+				keyBools[i] = true;
+			}
+			else if (glfwGetKey(window, keyCodes[i]) == GLFW_RELEASE)
+			{
+				keyBools[i] = false;
+			}
+			if (keyBools[i])
+			{
+				Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
+				const fvec3 pos = Camera.GetPosition();
+				Camera.SetPosition(pos + keyDirs[i]); //todo: * deltaTime
+			}
 		}
 	}
 
@@ -83,35 +116,33 @@ namespace Poole
 		const uvec2 windowSizeUnsigned = Window::GetWindowSize();
 		const fvec2 windowSize = { (float)windowSizeUnsigned.x, (float)windowSizeUnsigned.y };
 
-		switch (norm)
+		fvec2 out;
+		if ((norm & ECursorNormalization::ZeroToOne) > 0)
 		{
-			case ECursorNormalization::ZeroToOne:
-			case ECursorNormalization::ZeroToOneAspect:
-			{
-				fvec2 out = abs / windowSize;
-				if (norm == ECursorNormalization::ZeroToOneAspect)
-				{
-					out.x *= windowSize.x / windowSize.y;
-				}
-				return out;
-			}
-			case ECursorNormalization::NegativeOneToOne:
-			case ECursorNormalization::NegativeOneToOneAspect:
-			{
-				fvec2 out = ((abs / windowSize) - fvec2(0.5f)) * fvec2(2.f);
-				if (norm == ECursorNormalization::NegativeOneToOneAspect)
-				{
-					out.x *= windowSize.x / windowSize.y;
-				}
-				return out;
-			}
-			case ECursorNormalization::Absolute:
-			default:
-			{
-				std::cerr << "Unhandled CursorNormalizedMode: " << (u8)norm << "\n";
-				return abs;
-			}
+			out = abs / windowSize;
 		}
+		else if ((norm & ECursorNormalization::NegativeOneToOne) > 0)
+		{
+			out = ((abs / windowSize) - fvec2(0.5f)) * fvec2(2.f);
+		}
+		else
+		{
+			std::cerr << "Unhandled CursorNormalizedMode: " << (u8)norm << "\n";
+			return abs;
+		}
+
+		if ((norm & ECursorNormalization::FLAG_Aspect) > 0)
+		{
+			out.x *= windowSize.x / windowSize.y;
+		}
+		if ((norm & ECursorNormalization::FLAG_Camera) > 0)
+		{
+			Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
+			const fvec3 cameraPos = Camera.GetPosition();
+			out.x += cameraPos.x;
+			out.y += cameraPos.y;
+		}
+		return out;
 	}
 }
 
