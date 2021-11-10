@@ -24,10 +24,10 @@ namespace Poole::Rendering
 
 	void Renderer2D::Init()
 	{
-		s_RenderData.m_Shader = &Renderer::s_shaderUniformColorTransform2D;
-
 		s_RenderData.m_VertexArray.reset(VertexArray::Create());
 		s_RenderData.m_VertexArray->Bind();
+
+		s_RenderData.m_Shader = &Renderer::s_shaderUniformColorTransform2D;
 
 		fvec3 corners[4] =
 		{
@@ -50,9 +50,7 @@ namespace Poole::Rendering
 		s_RenderData.m_VertexArray->Bind();
 		s_RenderData.m_Shader->Bind();
 		s_RenderData.m_Shader->SetUniform("u_cameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
-	}
-	void Renderer2D::RenderScene()
-	{
+
 		s_RenderData.m_VertexBuffer->Bind();
 		s_RenderData.m_IndexBuffer->Bind();
 
@@ -67,6 +65,10 @@ namespace Poole::Rendering
 			(void*)0	//array buffer offset
 		);
 	}
+	void Renderer2D::RenderScene()
+	{
+
+	}
 	void Renderer2D::EndScene()
 	{
 		glDisableVertexAttribArray(0);
@@ -74,10 +76,11 @@ namespace Poole::Rendering
 
 	void Renderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
 	{
+		s_RenderData.m_VertexArray->Bind(); 
+
 		s_RenderData.m_Shader->SetUniform("u_Transform", MakeTransformMatrix(transform));
 		s_RenderData.m_Shader->SetUniform("u_Color", color);
 
-		s_RenderData.m_VertexArray->Bind(); 
 		s_RenderData.m_VertexBuffer->Bind(); //Probably unnecessary
 		s_RenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
 

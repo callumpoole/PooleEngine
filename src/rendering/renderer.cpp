@@ -19,7 +19,6 @@ namespace Poole::Rendering
 	GLShader Renderer::s_shaderExperimental2;
 	GLShader Renderer::s_shaderExperimental3;
 	std::vector<std::unique_ptr<IMeshBase>> Renderer::s_meshes;
-	GLuint Renderer::s_vertexBuffer;
 
 	void Renderer::Init()
 	{
@@ -35,12 +34,24 @@ namespace Poole::Rendering
 		GetRendererAPI()->SetClearColor({ 0.2f, 0.3f, 0.3f, 1.0f });
 		GetRendererAPI()->Clear();
 
+		RenderMeshesOldWay();
+
 		Renderer2D::BeginScene();
 	}
 	void Renderer::RenderScene()
 	{
-		Renderer2D::RenderScene(); //TODO: Investigate why this goes black if after the other stuff
+		Renderer2D::RenderScene();
+	}
+	void Renderer::EndScene(GLFWwindow* window)
+	{
+		Renderer2D::EndScene();
 
+		//Swap front and back buffers
+		glfwSwapBuffers(window);
+	}
+
+	void Renderer::RenderMeshesOldWay()
+	{
 		for (std::unique_ptr<IMeshBase>& ptr : s_meshes)
 		{
 			Shader* shader;
@@ -57,13 +68,6 @@ namespace Poole::Rendering
 
 			ptr->Render(*shader);
 		}
-	}
-	void Renderer::EndScene(GLFWwindow* window)
-	{
-		Renderer2D::EndScene();
-
-		//Swap front and back buffers
-		glfwSwapBuffers(window);
 	}
 
 	IMeshBase* Renderer::GetMesh(i32 index) 

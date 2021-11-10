@@ -45,12 +45,12 @@ namespace Poole::Rendering {
 		static GLShader s_shaderExperimental3;
 
 	private:
+		static void RenderMeshesOldWay();
 		static void LoadShaders();
 
 		static OrthographicCamera s_camera;
 
 		static std::vector<std::unique_ptr<IMeshBase>> s_meshes;
-		static GLuint s_vertexBuffer;
 	};
 
 	//--
