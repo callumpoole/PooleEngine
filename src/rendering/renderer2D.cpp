@@ -15,20 +15,23 @@ namespace Poole::Rendering
 		struct RenderData
 		{
 			GLShader* m_Shader;
-			std::unique_ptr<VertexArray> m_VertexArray;
-			std::unique_ptr<VertexBuffer> m_VertexBuffer;
-			std::unique_ptr<IndexBuffer> m_IndexBuffer;
+			std::shared_ptr<VertexArray> m_VertexArray;
+			std::shared_ptr<VertexBuffer> m_VertexBuffer;
+			std::shared_ptr<IndexBuffer> m_IndexBuffer;
 		};
 		static RenderData s_RenderData;
 	}
 
 	void Renderer2D::Init()
 	{
+		//Vertex Array
 		s_RenderData.m_VertexArray.reset(VertexArray::Create());
 		s_RenderData.m_VertexArray->Bind();
 
+		//Shader
 		s_RenderData.m_Shader = &Renderer::s_shaderUniformColorTransform2D;
 
+		//Vertex Buffer
 		fvec3 corners[4] =
 		{
 			{-1, -1, 0.f},
@@ -37,9 +40,15 @@ namespace Poole::Rendering
 			{-1,  1, 0.f},
 		};
 		s_RenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
+		s_RenderData.m_VertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position"},
+		});
+		s_RenderData.m_VertexArray->AddVertexBuffer(s_RenderData.m_VertexBuffer);
 
+		//Index Buffer
 		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
 		s_RenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+		s_RenderData.m_VertexArray->SetIndexBuffer(s_RenderData.m_IndexBuffer);
 	}
 	void Renderer2D::Shutdown()
 	{
@@ -47,23 +56,18 @@ namespace Poole::Rendering
 	}
 	void Renderer2D::BeginScene()
 	{
+		//Vertex Array
 		s_RenderData.m_VertexArray->Bind();
+
+		//Shader
 		s_RenderData.m_Shader->Bind();
-		s_RenderData.m_Shader->SetUniform("u_cameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+		s_RenderData.m_Shader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
 
+		//Vertex Buffer
 		s_RenderData.m_VertexBuffer->Bind();
-		s_RenderData.m_IndexBuffer->Bind();
 
-		//1st attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(
-			0,			//attribute 0. No particular reason for 0, but must match the layout in the shader.
-			3,			//count
-			GL_FLOAT,	//type
-			GL_FALSE,	//normalized?
-			0,			//stride
-			(void*)0	//array buffer offset
-		);
+		//Index Buffer
+		s_RenderData.m_IndexBuffer->Bind();
 	}
 	void Renderer2D::RenderScene()
 	{
@@ -71,7 +75,7 @@ namespace Poole::Rendering
 	}
 	void Renderer2D::EndScene()
 	{
-		glDisableVertexAttribArray(0);
+
 	}
 
 	void Renderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)

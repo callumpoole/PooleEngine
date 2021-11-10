@@ -13,8 +13,12 @@ namespace Poole::Rendering
 
 		virtual void Bind();
 		virtual void Unbind();
+
+		virtual const VertexBufferLayout& GetLayout() const override { return m_layout; }
+		virtual void SetLayout(const VertexBufferLayout& layout) override { m_layout = layout; }
 	private:
 		u32 m_RendererID;
+		VertexBufferLayout m_layout;
 	};
 
 	class OpenGL_IndexBuffer : public IndexBuffer

@@ -1,20 +1,20 @@
 #type vertex
 #version 330 core
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec4 inColor;
-uniform mat4 u_cameraViewProjection;
-out vec4 theColor;
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec4 a_Color;
+uniform mat4 u_CameraViewProjection;
+out vec4 io_Color;
 void main() {
-	gl_Position = u_cameraViewProjection * vec4(inPosition, 1.0);
+	gl_Position = u_CameraViewProjection * vec4(a_Position, 1.0);
 	gl_Position.w = 1.0;
-	theColor = inColor;
+	io_Color = a_Color;
 }
 
 
 #type fragment
 #version 330 core
-in vec4 theColor;
-out vec4 color;
+in vec4 io_Color;
+out vec4 o_Color;
 void main() {
-	color = theColor;
+	o_Color = io_Color;
 }

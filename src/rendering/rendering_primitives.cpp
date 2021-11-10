@@ -5,7 +5,7 @@ namespace Poole::Rendering
 {
 	void IMeshBase::SetUniforms(Shader& shader)
 	{
-		shader.SetUniform("u_cameraViewProjection", Poole::Rendering::Renderer::GetCamera().GetViewProjectionMatrix());
+		shader.SetUniform("u_CameraViewProjection", Poole::Rendering::Renderer::GetCamera().GetViewProjectionMatrix());
 	}
 
 	//--
