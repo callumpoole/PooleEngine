@@ -23,8 +23,7 @@ namespace Poole
         //Initialize the library GLFW
         if (!glfwInit())
         {
-            std::cout << "Failed to Init GLFW\n";
-            return;
+            LOG_FATAL("Failed to Init GLFW");
         }
 
         GLFWwindow* window = Window::Init(m_RunData.windowName, m_RunData.size);
@@ -36,13 +35,11 @@ namespace Poole
         //Init Glad
         if (!gladLoadGL())
         {
-            std::cout << "Failed to initialize OpenGL context\n";
-            return;
+            LOG_FATAL("Failed to initialize OpenGL context");
         }
         if (!GLAD_GL_VERSION_3_0)
         {
-            std::cout << "Open GL version too low!\n";
-            return;
+            LOG_FATAL("Open GL version too low!");
         }
 
         Window::SetupPostGlad(window);

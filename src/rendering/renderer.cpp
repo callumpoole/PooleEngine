@@ -78,7 +78,7 @@ namespace Poole::Rendering
 		}
 		else
 		{
-			std::cerr << "tried to access mesh at index: " << index << "but size is " << s_meshes.size() << ".\n";
+			LOG_ERROR("tried to access mesh at index: {} but size is {}", index, s_meshes.size());
 			return nullptr;
 		}
 	}

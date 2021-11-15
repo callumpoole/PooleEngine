@@ -13,7 +13,7 @@ namespace Poole
 	{
 		if (key == GLFW_KEY_1 && action == GLFW_PRESS)
 		{
-			std::cout << "1\n";
+			LOG_LINE("1");
 		}
 	}
 
@@ -89,7 +89,7 @@ namespace Poole
 		case ECursorClamping::LastValidPosition:
 			return MaybeInvert(m_LastMousePosInWindow);
 		default:
-			std::cerr << "Unhandled ECursorClamping: " << (u8)clamping << "\n";
+			LOG_ERROR("Unhandled ECursorClamping: {}", (u8)clamping);
 			[[fallthrough]];
 		case ECursorClamping::None: 
 			return MaybeInvert(m_LastMousePos);
@@ -126,7 +126,7 @@ namespace Poole
 		}
 		else
 		{
-			std::cerr << "Unhandled CursorNormalizedMode: " << (u8)norm << "\n";
+			LOG_ERROR("Unhandled CursorNormalizedMode: {}", (u8)norm);
 			return abs;
 		}
 

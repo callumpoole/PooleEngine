@@ -28,7 +28,7 @@ namespace Poole::Rendering
 		case ShaderDataType::Bool:     return 1;
 		}
 
-		assert(false, "Unknown ShaderDataType!");
+		ASSERT_MSG(false, "Unknown ShaderDataType!");
 		return 0;
 	}
 
@@ -47,7 +47,7 @@ namespace Poole::Rendering
 		{
 		}
 
-		uint32_t GetComponentCount() const
+		uint8_t GetComponentCount() const
 		{
 			switch (m_Type)
 			{
@@ -64,7 +64,7 @@ namespace Poole::Rendering
 			case ShaderDataType::Bool:    return 1;
 			}
 
-			assert(false, "Unknown ShaderDataType!");
+			ASSERT_MSG(false, "Unknown ShaderDataType!");
 			return 0;
 		}
 	};

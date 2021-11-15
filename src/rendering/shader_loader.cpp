@@ -34,7 +34,7 @@ namespace Poole::Rendering {
 
 	std::optional<GLShader::ShaderSource> GLShader::LoadFromFile(std::string_view combinedPath)
 	{
-		printf("Loading shader : %s\n", combinedPath.data());
+		LOG_LINE("Loading shader: {}", combinedPath.data());
 
 		namespace fs = std::filesystem;
 		fs::path path = fs::absolute(fs::path(combinedPath));
@@ -73,12 +73,8 @@ namespace Poole::Rendering {
 			}
 		}
 
-		//#todo: consider puts() or external fmt::
-		printf("Impossible to open %ls. Are you in the right directory ? Don't forget to read the FAQ !\n", path.c_str());
-#pragma warning (disable: 6031)
-		getchar(); //#todo: is there a better way to keep it open?
-#pragma warning (default: 6031)
-
+		LOG_FATAL("Impossible to open {}. Are you in the right directory ? Don't forget to read the FAQ !", path.string());
+		
 		return std::nullopt;
 	}
 
@@ -94,15 +90,15 @@ namespace Poole::Rendering {
 		i32 infoLogLength = 0;
 
 		// Compile Vertex Shader
-		printf("Compiling shader : Vertex\n");
+		LOG_LINE("Compiling shader: Vertex");
 		CompileAndCheckShader(vertexShaderID, vertexShaderCode, result, infoLogLength);
 
 		// Compile Fragment Shader
-		printf("Compiling shader : Fragment\n");
+		LOG_LINE("Compiling shader: Fragment");
 		CompileAndCheckShader(fragmentShaderID, fragmentShaderCode, result, infoLogLength);
 
 		// Link the program
-		printf("Linking program\n");
+		LOG_LINE("Linking program");
 		const GLuint programID = glCreateProgram();
 		glAttachShader(programID, vertexShaderID);
 		glAttachShader(programID, fragmentShaderID);
@@ -115,7 +111,7 @@ namespace Poole::Rendering {
 		{
 			std::vector<char> ProgramErrorMessage(infoLogLength + 1); //#todo: Investigate this, +1 for \0 ???
 			glGetProgramInfoLog(programID, infoLogLength, NULL, &ProgramErrorMessage[0]);
-			printf("%s\n", &ProgramErrorMessage[0]);
+			LOG_ERROR("{}", &ProgramErrorMessage[0]);
 		}
 
 		glDetachShader(programID, vertexShaderID);
@@ -139,7 +135,7 @@ namespace Poole::Rendering {
 		{
 			std::vector<char> shaderErrorMessage(infoLogLength + 1);
 			glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
-			printf("%s\n", &shaderErrorMessage[0]);
+			LOG_ERROR("{}", &shaderErrorMessage[0]);
 		}
 	}
 }

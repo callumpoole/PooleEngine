@@ -7,10 +7,16 @@
 #include <algorithm>
 #include <string>
 #include <string_view>
+#include <format>
+#include <source_location>
 #include <concepts>
+#include <iostream>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
+
+//Effectively escapes , in macros
+#define ARG(...) __VA_ARGS__
 
 #ifdef _WINDOWS
 	#ifndef NOMINMAX
@@ -20,6 +26,44 @@
 #else
 	#error Other Platforms not supported
 #endif
+
+
+
+
+#define LOG(msg, ...) \
+	std::cout << std::format(msg "\n", __VA_ARGS__);
+
+#define INTERNAL_LOG_LITERALS "[{}] {}:({},{}):"
+#define INTERNAL_LOG_PARAMS   std::source_location::current().file_name(), \
+							  std::source_location::current().function_name(), \
+							  std::source_location::current().line(), \
+							  std::source_location::current().column()
+
+#define LOG_LINE(msg, ...) \
+	std::cout << std::format("LOG: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
+
+#define LOG_WARNING(msg, ...) \
+	std::cout << std::format("WARNING: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
+
+#define LOG_ERROR(msg, ...) \
+	std::cerr << std::format("ERROR: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
+
+#define ASSERT(cond) assert(cond);
+
+#define LOG_FATAL(msg, ...) /*TODO: Use C++23 std::basic_stacktrace*/ \
+	std::cerr << std::format("FATAL ERROR: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__); \
+	ASSERT(false);
+
+#define ASSERT_MSG(cond, msg, ...)		\
+	if (!cond)							\
+	{									\
+		LOG_FATAL(msg, __VA_ARGS__);	\
+	}
+
+#define HALT() ASSERT(false);
+
+
+
 
 using i8  = int8_t;
 using i16 = int16_t;
@@ -91,9 +135,6 @@ struct ftransform2D
 	f32 rotation = 0;
 	fvec2 shear = fvec2(0.0f);
 };
-
-//Effectively escapes , in macros
-#define ARG(...) __VA_ARGS__
 
 namespace Colors
 {

@@ -22,7 +22,7 @@ namespace Poole::Rendering
 		case ShaderDataType::Bool:     return GL_BOOL;
 		}
 
-		assert(false, "Unknown ShaderDataType!");
+		ASSERT_MSG(false, "Unknown ShaderDataType!");
 		return 0;
 	}
 
@@ -47,7 +47,7 @@ namespace Poole::Rendering
 
 	void OpenGL_VertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
 	{
-		assert(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
+		ASSERT_MSG(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
 
 		glBindVertexArray(m_RendererID);
 		vertexBuffer->Bind();
@@ -106,7 +106,7 @@ namespace Poole::Rendering
 				break;
 			}
 			default:
-				assert(false, "Unknown ShaderDataType!");
+				ASSERT_MSG(false, "Unknown ShaderDataType!");
 			}
 		}
 
