@@ -46,30 +46,29 @@ namespace Poole
 
 	void Input::MoveCamera(GLFWwindow* window)
 	{
-		static std::array<bool, 4> keyBools   = { false, false, false, false };
-		constexpr std::array<u16, 4> keyCodes = { GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_UP };
-		constexpr float speed = 0.002f;
-		constexpr std::array<fvec3, 4> keyDirs = { fvec3(-speed,    0.f, 0.f), 
-												   fvec3( speed,    0.f, 0.f), 
-												   fvec3(   0.f, -speed, 0.f),
-												   fvec3(   0.f,  speed, 0.f) };
+		constexpr size_t numDirs = 4;
+		constexpr std::array<u16, numDirs> keyCodes = { GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_UP };
+		constexpr f32 speed = 0.002f;
+		constexpr std::array<fvec3, numDirs> keyDirs = { fvec3(-speed,    0.f, 0.f),
+														 fvec3( speed,    0.f, 0.f),
+														 fvec3(   0.f, -speed, 0.f),
+														 fvec3(   0.f,  speed, 0.f) };
 
-		for (size_t i = 0; i < 4; i++)
+		for (size_t i = 0; i < numDirs; i++)
 		{
 			if (glfwGetKey(window, keyCodes[i]) == GLFW_PRESS)
-			{
-				keyBools[i] = true;
-			}
-			else if (glfwGetKey(window, keyCodes[i]) == GLFW_RELEASE)
-			{
-				keyBools[i] = false;
-			}
-			if (keyBools[i])
 			{
 				Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
 				const fvec3 pos = Camera.GetPosition();
 				Camera.SetPosition(pos + keyDirs[i]); //todo: * deltaTime
 			}
+		}
+
+		//Reset camera position
+		if (glfwGetKey(window, GLFW_KEY_KP_0) == GLFW_PRESS)
+		{
+			Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
+			Camera.SetPosition(fvec3(0.f));
 		}
 	}
 

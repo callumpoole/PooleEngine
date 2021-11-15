@@ -15,18 +15,18 @@ namespace Poole::Rendering
 		SetBounds(bounds);
 	}
 
-	OrthographicCamera::OrthographicCamera(float left, float right, float bottom, float top)
+	OrthographicCamera::OrthographicCamera(f32 left, f32 right, f32 bottom, f32 top)
 		: m_viewMatrix(1.f)
 	{
 		SetBounds(left, right, bottom, top);
 	}
 
-	static void OnResize_OrthographicCamera(int width, int height)
+	static void OnResize_OrthographicCamera(i32 width, i32 height)
 	{
 		Renderer::GetCamera().UpdateAdaptiveCamera(width, height);
 	}
 
-	void OrthographicCamera::UpdateAdaptiveCamera(int width, int height)
+	void OrthographicCamera::UpdateAdaptiveCamera(i32 width, i32 height)
 	{
 		std::optional<f32> optScale = GetAdaptiveCameraScale();
 		if (optScale)
@@ -51,7 +51,7 @@ namespace Poole::Rendering
 		m_projectionMatrix = glm::ortho(bounds.left, bounds.right, bounds.bottom, bounds.top, -1.f, 1.f);
 		m_viewProjectionMatrix = m_projectionMatrix * m_viewMatrix;
 	}
-	void OrthographicCamera::SetBounds(float left, float right, float bottom, float top)
+	void OrthographicCamera::SetBounds(f32 left, f32 right, f32 bottom, f32 top)
 	{
 		SetBounds({ left, right, bottom, top });
 	}
