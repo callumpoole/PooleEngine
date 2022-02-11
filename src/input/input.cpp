@@ -6,21 +6,29 @@
 
 namespace Poole
 {
-	ivec2 Input::m_LastMousePos{ 0, 0 };
-	ivec2 Input::m_LastMousePosInWindow{ 0, 0 };
+	ivec2 Input::m_LastMousePos{};
+	ivec2 Input::m_LastMousePosInWindow{};
+	fvec2 Input::m_LastScrollDelta{};
 
 	void TestProcessInputEvent(GLFWwindow* /*window*/, i32 key, i32 /*scancode*/, i32 action, i32 /*mods*/)
 	{
 		if (key == GLFW_KEY_1 && action == GLFW_PRESS)
 		{
-			LOG_LINE("1");
+			LOG_LINE("1 Key Pressed");
 		}
+	}
+
+	void ProcessScrollEvent(GLFWwindow* /*window*/, double xOffset, double yOffset)
+	{
+		Input::m_LastScrollDelta = { (float)xOffset, (float)yOffset };
+		LOG("X: {}, Y: {}", xOffset, yOffset);
 	}
 
 	/*static*/ void Input::Init(GLFWwindow* window)
 	{
 		//Listen to input events
 		glfwSetKeyCallback(window, TestProcessInputEvent);
+		glfwSetScrollCallback(window, ProcessScrollEvent);
 	}
 
 	/*static*/ void Input::Tick(GLFWwindow* window)
@@ -30,7 +38,14 @@ namespace Poole
 			glfwSetWindowShouldClose(window, true);
 		}
 
-		MoveCamera(window);
+		if constexpr (AllowCameraMovement)
+		{
+			MoveCamera(window);
+		}
+		if constexpr (AllowCameraZooming)
+		{
+			ZoomCamera(window);
+		}
 
 		//Cache the cursor position this frame
 		double xpos, ypos;
@@ -44,33 +59,8 @@ namespace Poole
 		}
 	}
 
-	void Input::MoveCamera(GLFWwindow* window)
-	{
-		constexpr size_t numDirs = 4;
-		constexpr std::array<u16, numDirs> keyCodes = { GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_UP };
-		constexpr f32 speed = 0.002f;
-		constexpr std::array<fvec3, numDirs> keyDirs = { fvec3(-speed,    0.f, 0.f),
-														 fvec3( speed,    0.f, 0.f),
-														 fvec3(   0.f, -speed, 0.f),
-														 fvec3(   0.f,  speed, 0.f) };
 
-		for (size_t i = 0; i < numDirs; i++)
-		{
-			if (glfwGetKey(window, keyCodes[i]) == GLFW_PRESS)
-			{
-				Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
-				const fvec3 pos = Camera.GetPosition();
-				Camera.SetPosition(pos + keyDirs[i]); //todo: * deltaTime
-			}
-		}
 
-		//Reset camera position
-		if (glfwGetKey(window, GLFW_KEY_KP_0) == GLFW_PRESS)
-		{
-			Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
-			Camera.SetPosition(fvec3(0.f));
-		}
-	}
 
 	/*static*/ ivec2 Input::GetMousePosition(bool invertY, ECursorClamping clamping)
 	{
@@ -142,6 +132,42 @@ namespace Poole
 			out.y += cameraPos.y;
 		}
 		return out;
+	}
+
+
+
+
+	void Input::MoveCamera(GLFWwindow* window)
+	{
+		constexpr size_t numDirs = 4;
+		constexpr std::array<u16, numDirs> keyCodes = { GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_UP };
+		constexpr f32 speed = 0.002f;
+		constexpr std::array<fvec3, numDirs> keyDirs = { fvec3(-speed,    0.f, 0.f),
+														 fvec3(speed,    0.f, 0.f),
+														 fvec3(0.f, -speed, 0.f),
+														 fvec3(0.f,  speed, 0.f) };
+
+		for (size_t i = 0; i < numDirs; i++)
+		{
+			if (glfwGetKey(window, keyCodes[i]) == GLFW_PRESS)
+			{
+				Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
+				const fvec3 pos = Camera.GetPosition();
+				Camera.SetPosition(pos + keyDirs[i]); //todo: * deltaTime
+			}
+		}
+
+		//Reset camera position
+		if (glfwGetKey(window, GLFW_KEY_KP_0) == GLFW_PRESS)
+		{
+			Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
+			Camera.SetPosition(fvec3(0.f));
+		}
+	}
+
+	/*static*/ void Input::ZoomCamera(GLFWwindow* window)
+	{
+		//TODO
 	}
 }
 

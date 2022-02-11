@@ -16,12 +16,16 @@ namespace Poole {
 		virtual void BeginApp() = 0;
 		virtual void UpdateApp(float deltaTime) = 0;
 		virtual void EndApp() = 0;
+
+
 	private:
 		struct
 		{
 			const char* windowName;
 			uvec2 size;
 		} m_RunData; //Used to pass data from ctr to Run();
+
+
 	}; 
 
 	Engine* CreateApplication();

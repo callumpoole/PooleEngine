@@ -45,7 +45,7 @@ namespace Poole::Rendering {
 			{
 				std::stringstream ss[2];
 
-				enum class EShaderType
+				enum class EShaderType : u8
 				{
 					None = -1,
 					Vertex = 0,
@@ -65,11 +65,15 @@ namespace Poole::Rendering {
 					}
 					else if (type != EShaderType::None)
 					{
-						ss[(int)type] << line << '\n';
+						ss[(u8)type] << line << '\n';
 					}
 				}
 				stream.close();
-				return ShaderSource{ ss[0].str(), ss[1].str() };
+
+				return ShaderSource { 
+					ss[(u8)EShaderType::Vertex].str(), 
+					ss[(u8)EShaderType::Fragment].str() 
+				};
 			}
 		}
 

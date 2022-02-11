@@ -30,6 +30,14 @@ namespace Poole
 	};
 	ENUM_FLAGS(ECursorNormalization)
 
+	
+	/*
+		TODO: 
+		 - Make a generic enum for mappings for the GLFW ones, with just a GetKey() instead of: 
+		   glfwGetKey, glfwGetMouseButton, etc. AND supply a callback method.
+		 - Make a generic read axis for delta-mouse, delta-scroll, joysticks & delta-joysticks to be read each tick AND supply callback method.
+	*/
+
 	class Input
 	{
 	public:
@@ -42,11 +50,20 @@ namespace Poole
 		static uvec2 GetMousePositionUnsigned(ECursorClamping clamping = ECursorClamping::Clamp) { return GetMousePositionUnsigned(false, clamping); }
 		static fvec2 GetMousePositionFloat(bool invertY = false, ECursorClamping clamping = ECursorClamping::Clamp, ECursorNormalization norm = ECursorNormalization::Absolute);
 		static fvec2 GetMousePositionFloat(ECursorClamping clamping = ECursorClamping::Clamp, ECursorNormalization norm = ECursorNormalization::Absolute) { return GetMousePositionFloat(false, clamping, norm); }
+
+		static f32 GetMouseScrollDelta() { return m_LastScrollDelta.y; }
+		static fvec2 GetMouseScrollDelta2D() { return m_LastScrollDelta; }
 	private:
+		static constexpr bool AllowCameraMovement = true;
+		static constexpr bool AllowCameraZooming = true;
 		static void MoveCamera(GLFWwindow* window);
+		static void ZoomCamera(GLFWwindow* window);
 
 		static ivec2 m_LastMousePos;
 		static ivec2 m_LastMousePosInWindow;
+		static fvec2 m_LastScrollDelta;
+
+		friend void ProcessScrollEvent(GLFWwindow* window, double xOffset, double yOffset);
 	};
 }
 

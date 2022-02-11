@@ -9,6 +9,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set (APPLICATION_SRC ${APPLICATION_SRC} 
 	"include/poole.h"
 	"include/poole/core.h"
+	"include/poole/core/core_logging.h"
+	"include/poole/core/core_types.h"
+	"src/core/core_logging.cpp"
 	"include/poole/engine.h"
 	"include/poole/entry_point.h"
 	"src/engine.cpp"

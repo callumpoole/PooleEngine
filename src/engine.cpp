@@ -52,6 +52,8 @@ namespace Poole
         //Loop until the user closes the window
         while (!glfwWindowShouldClose(window))
         {
+            EngineLogTime::m_TickCount++;
+
             Input::Tick(window);
 
             Rendering::Renderer::BeginScene();
