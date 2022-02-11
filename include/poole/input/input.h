@@ -62,6 +62,7 @@ namespace Poole
 		static ivec2 m_LastMousePos;
 		static ivec2 m_LastMousePosInWindow;
 		static fvec2 m_LastScrollDelta;
+		static u64 m_KeepLastScrollDataTickID;
 
 		friend void ProcessScrollEvent(GLFWwindow* window, double xOffset, double yOffset);
 	};

@@ -9,6 +9,7 @@ namespace Poole
 	ivec2 Input::m_LastMousePos{};
 	ivec2 Input::m_LastMousePosInWindow{};
 	fvec2 Input::m_LastScrollDelta{};
+	u64 Input::m_KeepLastScrollDataTickID{};
 
 	void TestProcessInputEvent(GLFWwindow* /*window*/, i32 key, i32 /*scancode*/, i32 action, i32 /*mods*/)
 	{
@@ -21,7 +22,8 @@ namespace Poole
 	void ProcessScrollEvent(GLFWwindow* /*window*/, double xOffset, double yOffset)
 	{
 		Input::m_LastScrollDelta = { (float)xOffset, (float)yOffset };
-		LOG("X: {}, Y: {}", xOffset, yOffset);
+		Input::m_KeepLastScrollDataTickID = EngineLogTime::GetTickCount();
+		//LOG("Scroll X: {}, Y: {}", xOffset, yOffset);
 	}
 
 	/*static*/ void Input::Init(GLFWwindow* window)
@@ -56,6 +58,12 @@ namespace Poole
 			m_LastMousePos.y >= 0 && m_LastMousePos.y <= windowSize.y)
 		{
 			m_LastMousePosInWindow = m_LastMousePos;
+		}
+
+		//Reset Scroll Delta if it wasn't just applied this tick
+		if (Input::m_KeepLastScrollDataTickID != EngineLogTime::GetTickCount())
+		{
+			Input::m_LastScrollDelta = { 0,0 };
 		}
 	}
 
@@ -151,23 +159,33 @@ namespace Poole
 		{
 			if (glfwGetKey(window, keyCodes[i]) == GLFW_PRESS)
 			{
-				Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
-				const fvec3 pos = Camera.GetPosition();
-				Camera.SetPosition(pos + keyDirs[i]); //todo: * deltaTime
+				Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
+				const fvec3 pos = camera.GetPosition();
+				camera.SetPosition(pos + keyDirs[i]); //todo: * deltaTime
 			}
 		}
 
 		//Reset camera position
 		if (glfwGetKey(window, GLFW_KEY_KP_0) == GLFW_PRESS)
 		{
-			Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
-			Camera.SetPosition(fvec3(0.f));
+			Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
+			camera.SetPosition(fvec3(0.f));
 		}
 	}
 
-	/*static*/ void Input::ZoomCamera(GLFWwindow* window)
+	/*static*/ void Input::ZoomCamera(GLFWwindow* /*window*/)
 	{
-		//TODO
+		const f32 scrollY = GetMouseScrollDelta();
+		if (scrollY == 0.f)
+			return;
+
+		Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
+
+		const std::optional<f32> opt_zoom = camera.GetZoomScale();
+		const f32 zoom = opt_zoom.has_value() ? *opt_zoom : 1;
+
+		constexpr float scaler = 0.1f;
+		camera.SetZoomScale(zoom - scaler * scrollY);
 	}
 }
 

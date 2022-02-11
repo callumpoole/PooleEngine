@@ -28,7 +28,7 @@ namespace Poole::Rendering
 
 	void OrthographicCamera::UpdateAdaptiveCamera(i32 width, i32 height)
 	{
-		std::optional<f32> optScale = GetAdaptiveCameraScale();
+		std::optional<f32> optScale = GetZoomScale();
 		if (optScale)
 		{
 			const f32 scale = optScale.value();
@@ -37,9 +37,19 @@ namespace Poole::Rendering
 		}
 	}
 
-	void OrthographicCamera::UseCameraSizeWithScale(f32 scale)
+	void OrthographicCamera::EnableResizeWithWindow()
 	{
-		Window::m_OnResize.emplace_back(&OnResize_OrthographicCamera);
+		//No way to dynamically reset right now...
+		static bool bSet = false;
+		if (!bSet)
+		{
+			Window::m_OnResize.emplace_back(&OnResize_OrthographicCamera);
+			bSet = true;
+		}
+	}
+
+	void OrthographicCamera::SetZoomScale(f32 scale)
+	{
 		m_AdaptiveCameraScale = scale;
 		const uvec2 v = Window::GetWindowSize();
 		UpdateAdaptiveCamera(v.x, v.y);

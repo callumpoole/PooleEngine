@@ -22,7 +22,8 @@ namespace Poole::Rendering
 
 	void Renderer::Init()
 	{
-		s_camera.UseCameraSizeWithScale(1.f);
+		s_camera.EnableResizeWithWindow();
+		s_camera.SetZoomScale(1.f);
 		//m_camera.GetBounds();
 		LoadShaders();
 

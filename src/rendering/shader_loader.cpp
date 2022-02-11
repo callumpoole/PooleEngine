@@ -47,9 +47,9 @@ namespace Poole::Rendering {
 
 				enum class EShaderType : u8
 				{
-					None = -1,
-					Vertex = 0,
-					Fragment = 1
+					Vertex = 0, //Has to be 0 since it's an array index
+					Fragment = 1,
+					None = 255,
 				};
 
 				std::string line;

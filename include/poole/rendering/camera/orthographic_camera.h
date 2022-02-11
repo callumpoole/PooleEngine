@@ -23,7 +23,11 @@ namespace Poole::Rendering
 		OrthographicCamera(const Bounds& bounds);
 		OrthographicCamera(f32 left, f32 right, f32 bottom, f32 top);
 
-		void UseCameraSizeWithScale(f32 scale);
+		void EnableResizeWithWindow();
+		void UpdateAdaptiveCamera(i32 width, i32 height);
+
+		void SetZoomScale(f32 scale);
+		std::optional<f32> GetZoomScale() const { return m_AdaptiveCameraScale; }
 
 		const Bounds& GetBounds() const { return m_bounds; }
 		void SetBounds(const Bounds& bounds);
@@ -38,9 +42,6 @@ namespace Poole::Rendering
 		const fmat4& GetViewMatrix() const { return m_viewMatrix; }
 		const fmat4& GetProjectionMatrix() const { return m_projectionMatrix; }
 		const fmat4& GetViewProjectionMatrix() const { return m_viewProjectionMatrix; }
-
-		std::optional<f32> GetAdaptiveCameraScale() const { return m_AdaptiveCameraScale; }
-		void UpdateAdaptiveCamera(i32 width, i32 height);
 
 	private:
 		void RecalculateViewMatrix();
