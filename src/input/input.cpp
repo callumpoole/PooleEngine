@@ -164,7 +164,7 @@ namespace Poole
 			ASSERT(press != EInputPress::REPEAT); //Not yet supported
 
 			const u32 joy = ToGLFWJoystick(key);
-			if ((key & EInputKey::IS_GAMEPAD_BUTTON_FLAG) == 0) //If GAMEPAD
+			if ((key & EInputKey::IS_GAMEPAD_BUTTON_FLAG) > 0) //If GAMEPAD
 			{
 				GLFWgamepadstate state;
 				if (glfwGetGamepadState(joy, &state))
@@ -232,9 +232,23 @@ namespace Poole
 
 	/*static*/ void Input::ZoomCamera()
 	{
-		const f32 scrollY = GetMouseScrollDelta();
+		f32 scrollY = GetMouseScrollDelta();
 		if (scrollY == 0.f)
-			return;
+		{
+			constexpr f32 buttonScalar = 0.01f;
+			if (GetKeyDown(EInputKey::KEY_MINUS) || GetKeyDown(EInputKey::G1_LEFT_BUMPER))
+			{
+				scrollY = -buttonScalar;
+			}
+			else if (GetKeyDown(EInputKey::KEY_EQUAL) || GetKeyDown(EInputKey::G1_RIGHT_BUMPER))
+			{
+				scrollY = buttonScalar;
+			}
+			else
+			{
+				return;
+			}
+		}
 
 		Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
 
