@@ -35,18 +35,18 @@ namespace Poole
 
 	/*static*/ void Input::Tick(GLFWwindow* window)
 	{
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if (GetKeyDown(EInputKey::KEY_ESCAPE))
 		{
 			glfwSetWindowShouldClose(window, true);
 		}
 
 		if constexpr (AllowCameraMovement)
 		{
-			MoveCamera(window);
+			MoveCamera();
 		}
 		if constexpr (AllowCameraZooming)
 		{
-			ZoomCamera(window);
+			ZoomCamera();
 		}
 
 		//Cache the cursor position this frame
@@ -144,11 +144,68 @@ namespace Poole
 
 
 
+	/*static*/ bool Input::GetKey(EInputKey key, EInputPress press)
+	{
+		if (key == EInputKey::NONE)
+			return false;
 
-	void Input::MoveCamera(GLFWwindow* window)
+		if (key >= EInputKey::KEY_FIRST_PRINTABLE && key <= EInputKey::KEY_LAST_FUNCTIONAL)
+		{
+			return glfwGetKey(Window::m_WindowInstance, ToGLFWKey(key)) == u8(press);
+		}
+
+		if (key >= EInputKey::MOUSE_BUTTON_FIRST && key <= EInputKey::MOUSE_BUTTON_LAST)
+		{
+			return glfwGetMouseButton(Window::m_WindowInstance, ToGLFWMouseButton(key)) == u8(press);
+		}
+
+		if ((key & EInputKey::IS_JOYSTICK_FLAG) > 0)
+		{
+			ASSERT(press != EInputPress::REPEAT); //Not yet supported
+
+			const u32 joy = ToGLFWJoystick(key);
+			if ((key & EInputKey::IS_GAMEPAD_BUTTON_FLAG) == 0) //If GAMEPAD
+			{
+				GLFWgamepadstate state;
+				if (glfwGetGamepadState(joy, &state))
+				{
+					const u32 button = ToGLFWGamepadButton(key);
+					return state.buttons[button] == u8(press);
+				}
+			}
+			else //If HAT (VERY MUCH GUESS WORK, UNTESTED)
+			{
+				const u32 hat = ToGLFWJoystickHat(key);
+				int count;
+				const unsigned char* hats = glfwGetJoystickButtons(joy, &count);
+
+				ASSERT(count == 4);
+
+				if (hat == 0)					return (1 - (hats[0] | hats[1] | hats[2] | hats[3])) == u8(press);
+				if (IsPowerOfTwo<false>(hat))   return hats[hat] == u8(press);
+				if (hat == GLFW_HAT_LEFT_DOWN)  return (hats[GLFW_HAT_LEFT] | hats[GLFW_HAT_DOWN]) == u8(press);
+				if (hat == GLFW_HAT_LEFT_UP)    return (hats[GLFW_HAT_LEFT] | hats[GLFW_HAT_UP]) == u8(press);
+				if (hat == GLFW_HAT_RIGHT_DOWN) return (hats[GLFW_HAT_RIGHT] | hats[GLFW_HAT_DOWN]) == u8(press);
+				if (hat == GLFW_HAT_RIGHT_UP)   return (hats[GLFW_HAT_RIGHT] | hats[GLFW_HAT_UP]) == u8(press);
+
+				LOG_ERROR("Invalid HAT");
+			}
+		}
+
+		return false;
+	}
+
+
+
+
+	void Input::MoveCamera()
 	{
 		constexpr size_t numDirs = 4;
-		constexpr std::array<u16, numDirs> keyCodes = { GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_DOWN, GLFW_KEY_UP };
+		constexpr std::array<EInputKey, numDirs> keyCodes = { 
+			EInputKey::KEY_LEFT, 
+			EInputKey::KEY_RIGHT, 
+			EInputKey::KEY_DOWN, 
+			EInputKey::KEY_UP };
 		constexpr f32 speed = 0.002f;
 		constexpr std::array<fvec3, numDirs> keyDirs = { fvec3(-speed,    0.f, 0.f),
 														 fvec3(speed,    0.f, 0.f),
@@ -157,7 +214,7 @@ namespace Poole
 
 		for (size_t i = 0; i < numDirs; i++)
 		{
-			if (glfwGetKey(window, keyCodes[i]) == GLFW_PRESS)
+			if (GetKeyDown(keyCodes[i]))
 			{
 				Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
 				const fvec3 pos = camera.GetPosition();
@@ -166,14 +223,14 @@ namespace Poole
 		}
 
 		//Reset camera position
-		if (glfwGetKey(window, GLFW_KEY_KP_0) == GLFW_PRESS)
+		if (GetKeyDown(EInputKey::KEY_0) || GetKeyDown(EInputKey::KEY_KP_0))
 		{
 			Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
 			camera.SetPosition(fvec3(0.f));
 		}
 	}
 
-	/*static*/ void Input::ZoomCamera(GLFWwindow* /*window*/)
+	/*static*/ void Input::ZoomCamera()
 	{
 		const f32 scrollY = GetMouseScrollDelta();
 		if (scrollY == 0.f)

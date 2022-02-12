@@ -2,35 +2,12 @@
 #pragma once
 
 #include "poole/core.h"
+#include "input_types.h"
 
 struct GLFWwindow;
 
 namespace Poole
 {
-	enum class ECursorClamping : u8
-	{
-		None,
-		Clamp,
-		LastValidPosition,
-	};
-
-	enum class ECursorNormalization : u8
-	{
-		Absolute = 0,
-		ZeroToOne = 1,
-		NegativeOneToOne = 2,
-
-		FLAG_Aspect = 4, //Scaled for aspect ratio
-		FLAG_Camera = 8, //Move relative to camera
-		ALL_FLAGS = FLAG_Aspect | FLAG_Camera,
-
-		ZeroToOneAspect		         = ZeroToOne		| FLAG_Aspect,
-		NegativeOneToOneAspect       = NegativeOneToOne | FLAG_Aspect,
-		CameraNegativeOneToOneAspect = NegativeOneToOne | FLAG_Aspect | FLAG_Camera,
-	};
-	ENUM_FLAGS(ECursorNormalization)
-
-	
 	/*
 		TODO: 
 		 - Make a generic enum for mappings for the GLFW ones, with just a GetKey() instead of: 
@@ -53,14 +30,20 @@ namespace Poole
 
 		static f32 GetMouseScrollDelta() { return m_LastScrollDelta.y; }
 		static fvec2 GetMouseScrollDelta2D() { return m_LastScrollDelta; }
+
+		static bool GetKey(EInputKey key, EInputPress press);
+		static bool GetKeyDown(EInputKey key) { return GetKey(key, EInputPress::PRESS); }
+		static bool GetKeyUp(EInputKey key) { return GetKey(key, EInputPress::RELEASE); }
+		static bool GetKeyRepeat(EInputKey key) { return GetKey(key, EInputPress::REPEAT); }
 	private:
 		static constexpr bool AllowCameraMovement = true;
 		static constexpr bool AllowCameraZooming = true;
-		static void MoveCamera(GLFWwindow* window);
-		static void ZoomCamera(GLFWwindow* window);
+		static void MoveCamera();
+		static void ZoomCamera();
 
 		static ivec2 m_LastMousePos;
 		static ivec2 m_LastMousePosInWindow;
+
 		static fvec2 m_LastScrollDelta;
 		static u64 m_KeepLastScrollDataTickID;
 

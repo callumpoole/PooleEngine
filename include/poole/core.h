@@ -31,3 +31,15 @@
 #include "core/core_types.h"
 #include "core/core_logging.h"
 
+template<bool incZero = true>
+static constexpr bool IsPowerOfTwo(u64 n)
+{
+	if constexpr (incZero)
+	{
+		return (n & (n - 1)) == 0;
+	}
+	else
+	{
+		return (n > 0 && ((n & (n - 1)) == 0));
+	}
+}

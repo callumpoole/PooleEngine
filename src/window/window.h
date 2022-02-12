@@ -20,6 +20,7 @@ namespace Poole
 
 		static std::string_view GetWindowName() { return m_windowName; }
 		static uvec2 GetWindowSize() { return m_windowSize; }
+		static GLFWwindow* m_WindowInstance;
 	private:
 		static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 		static std::string_view m_windowName;

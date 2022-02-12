@@ -3,6 +3,7 @@
 
 namespace Poole
 {
+    GLFWwindow* Window::m_WindowInstance;
     std::vector<std::function<void(int width, int height)>> Window::m_OnResize;
     std::string_view Window::m_windowName;
     uvec2 Window::m_windowSize = {};
@@ -40,6 +41,7 @@ namespace Poole
         //Make the window's context current
         glfwMakeContextCurrent(window);
 
+        m_WindowInstance = window;
         return window;
     }
 

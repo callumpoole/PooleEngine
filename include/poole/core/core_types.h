@@ -161,28 +161,43 @@ static Vertex2Color4 ToColor4(const Vertex2Color3& s, f32 a = 1.f) { return ToVe
 
 
 //ENUMS
-#define ENUM_COMPARE_INT(T)									 \
-inline bool operator==(T a, u64 b)  { return (u64)a == b; }  \
-inline bool operator==(u64 a, T b)  { return a == (u64)b; }  \
-inline bool operator!=(T a, u64 b)  { return (u64)a != b; }  \
-inline bool operator!=(u64 a, T b)  { return a != (u64)b; }  \
-inline bool operator<(T a, u64 b)   { return (u64)a < b; }   \
-inline bool operator<(u64 a, T b)   { return a < (u64)b; }   \
-inline bool operator>(T a, u64 b)   { return (u64)a > b; }   \
-inline bool operator>(u64 a, T b)   { return a > (u64)b; }   \
-inline bool operator<=(T a, u64 b)  { return (u64)a <= b; }  \
-inline bool operator<=(u64 a, T b)  { return a <= (u64)b; }  \
-inline bool operator>=(T a, u64 b)  { return (u64)a >= b; }  \
-inline bool operator>=(u64 a, T b)  { return a >= (u64)b; }  \
-inline auto operator<=>(T a, u64 b) { return (u64)a <=> b; } \
-inline auto operator<=>(u64 a, T b) { return a <=> (u64)b; }
+#define ENUM_ARITHMETIC(T)													\
+inline constexpr T operator+ (T   a, u64 b) { return T((u64)a  +      b); } \
+inline constexpr T operator+ (u64 a, T   b) { return T(     a  + (u64)b); } \
+inline constexpr T operator+ (T   a, T   b) { return T((u64)a  + (u64)b); } \
+inline constexpr T operator- (T   a, u64 b) { return T((u64)a  -      b); } \
+inline constexpr T operator- (u64 a, T   b) { return T(     a  - (u64)b); } \
+inline constexpr T operator- (T   a, T   b) { return T((u64)a  - (u64)b); } \
+inline constexpr T operator<<(T   a, u64 b) { return T((u64)a <<      b); } \
+inline constexpr T operator<<(u64 a, T   b) { return T(     a << (u64)b); } \
+inline constexpr T operator<<(T   a, T   b) { return T((u64)a << (u64)b); } \
+inline constexpr T operator>>(T   a, u64 b) { return T((u64)a >>      b); } \
+inline constexpr T operator>>(u64 a, T   b) { return T(     a >> (u64)b); } \
+inline constexpr T operator>>(T   a, T   b) { return T((u64)a >> (u64)b); } \
 
-#define ENUM_FLAGS(T)												 \
-inline T operator~ (T a) { return (T)~(int)a; }						 \
-inline T operator| (T a, T b) { return (T)((int)a | (int)b); }		 \
-inline T operator& (T a, T b) { return (T)((int)a & (int)b); }		 \
-inline T operator^ (T a, T b) { return (T)((int)a ^ (int)b); }		 \
-inline T& operator|= (T& a, T b) { return (T&)((int&)a |= (int)b); } \
-inline T& operator&= (T& a, T b) { return (T&)((int&)a &= (int)b); } \
-inline T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int)b); } \
-ENUM_COMPARE_INT(T)
+#define ENUM_COMPARE_INT(T)											   \
+inline constexpr bool operator==(T a, u64 b)  { return (u64)a == b; }  \
+inline constexpr bool operator==(u64 a, T b)  { return a == (u64)b; }  \
+inline constexpr bool operator!=(T a, u64 b)  { return (u64)a != b; }  \
+inline constexpr bool operator!=(u64 a, T b)  { return a != (u64)b; }  \
+inline constexpr bool operator<(T a, u64 b)   { return (u64)a < b; }   \
+inline constexpr bool operator<(u64 a, T b)   { return a < (u64)b; }   \
+inline constexpr bool operator>(T a, u64 b)   { return (u64)a > b; }   \
+inline constexpr bool operator>(u64 a, T b)   { return a > (u64)b; }   \
+inline constexpr bool operator<=(T a, u64 b)  { return (u64)a <= b; }  \
+inline constexpr bool operator<=(u64 a, T b)  { return a <= (u64)b; }  \
+inline constexpr bool operator>=(T a, u64 b)  { return (u64)a >= b; }  \
+inline constexpr bool operator>=(u64 a, T b)  { return a >= (u64)b; }  \
+inline constexpr auto operator<=>(T a, u64 b) { return (u64)a <=> b; } \
+inline constexpr auto operator<=>(u64 a, T b) { return a <=> (u64)b; }
+
+#define ENUM_FLAGS(T)														   \
+inline constexpr T operator~ (T a) { return (T)~(u64)a; }					   \
+inline constexpr T operator| (T a, T b) { return (T)((u64)a | (u64)b); }	   \
+inline constexpr T operator& (T a, T b) { return (T)((u64)a & (u64)b); }	   \
+inline constexpr T operator^ (T a, T b) { return (T)((u64)a ^ (u64)b); }	   \
+inline constexpr T& operator|= (T& a, T b) { return (T&)((u64&)a |= (u64)b); } \
+inline constexpr T& operator&= (T& a, T b) { return (T&)((u64&)a &= (u64)b); } \
+inline constexpr T& operator^= (T& a, T b) { return (T&)((u64&)a ^= (u64)b); } \
+ENUM_COMPARE_INT(T)															   \
+ENUM_ARITHMETIC(T)

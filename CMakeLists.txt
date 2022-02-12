@@ -45,6 +45,7 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/platform/opengl/opengl_renderer_api.h"
 	"src/platform/opengl/opengl_renderer_api.cpp"
 	"include/poole/input/input.h"
+	"include/poole/input/input_types.h"
 	"src/input/input.cpp"
 	"src/window/window.h"
 	"src/window/window.cpp"
