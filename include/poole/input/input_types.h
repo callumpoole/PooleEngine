@@ -37,11 +37,6 @@ namespace Poole
 		REPEAT = 2,
 	};
 
-	enum class EInputAxis : u8
-	{
-
-	};
-
 	enum class EInputKeyMod : u8
 	{
 		//If this bit is set one or more Shift keys were held down.
@@ -83,7 +78,117 @@ namespace Poole
 		JOYSTICK_LAST = JOYSTICK_8, //NOTE: NOT 16!!
 	};
 
-	enum class EInputKey : u16
+	enum class EInputAxis : u8
+	{
+		NONE						= 0,
+
+		/* Mouse Axes */
+		MOUSE_POSITION_X			= 1,
+		MOUSE_POSITION_Y			= 2,
+		MOUSE_DELTA_X				= 3,
+		MOUSE_DELTA_Y				= 4,
+		MOUSE_SCROLL_DELTA_X		= 5,
+		MOUSE_SCROLL_DELTA_Y		= 6,
+		MOUSE_FIRST					= MOUSE_POSITION_X,
+		MOUSE_LAST					= MOUSE_SCROLL_DELTA_Y,
+
+		/* Gamepad Axes 'Flags' */
+		GAMEPAD_AXIS_FLAGS			= 0b0000'1111,
+		GAMEPAD_AXIS_LEFT_X         = 1,          //Previously 0 in GLFW
+		GAMEPAD_AXIS_LEFT_Y         = 2,
+		GAMEPAD_AXIS_RIGHT_X        = 3,
+		GAMEPAD_AXIS_RIGHT_Y        = 4,
+		GAMEPAD_AXIS_LEFT_TRIGGER   = 5,
+		GAMEPAD_AXIS_RIGHT_TRIGGER  = 6,
+		GAMEPAD_AXIS_FIRST          = GAMEPAD_AXIS_LEFT_X,
+		GAMEPAD_AXIS_LAST           = GAMEPAD_AXIS_RIGHT_TRIGGER,
+
+		/* Joysticks Flags */
+		IS_JOYSTICK_FLAG = 0b1111'0000,
+		JOYSTICK_FLAG_1  = 0b0001'0000, //Previously 0
+		JOYSTICK_FLAG_2  = 0b0010'0000, //Previously 1
+		JOYSTICK_FLAG_3  = 0b0011'0000, //Previously 2
+		JOYSTICK_FLAG_4  = 0b0100'0000, //Previously 3
+		JOYSTICK_FLAG_5  = 0b0101'0000, //Previously 4
+		JOYSTICK_FLAG_6  = 0b0110'0000, //Previously 5
+		JOYSTICK_FLAG_7  = 0b0111'0000, //Previously 6
+		JOYSTICK_FLAG_8  = 0b1000'0000, //Previously 7
+		//JOYSTICK_FLAG_9  = 0b1001'0000, //Previously 8
+		//JOYSTICK_FLAG_10 = 0b1010'0000, //Previously 9
+		//JOYSTICK_FLAG_11 = 0b1011'0000, //Previously 10
+		//JOYSTICK_FLAG_12 = 0b1100'0000, //Previously 11
+		//JOYSTICK_FLAG_13 = 0b1101'0000, //Previously 12
+		//JOYSTICK_FLAG_14 = 0b1110'0000, //Previously 13
+		//JOYSTICK_FLAG_15 = 0b1111'0000, //Previously 14
+		//JOYSTICK_FLAG_16 = IMPOSSIBLE,  //Previously 15
+
+		/* Joysticks / Gamepad 1 Axes */
+		G1_LEFT_X		  = JOYSTICK_FLAG_1 | GAMEPAD_AXIS_LEFT_X,
+		G1_LEFT_Y         = JOYSTICK_FLAG_1 | GAMEPAD_AXIS_LEFT_Y,
+		G1_RIGHT_X        = JOYSTICK_FLAG_1 | GAMEPAD_AXIS_RIGHT_X,
+		G1_RIGHT_Y        = JOYSTICK_FLAG_1 | GAMEPAD_AXIS_RIGHT_Y,
+		G1_LEFT_TRIGGER   = JOYSTICK_FLAG_1 | GAMEPAD_AXIS_LEFT_TRIGGER,
+		G1_RIGHT_TRIGGER  = JOYSTICK_FLAG_1 | GAMEPAD_AXIS_RIGHT_TRIGGER,
+
+		/* Joysticks / Gamepad 2 Axes */
+		G2_LEFT_X		  = JOYSTICK_FLAG_2 | GAMEPAD_AXIS_LEFT_X,
+		G2_LEFT_Y         = JOYSTICK_FLAG_2 | GAMEPAD_AXIS_LEFT_Y,
+		G2_RIGHT_X        = JOYSTICK_FLAG_2 | GAMEPAD_AXIS_RIGHT_X,
+		G2_RIGHT_Y        = JOYSTICK_FLAG_2 | GAMEPAD_AXIS_RIGHT_Y,
+		G2_LEFT_TRIGGER   = JOYSTICK_FLAG_2 | GAMEPAD_AXIS_LEFT_TRIGGER,
+		G2_RIGHT_TRIGGER  = JOYSTICK_FLAG_2 | GAMEPAD_AXIS_RIGHT_TRIGGER,
+
+		/* Joysticks / Gamepad 3 Axes */
+		G3_LEFT_X		  = JOYSTICK_FLAG_3 | GAMEPAD_AXIS_LEFT_X,
+		G3_LEFT_Y         = JOYSTICK_FLAG_3 | GAMEPAD_AXIS_LEFT_Y,
+		G3_RIGHT_X        = JOYSTICK_FLAG_3 | GAMEPAD_AXIS_RIGHT_X,
+		G3_RIGHT_Y        = JOYSTICK_FLAG_3 | GAMEPAD_AXIS_RIGHT_Y,
+		G3_LEFT_TRIGGER   = JOYSTICK_FLAG_3 | GAMEPAD_AXIS_LEFT_TRIGGER,
+		G3_RIGHT_TRIGGER  = JOYSTICK_FLAG_3 | GAMEPAD_AXIS_RIGHT_TRIGGER,
+
+		/* Joysticks / Gamepad 4 Axes */
+		G4_LEFT_X		  = JOYSTICK_FLAG_4 | GAMEPAD_AXIS_LEFT_X,
+		G4_LEFT_Y         = JOYSTICK_FLAG_4 | GAMEPAD_AXIS_LEFT_Y,
+		G4_RIGHT_X        = JOYSTICK_FLAG_4 | GAMEPAD_AXIS_RIGHT_X,
+		G4_RIGHT_Y        = JOYSTICK_FLAG_4 | GAMEPAD_AXIS_RIGHT_Y,
+		G4_LEFT_TRIGGER   = JOYSTICK_FLAG_4 | GAMEPAD_AXIS_LEFT_TRIGGER,
+		G4_RIGHT_TRIGGER  = JOYSTICK_FLAG_4 | GAMEPAD_AXIS_RIGHT_TRIGGER,
+
+		/* Joysticks / Gamepad 5 Axes */
+		G5_LEFT_X		  = JOYSTICK_FLAG_5 | GAMEPAD_AXIS_LEFT_X,
+		G5_LEFT_Y         = JOYSTICK_FLAG_5 | GAMEPAD_AXIS_LEFT_Y,
+		G5_RIGHT_X        = JOYSTICK_FLAG_5 | GAMEPAD_AXIS_RIGHT_X,
+		G5_RIGHT_Y        = JOYSTICK_FLAG_5 | GAMEPAD_AXIS_RIGHT_Y,
+		G5_LEFT_TRIGGER   = JOYSTICK_FLAG_5 | GAMEPAD_AXIS_LEFT_TRIGGER,
+		G5_RIGHT_TRIGGER  = JOYSTICK_FLAG_5 | GAMEPAD_AXIS_RIGHT_TRIGGER,
+
+		/* Joysticks / Gamepad 6 Axes */
+		G6_LEFT_X		  = JOYSTICK_FLAG_6 | GAMEPAD_AXIS_LEFT_X,
+		G6_LEFT_Y         = JOYSTICK_FLAG_6 | GAMEPAD_AXIS_LEFT_Y,
+		G6_RIGHT_X        = JOYSTICK_FLAG_6 | GAMEPAD_AXIS_RIGHT_X,
+		G6_RIGHT_Y        = JOYSTICK_FLAG_6 | GAMEPAD_AXIS_RIGHT_Y,
+		G6_LEFT_TRIGGER   = JOYSTICK_FLAG_6 | GAMEPAD_AXIS_LEFT_TRIGGER,
+		G6_RIGHT_TRIGGER  = JOYSTICK_FLAG_6 | GAMEPAD_AXIS_RIGHT_TRIGGER,
+
+		/* Joysticks / Gamepad 7 Axes */
+		G7_LEFT_X		  = JOYSTICK_FLAG_7 | GAMEPAD_AXIS_LEFT_X,
+		G7_LEFT_Y         = JOYSTICK_FLAG_7 | GAMEPAD_AXIS_LEFT_Y,
+		G7_RIGHT_X        = JOYSTICK_FLAG_7 | GAMEPAD_AXIS_RIGHT_X,
+		G7_RIGHT_Y        = JOYSTICK_FLAG_7 | GAMEPAD_AXIS_RIGHT_Y,
+		G7_LEFT_TRIGGER   = JOYSTICK_FLAG_7 | GAMEPAD_AXIS_LEFT_TRIGGER,
+		G7_RIGHT_TRIGGER  = JOYSTICK_FLAG_7 | GAMEPAD_AXIS_RIGHT_TRIGGER,
+
+		/* Joysticks / Gamepad 8 Axes */
+		G8_LEFT_X		  = JOYSTICK_FLAG_8 | GAMEPAD_AXIS_LEFT_X,
+		G8_LEFT_Y         = JOYSTICK_FLAG_8 | GAMEPAD_AXIS_LEFT_Y,
+		G8_RIGHT_X        = JOYSTICK_FLAG_8 | GAMEPAD_AXIS_RIGHT_X,
+		G8_RIGHT_Y        = JOYSTICK_FLAG_8 | GAMEPAD_AXIS_RIGHT_Y,
+		G8_LEFT_TRIGGER   = JOYSTICK_FLAG_8 | GAMEPAD_AXIS_LEFT_TRIGGER,
+		G8_RIGHT_TRIGGER  = JOYSTICK_FLAG_8 | GAMEPAD_AXIS_RIGHT_TRIGGER,
+	};
+	ENUM_FLAGS(EInputAxis)
+
+	enum class EInputButton : u16
 	{
 		NONE = 0,
 
@@ -231,7 +336,7 @@ namespace Poole
 		MOUSE_BUTTON_FIRST		= MOUSE_BUTTON_1,
 		MOUSE_BUTTON_LAST       = MOUSE_BUTTON_8, //356 == 0b0000_0001_0110_0100
 
-		/*Joysticks Flags*/
+		/* Joysticks Flags */
 		IS_JOYSTICK_FLAG = 0b1111'0000'0000'0000,
 		JOYSTICK_FLAG_1  = 0b0001'0000'0000'0000, //Previously 0
 		JOYSTICK_FLAG_2  = 0b0010'0000'0000'0000, //Previously 1
@@ -248,9 +353,9 @@ namespace Poole
 		//JOYSTICK_FLAG_13 = 0b1101'0000'0000'0000, //Previously 12
 		//JOYSTICK_FLAG_14 = 0b1110'0000'0000'0000, //Previously 13
 		//JOYSTICK_FLAG_15 = 0b1111'0000'0000'0000, //Previously 14
-		//JOYSTICK_FLAG_16 = 0b1000'0000'0000'0000, //Previously 15
+		//JOYSTICK_FLAG_16 = IMPOSSIBLE,			//Previously 15  
 
-		/*Joysticks Hat Flags*/
+		/* Joysticks Hat Flags */
 		IS_JOYSTICK_HAT_FLAG		 = 0b0000'0000'0000'1111,
 		JOYSTICK_HAT_FLAG_CENTERED   = 0,
 		JOYSTICK_HAT_FLAG_UP         = 1,
@@ -262,10 +367,10 @@ namespace Poole
 		JOYSTICK_HAT_FLAG_LEFT_UP    = (JOYSTICK_HAT_FLAG_LEFT  | JOYSTICK_HAT_FLAG_UP),
 		JOYSTICK_HAT_FLAG_LEFT_DOWN  = (JOYSTICK_HAT_FLAG_LEFT  | JOYSTICK_HAT_FLAG_DOWN),
 
-		/*Joysticks(Gamepad) Button Flags*/
-		IS_GAMEPAD_BUTTON_FLAG		 = 0b0000'0000'1111'0000,
+		/* Joysticks(Gamepad) Button 'Flags' */
+		GAMEPAD_BUTTON_FLAGS		 = 0b0000'0000'1111'0000,
 		GAMEPAD_BUTTON_SHIFT         = 4,
-		GAMEPAD_BUTTON_A             = 1  << GAMEPAD_BUTTON_SHIFT, 
+		GAMEPAD_BUTTON_A             = 1  << GAMEPAD_BUTTON_SHIFT, //Previously 0 in GLFW
 		GAMEPAD_BUTTON_B             = 2  << GAMEPAD_BUTTON_SHIFT,
 		GAMEPAD_BUTTON_X             = 3  << GAMEPAD_BUTTON_SHIFT,
 		GAMEPAD_BUTTON_Y             = 4  << GAMEPAD_BUTTON_SHIFT,
@@ -535,53 +640,100 @@ namespace Poole
 		G8_SQUARE		  = JOYSTICK_FLAG_8 | GAMEPAD_BUTTON_SQUARE,
 		G8_TRIANGLE		  = JOYSTICK_FLAG_8 | GAMEPAD_BUTTON_TRIANGLE,
 	};
-	ENUM_FLAGS(EInputKey)
+	ENUM_FLAGS(EInputButton)
 
 
 
-	static constexpr u32 ToGLFWKey(EInputKey key)
+
+
+	/* Joystick ID to Button/Axis */
+	static constexpr EInputButton ToJoystickButtonFlag(EJoystickID id)
+	{
+		return EInputButton(u16(id) << 12);
+	}
+	/*TEST*/ static_assert(ToJoystickButtonFlag(EJoystickID::JOYSTICK_5) == EInputButton::JOYSTICK_FLAG_5);
+	static constexpr EInputAxis ToJoystickAxisFlag(EJoystickID id)
+	{
+		return EInputAxis(u16(id) << 4);
+	}
+	/*TEST*/ static_assert(ToJoystickAxisFlag(EJoystickID::JOYSTICK_5) == EInputAxis::JOYSTICK_FLAG_5);
+
+
+
+	/* Button/Axis to Joystick ID */
+	static constexpr EJoystickID ToJoystickID(EInputButton flag)
+	{
+		return EJoystickID(u16(flag & EInputButton::IS_JOYSTICK_FLAG) >> 12);
+	}
+	/*TEST*/ static_assert(ToJoystickID(EInputButton::JOYSTICK_FLAG_7) == EJoystickID::JOYSTICK_7);
+	static constexpr EJoystickID ToJoystickID(EInputAxis flag)
+	{
+		return EJoystickID(u16(flag & EInputAxis::IS_JOYSTICK_FLAG) >> 4);
+	}
+	/*TEST*/ static_assert(ToJoystickID(EInputButton::JOYSTICK_FLAG_7) == EJoystickID::JOYSTICK_7);
+
+
+
+	/* To GLFW Key */
+	static constexpr u32 ToGLFWKey(EInputButton key)
 	{
 		return u32(key);
 	}
-	static constexpr u32 ToGLFWMouseButton(EInputKey key)
+	/*TEST*/ static_assert(ToGLFWKey(EInputButton::KEY_D) == GLFW_KEY_D);
+
+
+
+	/* To GLFW Mouse Button */
+	static constexpr u32 ToGLFWMouseButton(EInputButton key)
 	{
-		return u32(key - EInputKey::MOUSE_BUTTON_OFFSET);
+		return u32(key - EInputButton::MOUSE_BUTTON_OFFSET);
 	}
+	/*TEST*/ static_assert(ToGLFWMouseButton(EInputButton::MOUSE_BUTTON_3) == GLFW_MOUSE_BUTTON_3);
 
 
 
-	static constexpr EInputKey ToJoystickFlag(EJoystickID id)
-	{
-		return EInputKey(u16(id) << 12);
-	}
-	/*TEST*/ static_assert(ToJoystickFlag(EJoystickID::JOYSTICK_5) == EInputKey::JOYSTICK_FLAG_5);
-
-	static constexpr EJoystickID ToJoystickID(EInputKey flag)
-	{
-		return EJoystickID(u16(flag & EInputKey::IS_JOYSTICK_FLAG) >> 12);
-	}
-	/*TEST*/ static_assert(ToJoystickID(EInputKey::JOYSTICK_FLAG_7) == EJoystickID::JOYSTICK_7);
-
+	/* To GLFW Joystick */
 	static constexpr u32 ToGLFWJoystick(EJoystickID id)
 	{
 		ASSERT(id != EJoystickID::NONE);
 		return u32(id) - 1;
 	}
-	static constexpr u32 ToGLFWJoystick(EInputKey flag)
+	/*TEST*/ static_assert(ToGLFWJoystick(EJoystickID::JOYSTICK_1) == GLFW_JOYSTICK_1);
+	static constexpr u32 ToGLFWJoystick(EInputButton flag)
 	{
 		return ToGLFWJoystick(ToJoystickID(flag));
 	}
-	/*TEST*/ static_assert(ToGLFWJoystick(EJoystickID::JOYSTICK_1) == GLFW_JOYSTICK_1);
-
-	static constexpr u32 ToGLFWGamepadButton(EInputKey flag)
+	/*TEST*/ static_assert(ToGLFWJoystick(EInputButton::JOYSTICK_FLAG_3) == GLFW_JOYSTICK_3);
+	static constexpr u32 ToGLFWJoystick(EInputAxis flag)
 	{
-		return u32((flag & EInputKey::IS_GAMEPAD_BUTTON_FLAG) >> EInputKey::GAMEPAD_BUTTON_SHIFT) - 1;
+		return ToGLFWJoystick(ToJoystickID(flag));
 	}
-	/*TEST*/ static_assert(ToGLFWGamepadButton(EInputKey::G3_Y) == GLFW_GAMEPAD_BUTTON_Y);
+	/*TEST*/ static_assert(ToGLFWJoystick(EInputAxis::JOYSTICK_FLAG_5) == GLFW_JOYSTICK_5);
 
-	static constexpr u32 ToGLFWJoystickHat(EInputKey flag)
+
+
+	/* To GLFW Gamepad Button */
+	static constexpr u32 ToGLFWGamepadButton(EInputButton flag)
 	{
-		return u32(flag & EInputKey::IS_JOYSTICK_HAT_FLAG);
+		return u32((flag & EInputButton::GAMEPAD_BUTTON_FLAGS) >> EInputButton::GAMEPAD_BUTTON_SHIFT) - 1;
 	}
-	/*TEST*/ static_assert(ToGLFWJoystickHat(EInputKey::J4_HAT_RIGHT_DOWN) == GLFW_HAT_RIGHT_DOWN);
+	/*TEST*/ static_assert(ToGLFWGamepadButton(EInputButton::G3_Y) == GLFW_GAMEPAD_BUTTON_Y);
+
+
+
+	/* To GLFW Gamepad HAT */
+	static constexpr u32 ToGLFWJoystickHat(EInputButton flag)
+	{
+		return u32(flag & EInputButton::IS_JOYSTICK_HAT_FLAG);
+	}
+	/*TEST*/ static_assert(ToGLFWJoystickHat(EInputButton::J4_HAT_RIGHT_DOWN) == GLFW_HAT_RIGHT_DOWN);
+
+
+
+	/* To GLFW Gamepad Axis */
+	static constexpr u32 ToGLFWGamepadAxis(EInputAxis flag)
+	{
+		return u32(flag & EInputAxis::GAMEPAD_AXIS_FLAGS) - 1;
+	}
+	/*TEST*/ static_assert(ToGLFWGamepadAxis(EInputAxis::G5_RIGHT_X) == GLFW_GAMEPAD_AXIS_RIGHT_X);
 }

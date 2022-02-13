@@ -6,6 +6,8 @@
 
 namespace Poole
 {
+	ivec2 Input::m_DeltaMousePos{};
+	ivec2 Input::m_DeltaMousePosInWindow{};
 	ivec2 Input::m_LastMousePos{};
 	ivec2 Input::m_LastMousePosInWindow{};
 	fvec2 Input::m_LastScrollDelta{};
@@ -35,11 +37,15 @@ namespace Poole
 
 	/*static*/ void Input::Tick(GLFWwindow* window)
 	{
-		if (GetKeyDown(EInputKey::KEY_ESCAPE))
+		//TEMP
+		if (IsButtonDown(EInputButton::KEY_ESCAPE))
 		{
 			glfwSetWindowShouldClose(window, true);
 		}
 
+		TickMouse(window);
+
+		//TEMP
 		if constexpr (AllowCameraMovement)
 		{
 			MoveCamera();
@@ -49,17 +55,7 @@ namespace Poole
 			ZoomCamera();
 		}
 
-		//Cache the cursor position this frame
-		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
-		m_LastMousePos = { floor(xpos), floor(ypos) };
-		const ivec2 windowSize = (ivec2)Window::GetWindowSize();
-		if (m_LastMousePos.x >= 0 && m_LastMousePos.x <= windowSize.x &&
-			m_LastMousePos.y >= 0 && m_LastMousePos.y <= windowSize.y)
-		{
-			m_LastMousePosInWindow = m_LastMousePos;
-		}
-
+		//TO MOVE:
 		//Reset Scroll Delta if it wasn't just applied this tick
 		if (Input::m_KeepLastScrollDataTickID != EngineLogTime::GetTickCount())
 		{
@@ -67,6 +63,36 @@ namespace Poole
 		}
 	}
 
+	/*static*/ void Input::TickMouse(GLFWwindow* window)
+	{
+		double xPos, yPos;
+		glfwGetCursorPos(window, &xPos, &yPos);
+		const ivec2 intPos = { floor(xPos), floor(yPos) };
+
+		bool isInWindow;
+		{
+			const ivec2 windowSize = (ivec2)Window::GetWindowSize();
+			isInWindow = (m_LastMousePos.x >= 0 && m_LastMousePos.x <= windowSize.x &&
+						  m_LastMousePos.y >= 0 && m_LastMousePos.y <= windowSize.y);
+		}
+
+		if (EngineLogTime::GetTickCount() != 0)
+		{
+			m_DeltaMousePos = intPos - m_LastMousePos;
+
+			if (isInWindow)
+			{
+				m_DeltaMousePosInWindow = m_DeltaMousePos;
+			}
+		}
+
+		//Cache the cursor position this frame
+		m_LastMousePos = intPos;
+		if (isInWindow)
+		{
+			m_LastMousePosInWindow = m_LastMousePos;
+		}
+	}
 
 
 
@@ -93,17 +119,38 @@ namespace Poole
 			return MaybeInvert(m_LastMousePos);
 		}
 	}
-
 	/*static*/ uvec2 Input::GetMousePositionUnsigned(bool invertY, ECursorClamping clamping)
 	{
 		const ivec2 i2 = GetMousePosition(invertY, clamping);
 		return { i2.x < 0 ? 0u : i2.x, i2.y < 0 ? 0u : i2.y };
 	}
-
 	/*static*/ fvec2 Input::GetMousePositionFloat(bool invertY, ECursorClamping clamping, ECursorNormalization norm)
 	{
 		const ivec2 i2 = GetMousePosition(invertY, clamping);
-		const fvec2 abs = { (float)i2.x, (float)i2.y };
+		return GetMouseFloatLogic(i2, norm);
+	}
+
+
+	/*static*/ ivec2 Input::GetMouseDelta(bool invertY, bool withinScreen)
+	{
+		auto MaybeInvert = [invertY](const ivec2& in) -> ivec2
+		{
+			return invertY ? ivec2{ in.x, - in.y } : in;
+		};
+
+		if (withinScreen) return MaybeInvert(m_DeltaMousePosInWindow);
+		else			  return MaybeInvert(m_DeltaMousePos);
+	}
+	/*static*/ fvec2 Input::GetMouseDeltaFloat(bool invertY, bool withinScreen, ECursorNormalization norm)
+	{
+		const ivec2 i2 = GetMouseDelta(invertY, withinScreen);
+		return GetMouseFloatLogic(i2, norm);
+	}
+
+
+	/*static*/ fvec2 Input::GetMouseFloatLogic(ivec2 in, ECursorNormalization norm)
+	{
+		const fvec2 abs = { (float)in.x, (float)in.y };
 
 		if (norm == ECursorNormalization::Absolute)
 		{
@@ -143,39 +190,38 @@ namespace Poole
 	}
 
 
-
-	/*static*/ bool Input::GetKey(EInputKey key, EInputPress press)
+	/*static*/ bool Input::IsButton(EInputButton button, EInputPress press)
 	{
-		if (key == EInputKey::NONE)
+		if (button == EInputButton::NONE)
 			return false;
 
-		if (key >= EInputKey::KEY_FIRST_PRINTABLE && key <= EInputKey::KEY_LAST_FUNCTIONAL)
+		if (button >= EInputButton::KEY_FIRST_PRINTABLE && button <= EInputButton::KEY_LAST_FUNCTIONAL)
 		{
-			return glfwGetKey(Window::m_WindowInstance, ToGLFWKey(key)) == u8(press);
+			return glfwGetKey(Window::m_WindowInstance, ToGLFWKey(button)) == u8(press);
 		}
 
-		if (key >= EInputKey::MOUSE_BUTTON_FIRST && key <= EInputKey::MOUSE_BUTTON_LAST)
+		if (button >= EInputButton::MOUSE_BUTTON_FIRST && button <= EInputButton::MOUSE_BUTTON_LAST)
 		{
-			return glfwGetMouseButton(Window::m_WindowInstance, ToGLFWMouseButton(key)) == u8(press);
+			return glfwGetMouseButton(Window::m_WindowInstance, ToGLFWMouseButton(button)) == u8(press);
 		}
 
-		if ((key & EInputKey::IS_JOYSTICK_FLAG) > 0)
+		if ((button & EInputButton::IS_JOYSTICK_FLAG) > 0)
 		{
 			ASSERT(press != EInputPress::REPEAT); //Not yet supported
 
-			const u32 joy = ToGLFWJoystick(key);
-			if ((key & EInputKey::IS_GAMEPAD_BUTTON_FLAG) > 0) //If GAMEPAD
+			const u32 joy = ToGLFWJoystick(button);
+			if ((button & EInputButton::GAMEPAD_BUTTON_FLAGS) > 0) //If GAMEPAD
 			{
 				GLFWgamepadstate state;
 				if (glfwGetGamepadState(joy, &state))
 				{
-					const u32 button = ToGLFWGamepadButton(key);
-					return state.buttons[button] == u8(press);
+					const u32 glfw_button = ToGLFWGamepadButton(button);
+					return state.buttons[glfw_button] == u8(press);
 				}
 			}
 			else //If HAT (VERY MUCH GUESS WORK, UNTESTED)
 			{
-				const u32 hat = ToGLFWJoystickHat(key);
+				const u32 hat = ToGLFWJoystickHat(button);
 				int count;
 				const unsigned char* hats = glfwGetJoystickButtons(joy, &count);
 
@@ -196,16 +242,51 @@ namespace Poole
 	}
 
 
+	/*static*/ float Input::GetAxisRaw(EInputAxis axis)
+	{
+		if (axis == EInputAxis::NONE)
+		{
+			return 0.f;
+		}
+
+		if ((axis & EInputAxis::IS_JOYSTICK_FLAG) > 0) //Gamepad
+		{
+			const u32 joy = ToGLFWJoystick(axis);
+			GLFWgamepadstate state;
+			if (glfwGetGamepadState(joy, &state))
+			{
+				const u32 glfw_axis = ToGLFWGamepadAxis(axis);
+				return state.axes[glfw_axis];
+			}
+		}
+		else //Mouse
+		{
+			switch (axis)
+			{
+				case EInputAxis::MOUSE_POSITION_X: return GetMousePositionFloat().x;
+				case EInputAxis::MOUSE_POSITION_Y: return GetMousePositionFloat().y;
+				case EInputAxis::MOUSE_DELTA_X:	return GetMouseDeltaFloat().x;
+				case EInputAxis::MOUSE_DELTA_Y:	return GetMouseDeltaFloat().y;
+				case EInputAxis::MOUSE_SCROLL_DELTA_Y: return GetMouseScrollDelta();
+				[[unlikely]] 
+				case EInputAxis::MOUSE_SCROLL_DELTA_X: return GetMouseScrollDelta2D().x;
+			}
+		}
+
+		return 0.f;
+	}
 
 
-	void Input::MoveCamera()
+
+
+	/*static*/ void Input::MoveCamera()
 	{
 		constexpr size_t numDirs = 4;
-		constexpr std::array<EInputKey, numDirs> keyCodes = { 
-			EInputKey::KEY_LEFT, 
-			EInputKey::KEY_RIGHT, 
-			EInputKey::KEY_DOWN, 
-			EInputKey::KEY_UP };
+		constexpr std::array<EInputButton, numDirs> keyCodes = { 
+			EInputButton::KEY_LEFT, 
+			EInputButton::KEY_RIGHT, 
+			EInputButton::KEY_DOWN, 
+			EInputButton::KEY_UP };
 		constexpr f32 speed = 0.002f;
 		constexpr std::array<fvec3, numDirs> keyDirs = { fvec3(-speed,    0.f, 0.f),
 														 fvec3(speed,    0.f, 0.f),
@@ -214,7 +295,7 @@ namespace Poole
 
 		for (size_t i = 0; i < numDirs; i++)
 		{
-			if (GetKeyDown(keyCodes[i]))
+			if (IsButtonDown(keyCodes[i]))
 			{
 				Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
 				const fvec3 pos = camera.GetPosition();
@@ -223,7 +304,7 @@ namespace Poole
 		}
 
 		//Reset camera position
-		if (GetKeyDown(EInputKey::KEY_0) || GetKeyDown(EInputKey::KEY_KP_0))
+		if (IsButtonDown(EInputButton::KEY_0) || IsButtonDown(EInputButton::KEY_KP_0))
 		{
 			Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
 			camera.SetPosition(fvec3(0.f));
@@ -236,11 +317,11 @@ namespace Poole
 		if (scrollY == 0.f)
 		{
 			constexpr f32 buttonScalar = 0.01f;
-			if (GetKeyDown(EInputKey::KEY_MINUS) || GetKeyDown(EInputKey::G1_LEFT_BUMPER))
+			if (IsButtonDown(EInputButton::KEY_MINUS) || IsButtonDown(EInputButton::G1_LEFT_BUMPER))
 			{
 				scrollY = -buttonScalar;
 			}
-			else if (GetKeyDown(EInputKey::KEY_EQUAL) || GetKeyDown(EInputKey::G1_RIGHT_BUMPER))
+			else if (IsButtonDown(EInputButton::KEY_EQUAL) || IsButtonDown(EInputButton::G1_RIGHT_BUMPER))
 			{
 				scrollY = buttonScalar;
 			}
