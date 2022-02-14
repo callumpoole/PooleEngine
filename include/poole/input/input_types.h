@@ -56,6 +56,13 @@ namespace Poole
 	};
 	ENUM_FLAGS(EInputKeyMod)
 
+	enum class EJoystickType : u8
+	{
+		Disconnected = 0,
+		Gamepad = 1,
+		Hat = 2,
+	};
+
 	enum class EJoystickID : u8
 	{
 		NONE = 0,
@@ -77,6 +84,7 @@ namespace Poole
 		//JOYSTICK_16   = 16,
 		JOYSTICK_LAST = JOYSTICK_8, //NOTE: NOT 16!!
 	};
+	ENUM_ARITHMETIC(EJoystickID)
 
 	enum class EInputAxis : u8
 	{

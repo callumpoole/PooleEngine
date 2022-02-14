@@ -13,11 +13,21 @@ namespace Poole
 	fvec2 Input::m_LastScrollDelta{};
 	u64 Input::m_KeepLastScrollDataTickID{};
 
-	void TestProcessInputEvent(GLFWwindow* /*window*/, i32 key, i32 /*scancode*/, i32 action, i32 /*mods*/)
+	void ProcessKeyEvent(GLFWwindow* /*window*/, i32 /*key*/, i32 /*scancode*/, i32 action, i32 /*mods*/)
 	{
-		if (key == GLFW_KEY_1 && action == GLFW_PRESS)
+		static int i = 0;
+		if (action == GLFW_PRESS)
 		{
-			LOG_LINE("1 Key Pressed");
+			LOG("key = {}", i++);
+		}
+	}
+
+	void ProcessMouseButtonEvent(GLFWwindow* /*window*/, i32 /*mouseButton*/, i32 action, i32 /*mods*/)
+	{
+		static int i = 0;
+		if (action == GLFW_PRESS)
+		{
+			LOG("mouse = {}", i++);
 		}
 	}
 
@@ -31,7 +41,8 @@ namespace Poole
 	/*static*/ void Input::Init(GLFWwindow* window)
 	{
 		//Listen to input events
-		glfwSetKeyCallback(window, TestProcessInputEvent);
+		glfwSetKeyCallback(window, ProcessKeyEvent);
+		glfwSetMouseButtonCallback(window, ProcessMouseButtonEvent);
 		glfwSetScrollCallback(window, ProcessScrollEvent);
 	}
 
@@ -44,6 +55,8 @@ namespace Poole
 		}
 
 		TickMouse(window);
+
+		LOG("Gamepad: {}, Guid: {}", GetJoystickName(EJoystickID::JOYSTICK_1), GetJoystickGUID(EJoystickID::JOYSTICK_1));
 
 		//TEMP
 		if constexpr (AllowCameraMovement)
@@ -242,7 +255,7 @@ namespace Poole
 	}
 
 
-	/*static*/ float Input::GetAxisRaw(EInputAxis axis)
+	/*static*/ f32 Input::GetAxisRaw(EInputAxis axis)
 	{
 		if (axis == EInputAxis::NONE)
 		{
@@ -275,6 +288,58 @@ namespace Poole
 
 		return 0.f;
 	}
+
+
+
+	/*static*/ EJoystickType Input::GetJoystickType(EJoystickID ID)
+	{
+		const int glfwID = ToGLFWJoystick(ID);
+
+		if (glfwJoystickPresent(glfwID))
+		{
+			return glfwJoystickIsGamepad(glfwID) ? EJoystickType::Gamepad : EJoystickType::Hat;
+		}
+		else
+		{
+			return EJoystickType::Disconnected;
+		}
+	}
+
+	/*static*/ bool Input::IsAnyJoystickTypePresent(EJoystickType type)
+	{
+		for (EJoystickID i = EJoystickID::JOYSTICK_1; i < EJoystickID::JOYSTICK_LAST; ++i)
+		{
+			if (GetJoystickType(i) == type)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/*static*/ const char* Input::GetJoystickGUIDRaw(EJoystickID ID)
+	{
+		const int glfwID = ToGLFWJoystick(ID);
+		return glfwGetJoystickGUID(glfwID);
+	}
+	/*static*/ std::string Input::GetJoystickGUID(EJoystickID ID)
+	{
+		const char* raw = GetJoystickGUIDRaw(ID);
+		return raw ? std::string(raw) : std::string{};
+	}
+
+	/*static*/ const char* Input::GetJoystickNameRaw(EJoystickID ID)
+	{
+		const int glfwID = ToGLFWJoystick(ID);
+		return glfwGetJoystickName(glfwID);
+	}
+	/*static*/ std::string Input::GetJoystickName(EJoystickID ID)
+	{
+		const char* raw = GetJoystickNameRaw(ID);
+		return raw ? std::string(raw) : std::string{};
+	}
+
+
 
 
 

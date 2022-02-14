@@ -174,6 +174,10 @@ inline constexpr T operator<<(T   a, T   b) { return T((u64)a << (u64)b); } \
 inline constexpr T operator>>(T   a, u64 b) { return T((u64)a >>      b); } \
 inline constexpr T operator>>(u64 a, T   b) { return T(     a >> (u64)b); } \
 inline constexpr T operator>>(T   a, T   b) { return T((u64)a >> (u64)b); } \
+inline constexpr T /*Pre*/ operator++(T& a) { a = a + 1; return a; } \
+inline constexpr T /*Pre*/ operator--(T& a) { a = a - 1; return a; } \
+inline constexpr T /*Post*/ operator++(T& a, /*weird*/ int) { const T prev = a; a = a + 1; return prev; } \
+inline constexpr T /*Post*/ operator--(T& a, /*weird*/ int) { const T prev = a; a = a - 1; return prev; }
 
 #define ENUM_COMPARE_INT(T)											   \
 inline constexpr bool operator==(T a, u64 b)  { return (u64)a == b; }  \
