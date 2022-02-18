@@ -18,6 +18,12 @@ namespace Poole::Rendering
 		{
 			DrawQuad({ pos, scale, rotation, shear }, color);
 		}
+
+		static void DrawCircle(const ftransform2D& transform, const fcolor4& color, float thickness = 1.f, float fade = 0.f);
+		static void DrawCircle(const fvec2& pos, const fvec2& scale, const fcolor4& color, f32 rotation = 0, const fvec2& shear = fvec2(0.f), float thickness = 1.f, float fade = 0.f)
+		{
+			DrawCircle({ pos, scale, rotation, shear }, color, thickness, fade);
+		}
 		 
 		static fmat4 MakeTransformMatrix(const ftransform2D& transform);
 		static fmat4 MakeTransformMatrix(const fvec2& pos, const fvec2& scale, f32 rotation = 0, const fvec2& shear = fvec2(0.f))

@@ -16,71 +16,44 @@ namespace Poole::Rendering
 	{
 		struct RenderData
 		{
-			GLShader* m_Shader;
 			std::shared_ptr<VertexArray> m_VertexArray;
 			std::shared_ptr<VertexBuffer> m_VertexBuffer;
 			std::shared_ptr<IndexBuffer> m_IndexBuffer;
 		};
 		static RenderData s_QuadRenderData;
-		static RenderData s_CircleRenderData;
+
+		GLShader* m_QuadShader;
+		GLShader* m_CircleShader;
 	}
 
 	void Renderer2D::Init()
 	{
-		//Quad
+		//Vertex Array
+		s_QuadRenderData.m_VertexArray.reset(VertexArray::Create());
+		s_QuadRenderData.m_VertexArray->Bind();
+
+		//Shader
+		m_QuadShader = &Renderer::s_shaderUniformColorTransform2D;
+		m_CircleShader = &Renderer::s_shaderCircleTransform2D;
+
+		//Vertex Buffer
+		fvec3 corners[4] =
 		{
-			//Vertex Array
-			s_QuadRenderData.m_VertexArray.reset(VertexArray::Create());
-			s_QuadRenderData.m_VertexArray->Bind();
+			{-1, -1, 0.f},
+			{ 1, -1, 0.f},
+			{ 1,  1, 0.f},
+			{-1,  1, 0.f},
+		};
+		s_QuadRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
+		s_QuadRenderData.m_VertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position"},
+		});
+		s_QuadRenderData.m_VertexArray->AddVertexBuffer(s_QuadRenderData.m_VertexBuffer);
 
-			//Shader
-			//s_QuadRenderData.m_Shader = &Renderer::s_shaderUniformColorTransform2D;
-			s_QuadRenderData.m_Shader = &Renderer::s_shaderCircleTransform2D;
-
-			//Vertex Buffer
-			fvec3 corners[4] =
-			{
-				{-1, -1, 0.f},
-				{ 1, -1, 0.f},
-				{ 1,  1, 0.f},
-				{-1,  1, 0.f},
-			};
-			s_QuadRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
-			s_QuadRenderData.m_VertexBuffer->SetLayout({
-				{ ShaderDataType::Float3, "a_Position"},
-			});
-			s_QuadRenderData.m_VertexArray->AddVertexBuffer(s_QuadRenderData.m_VertexBuffer);
-
-			//Index Buffer
-			u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-			s_QuadRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-			s_QuadRenderData.m_VertexArray->SetIndexBuffer(s_QuadRenderData.m_IndexBuffer);
-		}
-		//Circle
-		{
-			//Vertex Array
-			s_CircleRenderData.m_VertexArray.reset(VertexArray::Create());
-			s_CircleRenderData.m_VertexArray->Bind();
-
-			//Vertex Buffer
-			fvec3 corners[4] =
-			{
-				{-1, -1, 0.f},
-				{ 1, -1, 0.f},
-				{ 1,  1, 0.f},
-				{-1,  1, 0.f},
-			};
-			s_CircleRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
-			s_CircleRenderData.m_VertexBuffer->SetLayout({
-				{ ShaderDataType::Float3, "a_Position"},
-			});
-			s_CircleRenderData.m_VertexArray->AddVertexBuffer(s_CircleRenderData.m_VertexBuffer);
-
-			//Index Buffer
-			u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-			s_CircleRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-			s_CircleRenderData.m_VertexArray->SetIndexBuffer(s_CircleRenderData.m_IndexBuffer);
-		}
+		//Index Buffer
+		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+		s_QuadRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+		s_QuadRenderData.m_VertexArray->SetIndexBuffer(s_QuadRenderData.m_IndexBuffer);
 	}
 	void Renderer2D::Shutdown()
 	{
@@ -91,23 +64,19 @@ namespace Poole::Rendering
 		//Vertex Array
 		s_QuadRenderData.m_VertexArray->Bind();
 
-		//Shader
-		s_QuadRenderData.m_Shader->Bind();
-		s_QuadRenderData.m_Shader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
-
-		//TEMP FOR CIRCLES
-		s_QuadRenderData.m_Shader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
-
-		const fvec2 mouseNorm = Input::GetMousePositionFloat(true, ECursorClamping::Clamp, ECursorNormalization::ZeroToOne);
-		LOG("Mouse = {} , {}", mouseNorm.x, mouseNorm.y);
-		s_QuadRenderData.m_Shader->SetUniform("u_Thickness", mouseNorm.x);
-		s_QuadRenderData.m_Shader->SetUniform("u_Fade", mouseNorm.y);
-
 		//Vertex Buffer
 		s_QuadRenderData.m_VertexBuffer->Bind();
 
 		//Index Buffer
 		s_QuadRenderData.m_IndexBuffer->Bind();
+
+		//Shader
+		m_QuadShader->Bind();
+		m_QuadShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+
+		//TEMP FOR CIRCLES
+		m_CircleShader->Bind();
+		m_CircleShader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
 	}
 	void Renderer2D::RenderScene()
 	{
@@ -122,14 +91,37 @@ namespace Poole::Rendering
 	{
 		s_QuadRenderData.m_VertexArray->Bind(); 
 
-		s_QuadRenderData.m_Shader->SetUniform("u_Transform", MakeTransformMatrix(transform));
-		s_QuadRenderData.m_Shader->SetUniform("u_Color", color);
+		m_QuadShader->Bind();
+		m_QuadShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
+		m_QuadShader->SetUniform("u_Color", color);
 
 		s_QuadRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
 		s_QuadRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
 
 		GetRendererAPI()->DrawIndexed(6);
 	}
+
+	void Renderer2D::DrawCircle(const ftransform2D& transform, const fcolor4& color, float thickness, float fade)
+	{
+		s_QuadRenderData.m_VertexArray->Bind();
+
+		m_CircleShader->Bind();
+
+		//It's cheaper to process in C++, than in each fragment
+		const fmat4 Transform = MakeTransformMatrix(transform);
+		const fmat4 CameraViewProj = Renderer::GetCamera().GetViewProjectionMatrix();
+		m_CircleShader->SetUniform("u_InvTransform_InvCameraViewProj", glm::inverse(Transform) * glm::inverse(CameraViewProj));
+
+		m_CircleShader->SetUniform("u_Color", color);
+		m_CircleShader->SetUniform("u_Thickness", thickness);
+		m_CircleShader->SetUniform("u_Fade", std::max(fade, 0.000001f));
+
+		s_QuadRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
+		s_QuadRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
+
+		GetRendererAPI()->DrawIndexed(6);
+	}
+
 
 	
 
