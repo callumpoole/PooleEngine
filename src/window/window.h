@@ -11,19 +11,22 @@ namespace Poole
 	{
 	public:
 		[[nodiscard]]
-		static GLFWwindow* Init(const char* windowName, uvec2 size);
+		static GLFWwindow* Init(const char* title, uvec2 size);
 		static void SetupPostGlad(GLFWwindow* window);
 		static void Tick();
 		static void Close();
+		static void SetWindowTitle(const char* title);
 
 		static std::vector<std::function<void(int width, int height)>> m_OnResize;
 
-		static std::string_view GetWindowName() { return m_windowName; }
-		static uvec2 GetWindowSize() { return m_windowSize; }
+		static std::string GetOriginalTitle() { return m_OriginalTitle; }
+		static std::string GetCurrentTitle() { return m_Title; }
+		static uvec2 GetWindowSize() { return m_WindowSize; }
 		static GLFWwindow* m_WindowInstance;
 	private:
 		static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-		static std::string_view m_windowName;
-		static uvec2 m_windowSize;
+		static std::string m_OriginalTitle;
+		static std::string m_Title;
+		static uvec2 m_WindowSize;
 	};
 }

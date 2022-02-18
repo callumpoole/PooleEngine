@@ -1,10 +1,25 @@
 #include "core/core_logging.h"
 
 #include "core.h"
+#include <filesystem>
 
 namespace Poole
 {
-	u64 EngineLogTime::m_TickCount = 0;
+	u64 EngineTime::s_TickCount = 0;
+	u64 EngineTime::s_FrameNS = 0;
+	f32 EngineTime::s_FrameMS = 0.f;
+	f32 EngineTime::s_DeltaTime = 0.f;
+	f32 EngineTime::s_FPS = 0.f;
+
+	long long EngineTime::s_LaunchSinceEpochNS = 0;
+	long long EngineTime::s_FirstTickSinceEpochNS = 0;
+	f32 EngineTime::s_SecondsSinceLaunch = 0.f;
+	f32 EngineTime::s_SecondsSinceFirstTick = 0.f;
+
+	f32 EngineTime::s_AccDeltaTimeThisSecond = 0.f;
+	u64 EngineTime::s_AccTicksThisSecond = 0;
+	f32 EngineTime::s_AvgDeltaTime = 0.f;
+	f32 EngineTime::s_AvgFPS = 0.f;
 
 	size_t CharactersToRemoveFromPath()
 	{

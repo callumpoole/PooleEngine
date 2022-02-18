@@ -1,17 +1,30 @@
 #pragma once
 
 #include "core.h"
-#include <filesystem>
 
 namespace Poole
 {
-	class EngineLogTime
+	class EngineTime
 	{
 		friend class Engine;
 	public:
-		static u64 GetTickCount() { return m_TickCount; }
+		static u64 GetTickCount() { return s_TickCount; }
 	private:
-		static u64 m_TickCount;
+		static u64 s_TickCount;
+		static u64 s_FrameNS;
+		static f32 s_FrameMS;
+		static f32 s_DeltaTime;
+		static f32 s_FPS;
+
+		static long long s_LaunchSinceEpochNS;
+		static long long s_FirstTickSinceEpochNS;
+		static f32 s_SecondsSinceLaunch;
+		static f32 s_SecondsSinceFirstTick;
+
+		static f32 s_AccDeltaTimeThisSecond;
+		static u64 s_AccTicksThisSecond;
+		static f32 s_AvgDeltaTime;
+		static f32 s_AvgFPS;
 	};
 
 	size_t CharactersToRemoveFromPath();
@@ -19,8 +32,8 @@ namespace Poole
 }
 
 
-#define INTERNAL_LOG_TICK_LITERALS "[{}] "
-#define INTERNAL_LOG_TICK_PARAMS Poole::EngineLogTime::GetTickCount() % 1000
+#define INTERNAL_LOG_TICK_LITERALS "[{:3}] "
+#define INTERNAL_LOG_TICK_PARAMS Poole::EngineTime::GetTickCount() % 1000
 
 #define INTERNAL_LOG_LITERALS INTERNAL_LOG_TICK_LITERALS "[{}] {}:({},{}): "
 #define INTERNAL_LOG_PARAMS   INTERNAL_LOG_TICK_PARAMS, \

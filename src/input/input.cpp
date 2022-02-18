@@ -34,7 +34,7 @@ namespace Poole
 	void ProcessScrollEvent(GLFWwindow* /*window*/, double xOffset, double yOffset)
 	{
 		Input::m_LastScrollDelta = { (float)xOffset, (float)yOffset };
-		Input::m_KeepLastScrollDataTickID = EngineLogTime::GetTickCount();
+		Input::m_KeepLastScrollDataTickID = EngineTime::GetTickCount();
 		//LOG("Scroll X: {}, Y: {}", xOffset, yOffset);
 	}
 
@@ -70,7 +70,7 @@ namespace Poole
 
 		//TO MOVE:
 		//Reset Scroll Delta if it wasn't just applied this tick
-		if (Input::m_KeepLastScrollDataTickID != EngineLogTime::GetTickCount())
+		if (Input::m_KeepLastScrollDataTickID != EngineTime::GetTickCount())
 		{
 			Input::m_LastScrollDelta = { 0,0 };
 		}
@@ -89,7 +89,7 @@ namespace Poole
 						  m_LastMousePos.y >= 0 && m_LastMousePos.y <= windowSize.y);
 		}
 
-		if (EngineLogTime::GetTickCount() != 0)
+		if (EngineTime::GetTickCount() != 0)
 		{
 			m_DeltaMousePos = intPos - m_LastMousePos;
 

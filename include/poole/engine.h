@@ -19,6 +19,8 @@ namespace Poole {
 
 
 	private:
+		void HandleTimeParams(long long PreviousFrameTimeSinceEpochNS);
+
 		struct
 		{
 			const char* windowName;
