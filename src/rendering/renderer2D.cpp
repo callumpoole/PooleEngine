@@ -6,6 +6,7 @@
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/camera/orthographic_camera.h"
 #include "window/window.h"
+#include "input/input.h" //TEMP
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -96,6 +97,11 @@ namespace Poole::Rendering
 
 		//TEMP FOR CIRCLES
 		s_QuadRenderData.m_Shader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
+
+		const fvec2 mouseNorm = Input::GetMousePositionFloat(true, ECursorClamping::Clamp, ECursorNormalization::ZeroToOne);
+		LOG("Mouse = {} , {}", mouseNorm.x, mouseNorm.y);
+		s_QuadRenderData.m_Shader->SetUniform("u_Thickness", mouseNorm.x);
+		s_QuadRenderData.m_Shader->SetUniform("u_Fade", mouseNorm.y);
 
 		//Vertex Buffer
 		s_QuadRenderData.m_VertexBuffer->Bind();
