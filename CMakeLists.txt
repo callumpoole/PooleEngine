@@ -21,6 +21,7 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/shaders/UniformColor2DTransform.shader"
 	"src/rendering/shaders/VertexColor.shader"
 	"src/rendering/shaders/VertexColor2DTransform.shader"
+	"src/rendering/shaders/Circle2DTransform.shader"
 	"src/rendering/shaders/Experimental1.shader"
 	"src/rendering/shaders/Experimental2.shader"
 	"src/rendering/shaders/Experimental3.shader"

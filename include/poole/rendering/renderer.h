@@ -39,7 +39,8 @@ namespace Poole::Rendering {
 		static GLShader s_shaderUniformColor;
 		static GLShader s_shaderVertexColor;
 		static GLShader s_shaderUniformColorTransform2D;
-		static GLShader s_shaderVertexColorTransform2D;
+		static GLShader s_shaderVertexColorTransform2D; 
+		static GLShader s_shaderCircleTransform2D;
 		static GLShader s_shaderExperimental1;
 		static GLShader s_shaderExperimental2;
 		static GLShader s_shaderExperimental3;

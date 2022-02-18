@@ -15,6 +15,7 @@ namespace Poole::Rendering
 	GLShader Renderer::s_shaderVertexColor;
 	GLShader Renderer::s_shaderUniformColorTransform2D;
 	GLShader Renderer::s_shaderVertexColorTransform2D;
+	GLShader Renderer::s_shaderCircleTransform2D;
 	GLShader Renderer::s_shaderExperimental1;
 	GLShader Renderer::s_shaderExperimental2;
 	GLShader Renderer::s_shaderExperimental3;
@@ -94,6 +95,7 @@ namespace Poole::Rendering
 		s_shaderVertexColor = Rendering::GLShader(shader_path "VertexColor.shader");
 		s_shaderUniformColorTransform2D = Rendering::GLShader(shader_path "UniformColor2DTransform.shader");
 		s_shaderVertexColorTransform2D = Rendering::GLShader(shader_path "VertexColor2DTransform.shader");
+		s_shaderCircleTransform2D = Rendering::GLShader(shader_path "Circle2DTransform.shader");
 		//s_shaderExperimental1 = Rendering::GLShader(shader_path "Experimental1.shader");
 		//s_shaderExperimental2 = Rendering::GLShader(shader_path "Experimental2.shader");
 		//s_shaderExperimental3 = Rendering::GLShader(shader_path "Experimental3.shader");

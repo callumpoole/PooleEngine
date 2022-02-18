@@ -42,6 +42,7 @@ namespace Poole
 
 
 		/* Buttons & Axes */
+	public:
 		static bool IsButton(EInputButton button, EInputPress press);
 		static bool IsButtonDown(EInputButton button)   { return IsButton(button, EInputPress::PRESS); }
 		static bool IsButtonUp(EInputButton button)		{ return IsButton(button, EInputPress::RELEASE); }

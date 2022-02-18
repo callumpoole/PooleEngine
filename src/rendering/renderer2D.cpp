@@ -5,6 +5,7 @@
 #include "rendering/renderer.h"
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/camera/orthographic_camera.h"
+#include "window/window.h"
 
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -19,36 +20,66 @@ namespace Poole::Rendering
 			std::shared_ptr<VertexBuffer> m_VertexBuffer;
 			std::shared_ptr<IndexBuffer> m_IndexBuffer;
 		};
-		static RenderData s_RenderData;
+		static RenderData s_QuadRenderData;
+		static RenderData s_CircleRenderData;
 	}
 
 	void Renderer2D::Init()
 	{
-		//Vertex Array
-		s_RenderData.m_VertexArray.reset(VertexArray::Create());
-		s_RenderData.m_VertexArray->Bind();
-
-		//Shader
-		s_RenderData.m_Shader = &Renderer::s_shaderUniformColorTransform2D;
-
-		//Vertex Buffer
-		fvec3 corners[4] =
+		//Quad
 		{
-			{-1, -1, 0.f},
-			{ 1, -1, 0.f},
-			{ 1,  1, 0.f},
-			{-1,  1, 0.f},
-		};
-		s_RenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
-		s_RenderData.m_VertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position"},
-		});
-		s_RenderData.m_VertexArray->AddVertexBuffer(s_RenderData.m_VertexBuffer);
+			//Vertex Array
+			s_QuadRenderData.m_VertexArray.reset(VertexArray::Create());
+			s_QuadRenderData.m_VertexArray->Bind();
 
-		//Index Buffer
-		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-		s_RenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-		s_RenderData.m_VertexArray->SetIndexBuffer(s_RenderData.m_IndexBuffer);
+			//Shader
+			//s_QuadRenderData.m_Shader = &Renderer::s_shaderUniformColorTransform2D;
+			s_QuadRenderData.m_Shader = &Renderer::s_shaderCircleTransform2D;
+
+			//Vertex Buffer
+			fvec3 corners[4] =
+			{
+				{-1, -1, 0.f},
+				{ 1, -1, 0.f},
+				{ 1,  1, 0.f},
+				{-1,  1, 0.f},
+			};
+			s_QuadRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
+			s_QuadRenderData.m_VertexBuffer->SetLayout({
+				{ ShaderDataType::Float3, "a_Position"},
+			});
+			s_QuadRenderData.m_VertexArray->AddVertexBuffer(s_QuadRenderData.m_VertexBuffer);
+
+			//Index Buffer
+			u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+			s_QuadRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+			s_QuadRenderData.m_VertexArray->SetIndexBuffer(s_QuadRenderData.m_IndexBuffer);
+		}
+		//Circle
+		{
+			//Vertex Array
+			s_CircleRenderData.m_VertexArray.reset(VertexArray::Create());
+			s_CircleRenderData.m_VertexArray->Bind();
+
+			//Vertex Buffer
+			fvec3 corners[4] =
+			{
+				{-1, -1, 0.f},
+				{ 1, -1, 0.f},
+				{ 1,  1, 0.f},
+				{-1,  1, 0.f},
+			};
+			s_CircleRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
+			s_CircleRenderData.m_VertexBuffer->SetLayout({
+				{ ShaderDataType::Float3, "a_Position"},
+			});
+			s_CircleRenderData.m_VertexArray->AddVertexBuffer(s_CircleRenderData.m_VertexBuffer);
+
+			//Index Buffer
+			u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+			s_CircleRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+			s_CircleRenderData.m_VertexArray->SetIndexBuffer(s_CircleRenderData.m_IndexBuffer);
+		}
 	}
 	void Renderer2D::Shutdown()
 	{
@@ -57,17 +88,20 @@ namespace Poole::Rendering
 	void Renderer2D::BeginScene()
 	{
 		//Vertex Array
-		s_RenderData.m_VertexArray->Bind();
+		s_QuadRenderData.m_VertexArray->Bind();
 
 		//Shader
-		s_RenderData.m_Shader->Bind();
-		s_RenderData.m_Shader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+		s_QuadRenderData.m_Shader->Bind();
+		s_QuadRenderData.m_Shader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+
+		//TEMP FOR CIRCLES
+		s_QuadRenderData.m_Shader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
 
 		//Vertex Buffer
-		s_RenderData.m_VertexBuffer->Bind();
+		s_QuadRenderData.m_VertexBuffer->Bind();
 
 		//Index Buffer
-		s_RenderData.m_IndexBuffer->Bind();
+		s_QuadRenderData.m_IndexBuffer->Bind();
 	}
 	void Renderer2D::RenderScene()
 	{
@@ -80,13 +114,13 @@ namespace Poole::Rendering
 
 	void Renderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
 	{
-		s_RenderData.m_VertexArray->Bind(); 
+		s_QuadRenderData.m_VertexArray->Bind(); 
 
-		s_RenderData.m_Shader->SetUniform("u_Transform", MakeTransformMatrix(transform));
-		s_RenderData.m_Shader->SetUniform("u_Color", color);
+		s_QuadRenderData.m_Shader->SetUniform("u_Transform", MakeTransformMatrix(transform));
+		s_QuadRenderData.m_Shader->SetUniform("u_Color", color);
 
-		s_RenderData.m_VertexBuffer->Bind(); //Probably unnecessary
-		s_RenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
+		s_QuadRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
+		s_QuadRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
 
 		GetRendererAPI()->DrawIndexed(6);
 	}

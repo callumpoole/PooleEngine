@@ -56,7 +56,7 @@ namespace Poole
 
 		TickMouse(window);
 
-		LOG("Gamepad: {}, Guid: {}", GetJoystickName(EJoystickID::JOYSTICK_1), GetJoystickGUID(EJoystickID::JOYSTICK_1));
+		//LOG("Gamepad: {}, Guid: {}", GetJoystickName(EJoystickID::JOYSTICK_1), GetJoystickGUID(EJoystickID::JOYSTICK_1));
 
 		//TEMP
 		if constexpr (AllowCameraMovement)
@@ -151,8 +151,7 @@ namespace Poole
 			return invertY ? ivec2{ in.x, - in.y } : in;
 		};
 
-		if (withinScreen) return MaybeInvert(m_DeltaMousePosInWindow);
-		else			  return MaybeInvert(m_DeltaMousePos);
+		return MaybeInvert(withinScreen ? m_DeltaMousePosInWindow : m_DeltaMousePos);
 	}
 	/*static*/ fvec2 Input::GetMouseDeltaFloat(bool invertY, bool withinScreen, ECursorNormalization norm)
 	{
