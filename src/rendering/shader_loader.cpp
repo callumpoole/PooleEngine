@@ -8,15 +8,26 @@ namespace Poole::Rendering {
 
 	GLShader::GLShader(std::string_view combinedPath)
 	{
+		bool Success = true;
 		std::optional<ShaderSource> Source = LoadFromFile(combinedPath);
 		if (Source)
 		{
-			m_programID = LoadShaderLiterals(Source->vertexShader.c_str(), Source->fragmentShader.c_str());
+			m_programID = LoadShaderLiterals(Source->vertexShader.c_str(), Source->fragmentShader.c_str(), Success);
+
+			if (Success)
+			{
+				LOG("Loaded {}", combinedPath.data());
+			}
 		}
 	}
 	GLShader::GLShader(std::string_view vertexShaderCode, std::string_view fragmentShaderCode)
 	{
-		m_programID = LoadShaderLiterals(vertexShaderCode.data(), fragmentShaderCode.data());
+		bool Success = true;
+		m_programID = LoadShaderLiterals(vertexShaderCode.data(), fragmentShaderCode.data(), Success);
+		if (Success)
+		{
+			LOG("Loaded Vertex: {} & Fragment: {}", vertexShaderCode.data(), fragmentShaderCode.data());
+		}
 	}
 	GLShader::~GLShader()
 	{
@@ -34,7 +45,7 @@ namespace Poole::Rendering {
 
 	std::optional<GLShader::ShaderSource> GLShader::LoadFromFile(std::string_view combinedPath)
 	{
-		LOG_LINE("Loading shader: {}", combinedPath.data());
+		//LOG_LINE("Loading shader: {}", combinedPath.data());
 
 		namespace fs = std::filesystem;
 		fs::path path = fs::absolute(fs::path(combinedPath));
@@ -43,12 +54,14 @@ namespace Poole::Rendering {
 			std::ifstream stream(path, std::ios::in);
 			if (stream.is_open())
 			{
-				std::stringstream ss[2];
-
+				constexpr u8 NUM_TYPES = 2;
+				std::stringstream ss[NUM_TYPES];
+				
 				enum class EShaderType : u8
 				{
 					Vertex = 0, //Has to be 0 since it's an array index
 					Fragment = 1,
+					Last = Fragment,
 					None = 255,
 				};
 
@@ -67,6 +80,12 @@ namespace Poole::Rendering {
 					{
 						ss[(u8)type] << line << '\n';
 					}
+
+					static_assert(NUM_TYPES == 2);
+					if ((u8)type == 0)
+					{
+						ss[1] << '\n'; //This ensures line numbers are correct in error messages
+					}
 				}
 				stream.close();
 
@@ -82,9 +101,11 @@ namespace Poole::Rendering {
 		return std::nullopt;
 	}
 
-	GLuint GLShader::LoadShaderLiterals(const char* vertexShaderCode, const char* fragmentShaderCode)
+	GLuint GLShader::LoadShaderLiterals(const char* vertexShaderCode, const char* fragmentShaderCode, bool& outSuccess)
 	{
 		//Source: http://www.opengl-tutorial.org/beginners-tutorials/tutorial-2-the-first-triangle/
+
+		outSuccess = true;
 
 		// Create the shaders
 		const GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -93,16 +114,30 @@ namespace Poole::Rendering {
 		GLint result = GL_FALSE;
 		i32 infoLogLength = 0;
 
+		auto ShowError = [&infoLogLength](const GLuint& ID, std::string_view shaderTypeName)
+		{
+			std::vector<char> shaderErrorMessage(infoLogLength + 1);
+			glGetShaderInfoLog(ID, infoLogLength, NULL, &shaderErrorMessage[0]);
+			LOG_ERROR("Failed to {} - {}", shaderTypeName.data(), &shaderErrorMessage[0]);
+		};
+
 		// Compile Vertex Shader
-		LOG_LINE("Compiling shader: Vertex");
-		CompileAndCheckShader(vertexShaderID, vertexShaderCode, result, infoLogLength);
+		const bool CompiledVertex = CompileShader(vertexShaderID, vertexShaderCode, result, infoLogLength);
+		if (!CompiledVertex)
+		{
+			ShowError(vertexShaderID, "Compile Vertex Shader");
+			outSuccess = false;
+		}
 
 		// Compile Fragment Shader
-		LOG_LINE("Compiling shader: Fragment");
-		CompileAndCheckShader(fragmentShaderID, fragmentShaderCode, result, infoLogLength);
+		const bool CompiledFragment = CompileShader(fragmentShaderID, fragmentShaderCode, result, infoLogLength);
+		if (!CompiledFragment)
+		{
+			ShowError(fragmentShaderID, "Compile Fragment Shader");
+			outSuccess = false;
+		}
 
 		// Link the program
-		LOG_LINE("Linking program");
 		const GLuint programID = glCreateProgram();
 		glAttachShader(programID, vertexShaderID);
 		glAttachShader(programID, fragmentShaderID);
@@ -113,9 +148,8 @@ namespace Poole::Rendering {
 		glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &infoLogLength);
 		if (infoLogLength > 0)
 		{
-			std::vector<char> ProgramErrorMessage(infoLogLength + 1); //#todo: Investigate this, +1 for \0 ???
-			glGetProgramInfoLog(programID, infoLogLength, NULL, &ProgramErrorMessage[0]);
-			LOG_ERROR("{}", &ProgramErrorMessage[0]);
+			ShowError(programID, "Link Program ID");
+			outSuccess = false;
 		}
 
 		glDetachShader(programID, vertexShaderID);
@@ -127,7 +161,7 @@ namespace Poole::Rendering {
 		return programID;
 	}
 
-	void GLShader::CompileAndCheckShader(const GLuint& shaderID, const char* shaderCode, GLint& result, i32& infoLogLength)
+	bool GLShader::CompileShader(const GLuint& shaderID, const char* shaderCode, GLint& result, i32& infoLogLength)
 	{
 		glShaderSource(shaderID, 1, &shaderCode, NULL);
 		glCompileShader(shaderID);
@@ -135,12 +169,8 @@ namespace Poole::Rendering {
 		// Check Vertex Shader
 		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
 		glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
-		if (infoLogLength > 0)
-		{
-			std::vector<char> shaderErrorMessage(infoLogLength + 1);
-			glGetShaderInfoLog(shaderID, infoLogLength, NULL, &shaderErrorMessage[0]);
-			LOG_ERROR("{}", &shaderErrorMessage[0]);
-		}
+
+		return infoLogLength == 0;
 	}
 }
 

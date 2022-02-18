@@ -46,8 +46,8 @@ namespace Poole::Rendering {
 
 		std::optional<ShaderSource> LoadFromFile(std::string_view combinedPath);
 
-		GLuint LoadShaderLiterals(const char* vertexShaderCode, const char* fragmentShaderCode);
-		void CompileAndCheckShader(const GLuint& shaderID, const char* shaderCode, GLint& result, i32& infoLogLength);
+		GLuint LoadShaderLiterals(const char* vertexShaderCode, const char* fragmentShaderCode, bool& outSuccess);
+		bool CompileShader(const GLuint& shaderID, const char* shaderCode, GLint& result, i32& infoLogLength);
 
 		GLuint m_programID = 0;
 	};

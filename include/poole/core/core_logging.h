@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core.h"
+#include <filesystem>
 
 namespace Poole
 {
@@ -12,20 +13,28 @@ namespace Poole
 	private:
 		static u64 m_TickCount;
 	};
+
+	size_t CharactersToRemoveFromPath();
+	std::string_view ShortenFilename(const char* fullFileName);
 }
 
-#define INTERNAL_LOG_TICK_LITERALS "[{}]"
+
+#define INTERNAL_LOG_TICK_LITERALS "[{}] "
 #define INTERNAL_LOG_TICK_PARAMS Poole::EngineLogTime::GetTickCount() % 1000
 
-#define INTERNAL_LOG_LITERALS INTERNAL_LOG_TICK_LITERALS "[{}] {}:({},{}):"
+#define INTERNAL_LOG_LITERALS INTERNAL_LOG_TICK_LITERALS "[{}] {}:({},{}): "
 #define INTERNAL_LOG_PARAMS   INTERNAL_LOG_TICK_PARAMS, \
-							  std::source_location::current().file_name(), \
+							  ShortenFilename(std::source_location::current().file_name()).data(), \
 							  std::source_location::current().function_name(), \
 							  std::source_location::current().line(), \
 							  std::source_location::current().column()
 
+
+
 #define LOG(msg, ...) \
 	std::cout << std::format(INTERNAL_LOG_TICK_LITERALS msg "\n", INTERNAL_LOG_TICK_PARAMS, __VA_ARGS__);
+
+
 
 #define LOG_LINE(msg, ...) \
 	std::cout << std::format("LOG: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
