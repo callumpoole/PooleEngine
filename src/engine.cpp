@@ -20,12 +20,11 @@ namespace Poole
     {
     }
 
-
     void Engine::Run()
     {
         EngineTime::s_LaunchSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
-        Poole::CommandArgs().Apply(*this);
+        CommandArgs().Apply(*this);
         
         //Initialize the library GLFW
         if (!glfwInit())

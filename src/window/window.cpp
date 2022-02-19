@@ -32,8 +32,8 @@ namespace Poole
         GLFWwindow* window = glfwCreateWindow(size.x, size.y, title, NULL, NULL);
         if (!window)
         {
-            std::cout << "Failed to Create Window\n";
             glfwTerminate();
+            LOG_FATAL("Failed to Create Window");
             return nullptr;
         }
         m_OriginalTitle = title;

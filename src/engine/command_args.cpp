@@ -11,7 +11,7 @@ namespace Poole
         //The 0th arg will always be the path which is why it's skipped here.
         for (size_t i = 1; i < args.size(); i++)
         {
-            std::string_view view = args[i];
+            const std::string_view view = args[i];
 
             for (const auto& pair : s_Assignments.m_Data)
             {
@@ -27,35 +27,26 @@ namespace Poole
 
     void CommandArgs::AssignSize(Engine& engine, std::string_view assignee)
     {
-        const size_t comma = assignee.find(',');
-        if (comma != std::string_view::npos)
+        if (auto splitResult = Split(assignee, ','))
         {
-            const std::string_view left = assignee.substr(0, comma);
-            const std::string_view right = assignee.substr(comma + 1);
-            if (left.size() > 0 && right.size() > 0)
+            std::optional<u32> width = ToPrimitive<u32>(splitResult->first);
+            if (!width)
             {
-                u32 width, height;
-                auto resultW = std::from_chars(left.data(), left.data() + left.size(), width);
-                auto resultH = std::from_chars(right.data(), right.data() + right.size(), height);
-                if (resultW.ec == std::errc::invalid_argument) {
-                    LOG_ERROR("{} size= Width in valid format - ", errorMsg, left);
-                    return;
-                }
-                if (resultH.ec == std::errc::invalid_argument) {
-                    LOG_ERROR("{} size= Height in valid format - ", errorMsg, right);
-                    return;
-                }
-                engine.m_RunData.m_Size.x = width;
-                engine.m_RunData.m_Size.y = height;
+                LOG_ERROR("{} size= Width in valid format - {}", errorMsg, splitResult->first);
+                return;
             }
-            else
+            std::optional<u32> height = ToPrimitive<u32>(splitResult->second);
+            if (!height)
             {
-                LOG_ERROR("{} size= didn't provide a width and height", errorMsg);
+                LOG_ERROR("{} size= Height in valid format - {}", errorMsg, splitResult->second);
+                return;
             }
+
+            engine.m_RunData.m_Size = { *width, *height };
         }
         else
         {
-            LOG_ERROR("{} size= didn't include a comma", errorMsg);
+            LOG_ERROR("{} size= didn't include a comma - {}", errorMsg, assignee);
         }
     }
     void CommandArgs::AssignName(Engine& engine, std::string_view assignee)
@@ -63,4 +54,3 @@ namespace Poole
         engine.m_RunData.m_WindowName = assignee.data(); //Okay since both are valid for lifetime of program
     }
 }
-

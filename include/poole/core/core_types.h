@@ -80,9 +80,11 @@ struct ConstexprMap
 	using K = _K;
 	using V = _V;
 	static constexpr size_t Size = _Size;
-	std::array<std::pair<K, V>, _Size> m_Data;
+
+	std::array<std::pair<K, V>, Size> m_Data;
 	
-	constexpr V at(const K& key) const {
+	[[nodiscard]]
+	constexpr const V& at(const K& key) const {
 		const auto itr =
 			std::find_if(begin(m_Data), end(m_Data),
 				[&key](const auto& pair) { return pair.first == key; });

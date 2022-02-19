@@ -17,6 +17,7 @@ namespace Poole
 		static void Close();
 		static void SetWindowTitle(const char* title);
 
+		//TODO: Swap with event system
 		static std::vector<std::function<void(int width, int height)>> m_OnResize;
 
 		static std::string GetOriginalTitle() { return m_OriginalTitle; }
