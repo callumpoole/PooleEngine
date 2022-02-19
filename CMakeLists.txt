@@ -50,6 +50,8 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/input/input.cpp"
 	"src/window/window.h"
 	"src/window/window.cpp"
+	"src/engine/command_args.h"
+	"src/engine/command_args.cpp"
 	)
 
 # Setup Folder Filters for IDE

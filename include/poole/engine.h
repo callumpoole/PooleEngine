@@ -6,9 +6,10 @@ namespace Poole {
 
 	class Engine
 	{
+		friend class CommandArgs;
 	public:
-		Engine();
-	   	Engine(const char* windowName, uvec2 size);
+		Engine(std::vector<std::string_view>&& commandArgs = {});
+	   	Engine(std::vector<std::string_view>&& commandArgs, const char* windowName, uvec2 size);
 		virtual ~Engine() {}
 
 		void Run();
@@ -19,16 +20,15 @@ namespace Poole {
 
 
 	private:
-		void HandleTimeParams(long long PreviousFrameTimeSinceEpochNS);
+		void HandleTimeParams(i64 PreviousFrameTimeSinceEpochNS);
 
 		struct
 		{
-			const char* windowName;
-			uvec2 size;
+			std::vector<std::string_view> m_CommandArgs;
+			const char* m_WindowName;
+			uvec2 m_Size;
 		} m_RunData; //Used to pass data from ctr to Run();
-
-
 	}; 
 
-	Engine* CreateApplication();
+	Engine* CreateApplication(std::vector<std::string_view>&& commandArgs);
 }

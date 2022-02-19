@@ -11,8 +11,8 @@ namespace Poole
 	f32 EngineTime::s_DeltaTime = 0.f;
 	f32 EngineTime::s_FPS = 0.f;
 
-	long long EngineTime::s_LaunchSinceEpochNS = 0;
-	long long EngineTime::s_FirstTickSinceEpochNS = 0;
+	i64 EngineTime::s_LaunchSinceEpochNS = 0;
+	i64 EngineTime::s_FirstTickSinceEpochNS = 0;
 	f32 EngineTime::s_SecondsSinceLaunch = 0.f;
 	f32 EngineTime::s_SecondsSinceFirstTick = 0.f;
 

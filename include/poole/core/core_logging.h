@@ -16,8 +16,8 @@ namespace Poole
 		static f32 s_DeltaTime;
 		static f32 s_FPS;
 
-		static long long s_LaunchSinceEpochNS;
-		static long long s_FirstTickSinceEpochNS;
+		static i64 s_LaunchSinceEpochNS;
+		static i64 s_FirstTickSinceEpochNS;
 		static f32 s_SecondsSinceLaunch;
 		static f32 s_SecondsSinceFirstTick;
 

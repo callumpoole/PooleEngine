@@ -6,23 +6,26 @@
 #include "rendering/rendering_primitives.h"
 #include "input/input.h"
 #include "window/window.h"
-
+#include "engine/command_args.h"
 
 namespace Poole 
 {
-    Engine::Engine()
-        : m_RunData({ "Unamed Window", uvec2(640, 480) })
+    Engine::Engine(std::vector<std::string_view>&& commandArgs)
+        : m_RunData({ std::move(commandArgs), "Unamed Window", uvec2(640, 480)})
     {
     }
 
-    Engine::Engine(const char* windowName, uvec2 size)
-        : m_RunData({ windowName, size })
+    Engine::Engine(std::vector<std::string_view>&& commandArgs, const char* windowName, uvec2 size)
+        : m_RunData({ std::move(commandArgs), windowName, size })
     {
     }
+
 
     void Engine::Run()
     {
         EngineTime::s_LaunchSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+
+        Poole::CommandArgs().Apply(*this);
         
         //Initialize the library GLFW
         if (!glfwInit())
@@ -30,7 +33,7 @@ namespace Poole
             LOG_FATAL("Failed to Init GLFW");
         }
 
-        GLFWwindow* window = Window::Init(m_RunData.windowName, m_RunData.size);
+        GLFWwindow* window = Window::Init(m_RunData.m_WindowName, m_RunData.m_Size);
         if (!window)
         {
             return;
@@ -82,10 +85,10 @@ namespace Poole
         Window::Close();
     }
 
-    void Engine::HandleTimeParams(long long PreviousFrameTimeSinceEpochNS)
+    void Engine::HandleTimeParams(const i64 PreviousFrameTimeSinceEpochNS)
     {
-        const long long NowTimeSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-        const long long DeltaTimeDuration = NowTimeSinceEpochNS - PreviousFrameTimeSinceEpochNS;
+        const i64 NowTimeSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        const i64 DeltaTimeDuration = NowTimeSinceEpochNS - PreviousFrameTimeSinceEpochNS;
 
         EngineTime::s_FrameNS = DeltaTimeDuration;
         EngineTime::s_FrameMS = EngineTime::s_FrameNS / 1000'000.f;
@@ -108,7 +111,7 @@ namespace Poole
             EngineTime::s_AccDeltaTimeThisSecond = 0.f;
             EngineTime::s_AccTicksThisSecond = 0;
 
-            Window::SetWindowTitle((Window::GetCurrentTitle() + std::format(" - AvgFPS: {:5.1f}, AvgDTime: {:6.5f}, Open: {:.0f}",
+            Window::SetWindowTitle((Window::GetCurrentTitle() + std::format(" - AvgFPS: {:5.1f}, AvgDTime: {:6.5f}s, Open: {:.0f}s",
                 EngineTime::s_AvgFPS, EngineTime::s_AvgDeltaTime, EngineTime::s_SecondsSinceLaunch)).c_str());
         }
 
