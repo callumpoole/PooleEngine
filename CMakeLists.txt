@@ -27,8 +27,8 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/shaders/Experimental3.shader"
 	"include/poole/rendering/camera/orthographic_camera.h"
 	"src/rendering/camera/orthographic_camera.cpp"
-	"include/poole/rendering/renderer.h"
 	"include/poole/rendering/renderer2D.h"
+	"include/poole/rendering/renderer.h"
 	"src/rendering/renderer.cpp"
 	"src/rendering/renderer2D.cpp"
 	"include/poole/rendering/rendering_primitives.h"
@@ -52,6 +52,8 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/window/window.cpp"
 	"src/engine/command_args.h"
 	"src/engine/command_args.cpp"
+	"include/poole/engine/engine_time.h"
+	"src/engine/engine_time.cpp"
 	)
 
 # Setup Folder Filters for IDE

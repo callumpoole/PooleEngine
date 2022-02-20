@@ -10,19 +10,24 @@
 
 namespace Poole 
 {
-    Engine::Engine(std::vector<std::string_view>&& commandArgs)
-        : m_RunData({ std::move(commandArgs), "Unamed Window", uvec2(640, 480)})
-    {
-    }
+    Engine* Engine::m_Instance = nullptr;
 
     Engine::Engine(std::vector<std::string_view>&& commandArgs, const char* windowName, uvec2 size)
         : m_RunData({ std::move(commandArgs), windowName, size })
     {
+        m_Instance = this;
     }
+
+    Engine::Engine(std::vector<std::string_view>&& commandArgs) 
+        : Engine(std::move(commandArgs), "Unamed Window", uvec2(640, 480))
+    {
+        //See main constructor since it's called via this
+    }
+
 
     void Engine::Run()
     {
-        EngineTime::s_LaunchSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        m_TimeData.s_LaunchSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
         CommandArgs().Apply(*this);
         
@@ -57,7 +62,7 @@ namespace Poole
         BeginApp();
 
         //Init time stuff (after client code)
-        EngineTime::s_FirstTickSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        m_TimeData.s_FirstTickSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
         auto previousFrameTime = std::chrono::high_resolution_clock::now();
 
@@ -72,7 +77,7 @@ namespace Poole
 
             Rendering::Renderer::BeginScene();
 
-            UpdateApp(EngineTime::s_DeltaTime);
+            UpdateApp(m_TimeData.s_DeltaTime);
 
             Rendering::Renderer::RenderScene();
             Rendering::Renderer::EndScene(window);
@@ -89,32 +94,32 @@ namespace Poole
         const i64 NowTimeSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
         const i64 DeltaTimeDuration = NowTimeSinceEpochNS - PreviousFrameTimeSinceEpochNS;
 
-        EngineTime::s_FrameNS = DeltaTimeDuration;
-        EngineTime::s_FrameMS = EngineTime::s_FrameNS / 1000'000.f;
-        EngineTime::s_DeltaTime = EngineTime::s_FrameMS / 1000.f;
-        EngineTime::s_FPS = 1 / EngineTime::s_DeltaTime;
-        EngineTime::s_TickCount++;
+        m_TimeData.s_FrameNS = DeltaTimeDuration;
+        m_TimeData.s_FrameMS = m_TimeData.s_FrameNS / 1000'000.f;
+        m_TimeData.s_DeltaTime = m_TimeData.s_FrameMS / 1000.f;
+        m_TimeData.s_FPS = 1 / m_TimeData.s_DeltaTime;
+        m_TimeData.s_TickCount++;
 
-        const f32 PrevSecondsSinceLaunch = EngineTime::s_SecondsSinceLaunch;
-        EngineTime::s_SecondsSinceLaunch    = (NowTimeSinceEpochNS - EngineTime::s_LaunchSinceEpochNS)    / 1000'000'000.f;
-        EngineTime::s_SecondsSinceFirstTick = (NowTimeSinceEpochNS - EngineTime::s_FirstTickSinceEpochNS) / 1000'000'000.f;
+        const f32 PrevSecondsSinceLaunch = m_TimeData.s_SecondsSinceLaunch;
+        m_TimeData.s_SecondsSinceLaunch    = (NowTimeSinceEpochNS - m_TimeData.s_LaunchSinceEpochNS)    / 1000'000'000.f;
+        m_TimeData.s_SecondsSinceFirstTick = (NowTimeSinceEpochNS - m_TimeData.s_FirstTickSinceEpochNS) / 1000'000'000.f;
 
-        EngineTime::s_AccDeltaTimeThisSecond += EngineTime::s_DeltaTime;
-        EngineTime::s_AccTicksThisSecond++;
+        m_TimeData.s_AccDeltaTimeThisSecond += m_TimeData.s_DeltaTime;
+        m_TimeData.s_AccTicksThisSecond++;
 
         //If a new second occoured (not an exact science if multiple seconds are skipped, but it's only an approx)
-        if (std::floor(PrevSecondsSinceLaunch) != std::floor(EngineTime::s_SecondsSinceLaunch))
+        if (std::floor(PrevSecondsSinceLaunch) != std::floor(m_TimeData.s_SecondsSinceLaunch))
         {
-            EngineTime::s_AvgDeltaTime = EngineTime::s_AccDeltaTimeThisSecond / EngineTime::s_AccTicksThisSecond;
-            EngineTime::s_AvgFPS = 1 / EngineTime::s_AvgDeltaTime;
-            EngineTime::s_AccDeltaTimeThisSecond = 0.f;
-            EngineTime::s_AccTicksThisSecond = 0;
+            m_TimeData.s_AvgDeltaTime = m_TimeData.s_AccDeltaTimeThisSecond / m_TimeData.s_AccTicksThisSecond;
+            m_TimeData.s_AvgFPS = 1 / m_TimeData.s_AvgDeltaTime;
+            m_TimeData.s_AccDeltaTimeThisSecond = 0.f;
+            m_TimeData.s_AccTicksThisSecond = 0;
 
             Window::SetWindowTitle((Window::GetCurrentTitle() + std::format(" - AvgFPS: {:5.1f}, AvgDTime: {:6.5f}s, Open: {:.0f}s",
-                EngineTime::s_AvgFPS, EngineTime::s_AvgDeltaTime, EngineTime::s_SecondsSinceLaunch)).c_str());
+                m_TimeData.s_AvgFPS, m_TimeData.s_AvgDeltaTime, m_TimeData.s_SecondsSinceLaunch)).c_str());
         }
 
         //LOG("MS: {:7.3f}, DTime: {:8.5f}, FPS: {:7.1f}, AvgDTime: {:8.5f}, AvgFPS: {:7.1f}, Open: {:.2f}",
-        //    EngineTime::s_FrameMS, EngineTime::s_DeltaTime, EngineTime::s_FPS, EngineTime::s_AvgDeltaTime, EngineTime::s_AvgFPS, EngineTime::s_SecondsSinceLaunch);
+        //    m_TimeData.s_FrameMS, m_TimeData.s_DeltaTime, m_TimeData.s_FPS, m_TimeData.s_AvgDeltaTime, m_TimeData.s_AvgFPS, m_TimeData.s_SecondsSinceLaunch);
     }
 }

@@ -4,36 +4,14 @@
 
 namespace Poole
 {
-	class EngineTime
-	{
-		friend class Engine;
-	public:
-		static u64 GetTickCount() { return s_TickCount; }
-	private:
-		static u64 s_TickCount;
-		static u64 s_FrameNS;
-		static f32 s_FrameMS;
-		static f32 s_DeltaTime;
-		static f32 s_FPS;
-
-		static i64 s_LaunchSinceEpochNS;
-		static i64 s_FirstTickSinceEpochNS;
-		static f32 s_SecondsSinceLaunch;
-		static f32 s_SecondsSinceFirstTick;
-
-		static f32 s_AccDeltaTimeThisSecond;
-		static u64 s_AccTicksThisSecond;
-		static f32 s_AvgDeltaTime;
-		static f32 s_AvgFPS;
-	};
-
+	u64 LoggingGetTickCount();
 	size_t CharactersToRemoveFromPath();
 	std::string_view ShortenFilename(const char* fullFileName);
 }
 
 
 #define INTERNAL_LOG_TICK_LITERALS "[{:3}] "
-#define INTERNAL_LOG_TICK_PARAMS Poole::EngineTime::GetTickCount() % 1000
+#define INTERNAL_LOG_TICK_PARAMS LoggingGetTickCount() % 1000
 
 #define INTERNAL_LOG_LITERALS INTERNAL_LOG_TICK_LITERALS "[{}] {}:({},{}): "
 #define INTERNAL_LOG_PARAMS   INTERNAL_LOG_TICK_PARAMS, \

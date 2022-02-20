@@ -2,24 +2,18 @@
 
 #include "core.h"
 #include <filesystem>
+#include "engine.h"
 
 namespace Poole
 {
-	u64 EngineTime::s_TickCount = 0;
-	u64 EngineTime::s_FrameNS = 0;
-	f32 EngineTime::s_FrameMS = 0.f;
-	f32 EngineTime::s_DeltaTime = 0.f;
-	f32 EngineTime::s_FPS = 0.f;
-
-	i64 EngineTime::s_LaunchSinceEpochNS = 0;
-	i64 EngineTime::s_FirstTickSinceEpochNS = 0;
-	f32 EngineTime::s_SecondsSinceLaunch = 0.f;
-	f32 EngineTime::s_SecondsSinceFirstTick = 0.f;
-
-	f32 EngineTime::s_AccDeltaTimeThisSecond = 0.f;
-	u64 EngineTime::s_AccTicksThisSecond = 0;
-	f32 EngineTime::s_AvgDeltaTime = 0.f;
-	f32 EngineTime::s_AvgFPS = 0.f;
+	u64 LoggingGetTickCount()
+	{
+		if (const Engine* e = Engine::Get())
+		{
+			return e->GetTimeData().GetTickCount();
+		}
+		return 0;
+	}
 
 	size_t CharactersToRemoveFromPath()
 	{

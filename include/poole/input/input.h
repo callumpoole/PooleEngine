@@ -8,17 +8,17 @@ struct GLFWwindow;
 
 namespace Poole
 {
+	class Engine;
+
 	class Input
 	{
 	public:
 		static void Init(GLFWwindow* window);
 		static void Tick(GLFWwindow* window);
 
-
-
 		/* Mouse */
 	private:
-		static void TickMouse(GLFWwindow* window);
+		static void TickMouse(GLFWwindow* window, const Engine& e);
 	public:
 		static ivec2 GetMousePosition(bool invertY = false, ECursorClamping clamping = ECursorClamping::Clamp);
 		static uvec2 GetMousePositionUnsigned(bool invertY = false, ECursorClamping clamping = ECursorClamping::Clamp);

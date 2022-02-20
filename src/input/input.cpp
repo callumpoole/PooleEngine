@@ -1,6 +1,7 @@
 #include "poole/input/input.h"
 #include "rendering/renderer.h"
 #include "rendering/camera/orthographic_camera.h"
+#include "engine.h"
 #include <iostream>
 #include <window/window.h>
 
@@ -33,9 +34,12 @@ namespace Poole
 
 	void ProcessScrollEvent(GLFWwindow* /*window*/, double xOffset, double yOffset)
 	{
-		Input::m_LastScrollDelta = { (float)xOffset, (float)yOffset };
-		Input::m_KeepLastScrollDataTickID = EngineTime::GetTickCount();
-		//LOG("Scroll X: {}, Y: {}", xOffset, yOffset);
+		if (const Engine* e = Engine::Get())
+		{
+			Input::m_LastScrollDelta = { (float)xOffset, (float)yOffset };
+			Input::m_KeepLastScrollDataTickID = e->GetTimeData().GetTickCount();
+			//LOG("Scroll X: {}, Y: {}", xOffset, yOffset);
+		}
 	}
 
 	/*static*/ void Input::Init(GLFWwindow* window)
@@ -48,35 +52,39 @@ namespace Poole
 
 	/*static*/ void Input::Tick(GLFWwindow* window)
 	{
-		//TEMP
-		if (IsButtonDown(EInputButton::KEY_ESCAPE))
+		if (const Engine* e = Engine::Get())
 		{
-			glfwSetWindowShouldClose(window, true);
-		}
 
-		TickMouse(window);
+			//TEMP
+			if (IsButtonDown(EInputButton::KEY_ESCAPE))
+			{
+				glfwSetWindowShouldClose(window, true);
+			}
 
-		//LOG("Gamepad: {}, Guid: {}", GetJoystickName(EJoystickID::JOYSTICK_1), GetJoystickGUID(EJoystickID::JOYSTICK_1));
+			TickMouse(window, *e);
 
-		//TEMP
-		if constexpr (AllowCameraMovement)
-		{
-			MoveCamera();
-		}
-		if constexpr (AllowCameraZooming)
-		{
-			ZoomCamera();
-		}
+			//LOG("Gamepad: {}, Guid: {}", GetJoystickName(EJoystickID::JOYSTICK_1), GetJoystickGUID(EJoystickID::JOYSTICK_1));
 
-		//TO MOVE:
-		//Reset Scroll Delta if it wasn't just applied this tick
-		if (Input::m_KeepLastScrollDataTickID != EngineTime::GetTickCount())
-		{
-			Input::m_LastScrollDelta = { 0,0 };
+			//TEMP
+			if constexpr (AllowCameraMovement)
+			{
+				MoveCamera();
+			}
+			if constexpr (AllowCameraZooming)
+			{
+				ZoomCamera();
+			}
+
+			//TO MOVE:
+			//Reset Scroll Delta if it wasn't just applied this tick
+			if (Input::m_KeepLastScrollDataTickID != e->GetTimeData().GetTickCount())
+			{
+				Input::m_LastScrollDelta = { 0,0 };
+			}
 		}
 	}
 
-	/*static*/ void Input::TickMouse(GLFWwindow* window)
+	/*static*/ void Input::TickMouse(GLFWwindow* window, const Engine& e)
 	{
 		double xPos, yPos;
 		glfwGetCursorPos(window, &xPos, &yPos);
@@ -89,7 +97,7 @@ namespace Poole
 						  m_LastMousePos.y >= 0 && m_LastMousePos.y <= windowSize.y);
 		}
 
-		if (EngineTime::GetTickCount() != 0)
+		if (e.GetTimeData().GetTickCount() != 0)
 		{
 			m_DeltaMousePos = intPos - m_LastMousePos;
 
