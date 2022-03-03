@@ -2,13 +2,14 @@
 
 #include "graphics_api/buffer.h"
 #include "graphics_api/vertex_array.h"
+#include "graphics_api/texture.h"
 #include "rendering/renderer.h"
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/camera/orthographic_camera.h"
 #include "window/window.h"
-#include "input/input.h" //TEMP
 
 #include "glm/gtc/matrix_transform.hpp"
+
 
 namespace Poole::Rendering
 {
@@ -21,39 +22,75 @@ namespace Poole::Rendering
 			std::shared_ptr<IndexBuffer> m_IndexBuffer;
 		};
 		static RenderData s_QuadRenderData;
+		static RenderData s_TextureRenderData;
+
+		std::vector<std::shared_ptr<Texture>> m_Textures;
 
 		GLShader* m_QuadShader;
 		GLShader* m_CircleShader;
+		GLShader* m_TextureShader;
 	}
 
 	void Renderer2D::Init()
 	{
-		//Vertex Array
-		s_QuadRenderData.m_VertexArray.reset(VertexArray::Create());
-		s_QuadRenderData.m_VertexArray->Bind();
-
 		//Shader
 		m_QuadShader = &Renderer::s_shaderUniformColorTransform2D;
 		m_CircleShader = &Renderer::s_shaderCircleTransform2D;
+		m_TextureShader = &Renderer::s_shaderTextureTransform2D;
 
-		//Vertex Buffer
-		fvec3 corners[4] =
-		{
-			{-1, -1, 0.f},
-			{ 1, -1, 0.f},
-			{ 1,  1, 0.f},
-			{-1,  1, 0.f},
-		};
-		s_QuadRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
-		s_QuadRenderData.m_VertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position"},
-		});
-		s_QuadRenderData.m_VertexArray->AddVertexBuffer(s_QuadRenderData.m_VertexBuffer);
-
-		//Index Buffer
 		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-		s_QuadRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-		s_QuadRenderData.m_VertexArray->SetIndexBuffer(s_QuadRenderData.m_IndexBuffer);
+
+		//Colored Quad
+		{
+			//Vertex Array
+			s_QuadRenderData.m_VertexArray.reset(VertexArray::Create());
+			s_QuadRenderData.m_VertexArray->Bind();
+
+			//Vertex Buffer
+			fvec3 corners[4] =
+			{
+				{-1, -1, 0.f},
+				{ 1, -1, 0.f},
+				{ 1,  1, 0.f},
+				{-1,  1, 0.f},
+			};
+			s_QuadRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
+			s_QuadRenderData.m_VertexBuffer->SetLayout({
+				{ ShaderDataType::Float3, "a_Position"},
+			});
+			s_QuadRenderData.m_VertexArray->AddVertexBuffer(s_QuadRenderData.m_VertexBuffer);
+
+			//Index Buffer
+			s_QuadRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+			s_QuadRenderData.m_VertexArray->SetIndexBuffer(s_QuadRenderData.m_IndexBuffer);
+		}
+
+
+		//Textured Quad
+		{
+			//Vertex Array (Texture)
+			s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
+			s_TextureRenderData.m_VertexArray->Bind();
+
+			//Vertex Buffer (Texture)
+			f32 cornersForTexture[] =
+			{
+				-1, -1, 0.f,		0.f, 0.f,
+				 1, -1, 0.f,		1.f, 0.f,
+				 1,  1, 0.f,		1.f, 1.f,
+				-1,  1, 0.f,		0.f, 1.f,
+			};
+			s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
+			s_TextureRenderData.m_VertexBuffer->SetLayout({
+				{ ShaderDataType::Float3, "a_Position"},
+				{ ShaderDataType::Float2, "a_Texture"},
+			});
+			s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
+
+			//Index Buffer (Texture)
+			s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+			s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
+		}
 	}
 	void Renderer2D::Shutdown()
 	{
@@ -61,22 +98,38 @@ namespace Poole::Rendering
 	}
 	void Renderer2D::BeginScene()
 	{
-		//Vertex Array
-		s_QuadRenderData.m_VertexArray->Bind();
-
-		//Vertex Buffer
-		s_QuadRenderData.m_VertexBuffer->Bind();
-
-		//Index Buffer
-		s_QuadRenderData.m_IndexBuffer->Bind();
-
-		//Shader
-		m_QuadShader->Bind();
-		m_QuadShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
-
-		//TEMP FOR CIRCLES
-		m_CircleShader->Bind();
-		m_CircleShader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
+		//Colored Quad
+		{
+			//Vertex Array
+			s_QuadRenderData.m_VertexArray->Bind();
+			//Vertex Buffer
+			s_QuadRenderData.m_VertexBuffer->Bind();
+			//Index Buffer
+			s_QuadRenderData.m_IndexBuffer->Bind();
+		
+			//Shader
+			m_QuadShader->Bind();
+			m_QuadShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+		}
+		
+		//Textured Quad
+		{
+			//Vertex Array
+			s_TextureRenderData.m_VertexArray->Bind();
+			//Vertex Buffer
+			s_TextureRenderData.m_VertexBuffer->Bind();
+			//Index Buffer
+			s_TextureRenderData.m_IndexBuffer->Bind();
+		
+			m_TextureShader->Bind();
+			m_TextureShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+		}
+		
+		//Circles
+		{
+			m_CircleShader->Bind();
+			m_CircleShader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
+		}
 	}
 	void Renderer2D::RenderScene()
 	{
@@ -142,6 +195,43 @@ namespace Poole::Rendering
 			shearMat *
 			glm::scale(fmat4(1.0f), fvec3{ transform.scale.x, transform.scale.y, 1.f });
 	}
+
+
+	TextureHandle Renderer2D::LoadTexture(const char* path)
+	{
+		const TextureHandle outHandle = m_Textures.size();
+
+		std::shared_ptr<Texture> t;
+		t.reset(Texture::Create(path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE));
+		m_Textures.push_back(std::move(t));
+		return outHandle;
+	}
+	void Renderer2D::DrawTexturedQuad(const ftransform2D& transform, TextureHandle handle)
+	{
+		if (handle >= 0 && handle < m_Textures.size())
+		{
+			s_TextureRenderData.m_VertexArray->Bind();
+
+			m_TextureShader->Bind();
+			m_TextureShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
+			m_TextureShader->SetUniform("u_Color", Colors::White<fcolor4>);
+			m_Textures[handle]->Bind();
+			m_Textures[handle]->SetTextureUnit(*m_TextureShader, "tex0", 0);
+
+			s_TextureRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
+			s_TextureRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
+
+			GetRendererAPI()->DrawIndexed(6);
+
+			m_Textures[handle]->Unbind();
+		}
+		else
+		{
+			LOG_ERROR("invalid texture handle {}", handle);
+		}
+	}
+
+
 
 	//void Renderer2D::DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color)
 	//{

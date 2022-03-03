@@ -4,6 +4,8 @@
 
 namespace Poole::Rendering
 {
+	using TextureHandle = u32;
+
 	class Renderer2D
 	{
 	public:
@@ -29,6 +31,13 @@ namespace Poole::Rendering
 		static fmat4 MakeTransformMatrix(const fvec2& pos, const fvec2& scale, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
 		{
 			return MakeTransformMatrix({ pos, scale, rotation, shear });
+		}
+
+		static TextureHandle LoadTexture(const char* path);
+		static void DrawTexturedQuad(const ftransform2D& transform, TextureHandle handle);
+		static void DrawTexturedQuad(const fvec2& pos, const fvec2& scale, TextureHandle handle, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		{
+			DrawTexturedQuad({ pos, scale, rotation, shear }, handle);
 		}
 
 		//static void DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color);
