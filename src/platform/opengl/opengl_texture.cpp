@@ -1,27 +1,15 @@
 #include "opengl_texture.h"
-#include "stb/stb_image.h"
+#include "rendering/image/image.h"
 #include "poole/rendering/shader_loader.h"
 
 namespace Poole::Rendering
 {
-	OpenGL_Texture::OpenGL_Texture(const char* image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
+	OpenGL_Texture::OpenGL_Texture(const char* imagePath, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
 	{
 		type = texType;
 
-		int width = -1, height = -1, numChannels = -1;
-		stbi_set_flip_vertically_on_load(true); //Stb reads top to bottom, openGL is the opposite, so change stb mode.
-		unsigned char* bytes = stbi_load(image, &width, &height, &numChannels, 0);
-
-		if (width == -1 || height == -1 || numChannels == -1)
-		{
-			LOG_ERROR("Failed to load image: {}", image);
-			ID = 0;
-			return;
-		}
-		else
-		{
-			LOG("Loaded: {}, W: {}, H: {}, Channels: {}", image, width, height, numChannels);
-		}
+		Image::SetYFlipBeforeLoad(true); //TODO: Move somewhere when OpenGL rendering is selected
+		Image image = Image(imagePath);
 
 		//Generates an OpenGL texture object
 		glGenTextures(1, &ID);
@@ -43,7 +31,7 @@ namespace Poole::Rendering
 		//glTexParameterfv(texType, GL_TEXTURE_BORDER_COLOR, flatColor);
 
 		//Assign the image to the opengl texture object
-		glTexImage2D(texType, 0, /*BUG?*/GL_RGBA, width, height, 0, format, pixelType, bytes);
+		glTexImage2D(texType, 0, /*BUG?*/GL_RGBA, image.GetSize().x, image.GetSize().y, 0, format, pixelType, image.GetBytes());
 
 		//Gen mipMaps
 		glGenerateMipmap(texType);
@@ -54,9 +42,6 @@ namespace Poole::Rendering
 		// that GL_NEAREST_MIPMAP_NEAREST is what you want, although you could try GL_NEAREST_MIPMAP_LINEAR for the crunchy pixel 
 		// look but with less abrupt transitions between mip levels." -Some guy on a thread below
 		//Source: https://community.khronos.org/t/texture-renders-as-black-square/75799/8
-
-		//Deletes the data since openGL has it now
-		stbi_image_free(bytes);
 
 		//Unbinds the object to prevent accidental modification
 		glBindTexture(texType, 0);
