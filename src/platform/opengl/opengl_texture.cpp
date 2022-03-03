@@ -10,6 +10,7 @@ namespace Poole::Rendering
 
 		Image::SetYFlipBeforeLoad(true); //TODO: Move somewhere when OpenGL rendering is selected
 		Image image = Image(imagePath);
+		image.DebugPrint();
 
 		//Generates an OpenGL texture object
 		glGenTextures(1, &ID);
@@ -18,7 +19,7 @@ namespace Poole::Rendering
 		glActiveTexture(slot);
 		glBindTexture(texType, ID);
 
-		//Set minification and magnification algo (could also use GL_????)
+		//Set minification and magnification algo (could also use GL_NEAREST or GL_LINEAR)
 		glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 

@@ -34,19 +34,32 @@
 #include "core/core_types.h"
 #include "core/core_logging.h"
 
-template<bool incZero = true>
-static constexpr bool IsPowerOfTwo(u64 n)
+namespace Poole::Math
 {
-	if constexpr (incZero)
+	template<bool incZero = false>
+	static constexpr bool IsPowerOfTwo(u64 n)
 	{
-		return (n & (n - 1)) == 0;
+		if constexpr (incZero)
+		{
+			return (n & (n - 1)) == 0;
+		}
+		else
+		{
+			return (n > 0 && ((n & (n - 1)) == 0));
+		}
 	}
-	else
+
+	static constexpr std::array<char,2> ToHex(u8 num)
 	{
-		return (n > 0 && ((n & (n - 1)) == 0));
+		const u8 upper = (num & 0b1111'0000) >> 4;
+		const u8 lower = (num & 0b0000'1111);
+
+		const char upperChar = upper < 10 ? (char(upper) + '0') : (char(upper) - 10 + 'A');
+		const char lowerChar = lower < 10 ? (char(lower) + '0') : (char(lower) - 10 + 'A');
+
+		return { upperChar, lowerChar };
 	}
 }
-
 
 template<typename Prim>
 static constexpr std::optional<Prim> ToPrimitive(std::string_view str)

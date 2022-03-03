@@ -16,12 +16,20 @@ namespace Poole
 	
 		const u8* GetBytes() const { return m_Bytes; }
 		const ivec2& GetSize() const { return m_Size; }
-		const i32 GetColorChannels() const { return m_NumColorChannels; }
-	
+		i32 GetColorChannels() const { return m_NumColorChannels; }
+		bool WasYFlippedWhenLoaded() const { return m_YFlippedWhenLoaded; }
+
+		bool IsPowerOfTwo() const { return Math::IsPowerOfTwo((u64)m_Size.x) && Math::IsPowerOfTwo((u64)m_Size.y); }
+
+
+		void DebugPrint() const;
 	private:
 		static bool s_YFlip;
 		ivec2 m_Size = {-1,-1};
 		i32 m_NumColorChannels = -1;
 		u8* m_Bytes;
+		bool m_YFlippedWhenLoaded;
+
+		static constexpr u8 COLOR_DEPTH = 8;
 	};
 }

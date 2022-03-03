@@ -248,11 +248,11 @@ namespace Poole
 				ASSERT(count == 4);
 
 				if (hat == 0)					return (1 - (hats[0] | hats[1] | hats[2] | hats[3])) == u8(press);
-				if (IsPowerOfTwo<false>(hat))   return hats[hat] == u8(press);
-				if (hat == GLFW_HAT_LEFT_DOWN)  return (hats[GLFW_HAT_LEFT] | hats[GLFW_HAT_DOWN]) == u8(press);
-				if (hat == GLFW_HAT_LEFT_UP)    return (hats[GLFW_HAT_LEFT] | hats[GLFW_HAT_UP]) == u8(press);
-				if (hat == GLFW_HAT_RIGHT_DOWN) return (hats[GLFW_HAT_RIGHT] | hats[GLFW_HAT_DOWN]) == u8(press);
-				if (hat == GLFW_HAT_RIGHT_UP)   return (hats[GLFW_HAT_RIGHT] | hats[GLFW_HAT_UP]) == u8(press);
+				if (Math::IsPowerOfTwo(hat))	return hats[hat] == u8(press);
+				if (hat == GLFW_HAT_LEFT_DOWN)	return (hats[GLFW_HAT_LEFT] | hats[GLFW_HAT_DOWN]) == u8(press);
+				if (hat == GLFW_HAT_LEFT_UP)	return (hats[GLFW_HAT_LEFT] | hats[GLFW_HAT_UP]) == u8(press);
+				if (hat == GLFW_HAT_RIGHT_DOWN)	return (hats[GLFW_HAT_RIGHT] | hats[GLFW_HAT_DOWN]) == u8(press);
+				if (hat == GLFW_HAT_RIGHT_UP)	return (hats[GLFW_HAT_RIGHT] | hats[GLFW_HAT_UP]) == u8(press);
 
 				LOG_ERROR("Invalid HAT");
 			}
