@@ -31,10 +31,12 @@ using fmat2 = glm::mat2;
 using fmat3 = glm::mat3;
 using fmat4 = glm::mat4;
 
+using fcolor2 = glm::vec2;  //Could be useful for UV maps
 using fcolor3 = glm::vec3;
 using fcolor4 = glm::vec4;
-using ucolor3 = glm::uvec3;
-using ucolor4 = glm::uvec4;
+using u8color2 = glm::u8vec2; //Could be useful for UV maps
+using u8color3 = glm::u8vec3;
+using u8color4 = glm::u8vec4;
 
 struct ftransform2D
 {
@@ -105,8 +107,8 @@ namespace Colors
 	template<class T> inline constexpr T Name; \
 	template<> inline constexpr fcolor4 Name <fcolor4> = { R, G, B, A }; \
 	template<> inline constexpr fcolor3 Name <fcolor3> = { Name <fcolor4> }; \
-	template<> inline constexpr ucolor4 Name <ucolor4> = { Name <fcolor4> * 255.f }; \
-	template<> inline constexpr ucolor3 Name <ucolor3> = { Name <ucolor4> }; 
+	template<> inline constexpr u8color4 Name <u8color4> = { Name <fcolor4> * 255.f }; \
+	template<> inline constexpr u8color3 Name <u8color3> = { Name <u8color4> }; 
 
 	AddColor(Red, 1.00f, 0.00f, 0.00f, 1.00f);
 	AddColor(Green, 0.00f, 1.00f, 0.00f, 1.00f);

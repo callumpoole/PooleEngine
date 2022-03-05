@@ -50,29 +50,28 @@ namespace Poole
 
 		std::ostringstream out;
 
-		const size_t ROW_BYTES = m_Size.x * m_NumColorChannels;
+		u32 colorCounter = 0;
+		u32 widthCounter = 0;
 
-		size_t i			= m_YFlippedWhenLoaded ? (ROW_BYTES * (m_Size.y - 1)) : 0;
-		const size_t yDelta = m_YFlippedWhenLoaded ? -(ROW_BYTES * 2 - 1) : 1;
-
-		for (size_t y = 0; y < m_Size.y; y++, i += yDelta)
+		for (auto c : GetIterPerChannel())
 		{
-			for (size_t x = 0; x < m_Size.x; x++, i++)
+			out << Math::ToHexStr(c);
+
+			if (++colorCounter == m_NumColorChannels)
 			{
-				for (size_t c = 0; c < m_NumColorChannels; c++, i++)
-				{
-					const auto chars = Math::ToHex(m_Bytes[i]);
-					out << chars[0] << chars[1];
-				}
-				i--;
+				colorCounter = 0;
 				out << ' ';
-			}
-			i--;
+
+				if (++widthCounter == m_Size.x)
+				{
+					widthCounter = 0;
 #ifdef _WINDOWS
-			out << "\r\n";
+					out << "\r\n";
 #else
-			out << '\n';
+					out << '\n';
 #endif
+				}
+			}
 		}
 
 		std::string s(out.str());

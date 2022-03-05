@@ -49,15 +49,59 @@ namespace Poole::Math
 		}
 	}
 
-	static constexpr std::array<char,2> ToHex(u8 num)
+	static constexpr std::array<char,2> ToHex(const u8 num)
 	{
-		const u8 upper = (num & 0b1111'0000) >> 4;
-		const u8 lower = (num & 0b0000'1111);
+		const u8 upper = (num & 0xf0) >> 4;
+		const u8 lower = (num & 0x0f);
 
 		const char upperChar = upper < 10 ? (char(upper) + '0') : (char(upper) - 10 + 'A');
 		const char lowerChar = lower < 10 ? (char(lower) + '0') : (char(lower) - 10 + 'A');
 
 		return { upperChar, lowerChar };
+	}
+	static constexpr std::array<char, 4> ToHex(const u16 num)
+	{
+		const u8 upper = u8((num & 0xff00) >> 8);
+		const u8 lower = u8((num & 0x00ff));
+
+		const std::array<char, 2> u = ToHex(upper);
+		const std::array<char, 2> l = ToHex(lower);
+		return { u[0], u[1], l[0], l[1] };
+	}
+	static constexpr std::array<char, 4> ToHex(const u8color2 num)
+	{
+		return ToHex(u16(u16(num[1]) | (u16(num[0]) << 8)));
+	}
+	static constexpr std::array<char, 6> ToHex(const u8color3 num)
+	{
+		const std::array<char, 2> r = ToHex(num[0]);
+		const std::array<char, 2> g = ToHex(num[1]);
+		const std::array<char, 2> b = ToHex(num[2]);
+		return { r[0], r[1], g[0], g[1], b[0], b[1] };
+	}
+	static constexpr std::array<char, 8> ToHex(const u32 num)
+	{
+		const u16 upper = u16((num & 0xffff0000) >> 16);
+		const u16 lower = u16((num & 0x0000ffff));
+
+		const std::array<char, 4> u = ToHex(upper);
+		const std::array<char, 4> l = ToHex(lower);
+		return { u[0], u[1], u[2], u[3], l[0], l[1], l[2], l[3] };
+	}
+	static constexpr std::array<char, 8> ToHex(const u8color4 num)
+	{
+		return ToHex(u32(u32(num[3]) | (u32(num[2]) << 8) | (u32(num[1]) << 16) | (u32(num[0]) << 24)));
+	}
+	static constexpr std::string ToHexStr(const auto num)
+	{
+		auto hexArr = ToHex(num);
+
+		std::ostringstream out;
+		for (const char c : hexArr)
+		{
+			out << c;
+		}
+		return out.str();
 	}
 }
 
