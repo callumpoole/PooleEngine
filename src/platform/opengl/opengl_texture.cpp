@@ -10,7 +10,6 @@ namespace Poole::Rendering
 
 		Image::SetYFlipBeforeLoad(true); //TODO: Move somewhere when OpenGL rendering is selected
 		Image image = Image(imagePath);
-		image.DebugPrint();
 
 		//Generates an OpenGL texture object
 		glGenTextures(1, &ID);
@@ -32,7 +31,7 @@ namespace Poole::Rendering
 		//glTexParameterfv(texType, GL_TEXTURE_BORDER_COLOR, flatColor);
 
 		//Assign the image to the opengl texture object
-		glTexImage2D(texType, 0, /*BUG?*/GL_RGBA, image.GetSize().x, image.GetSize().y, 0, format, pixelType, image.GetBytes());
+		glTexImage2D(texType, 0, /*BUG?*/GL_RGBA, image.GetWidth(), image.GetHeight(), 0, format, pixelType, image.GetBytes());
 
 		//Gen mipMaps
 		glGenerateMipmap(texType);

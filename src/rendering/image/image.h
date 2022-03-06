@@ -10,30 +10,57 @@ namespace Poole
 	class Image
 	{
 	public:
+		static Image s_invalid;
+
 		Image(const char* path, bool* out_Successful = nullptr, bool printLogWhenLoaded = true);
+		Image(u8* bytes, uvec2 size, u32 channels, bool isYFlipped);
+		Image(u8* bytes, u32 width, u32 height, u32 channels, bool isYFlipped) : Image(bytes, {width, height}, channels, isYFlipped) {}
+		Image(const Image& src);
+		Image& operator=(const Image& rhs);
+		Image(Image&& src);
+		Image& operator=(Image&& rhs);
 		~Image();
 	
 		//Stb reads top to bottom, openGL is bottom to top
 		static void SetYFlipBeforeLoad(bool bottomToTop);
 		static bool GetYFlipBeforeLoad() { return s_YFlip; }
 	
+		const bool IsValid() const { return m_Bytes != nullptr; }
+		operator bool() { return IsValid(); }
 		const u8* GetBytes() const { return m_Bytes; }
 		const std::vector<u8> YFlipBytes() const;
-		const ivec2& GetSize() const { return m_Size; }
-		i32 GetColorChannels() const { return m_NumColorChannels; }
+		const uvec2& GetSize() const { return m_Size; }
+		u32 GetWidth() const { return m_Size.x; }
+		u32 GetHeight() const { return m_Size.y; }
+		u32 GetNumChannels() const { return m_NumChannels; }
+		u32 GetNumBytesPerRow() const { return m_Size.x * m_NumChannels; }
+		u32 GetNumBytes() const { return GetNumBytesPerRow() * m_Size.y; }
+		u32 GetNumPixels() const { return m_Size.x * m_Size.y; }
 		bool WasYFlippedWhenLoaded() const { return m_YFlippedWhenLoaded; }
 
 		bool IsPowerOfTwo() const { return Math::IsPowerOfTwo((u64)m_Size.x) && Math::IsPowerOfTwo((u64)m_Size.y); }
 
+		//Source: https://tannerhelland.com/2011/10/01/grayscale-image-algorithm-vb6.html
+		static f32 GreyscaleAveraged(f32 r, f32 g, f32 b)		{ return (r + g + b) / 3; }
+		static f32 GreyscaleColorAdj(f32 r, f32 g, f32 b)		{ return (r * 0.3f    + g * 0.59f   + b * 0.11f); }
+		static f32 GreyscaleColorAdj_BT709(f32 r, f32 g, f32 b) { return (r * 0.2126f + g * 0.7152f + b * 0.0722f); }
+		static f32 GreyscaleColorAdj_BT601(f32 r, f32 g, f32 b) { return (r * 0.299f  + g * 0.587f  + b * 0.114f); }
+
+		using GreyScaleFunc = f32(*)(f32 r, f32 g, f32 b);
+		
+		Image ToGreyscale(GreyScaleFunc func = &GreyscaleColorAdj) const;
+		Image GreyscaleToRGB() const;
+		Image GreyscaleToRGBA() const;
 
 		void DebugPrint() const;
 
 	private:
 		static bool s_YFlip;
-		ivec2 m_Size = { -1,-1 };
-		i32 m_NumColorChannels = -1;
-		u8* m_Bytes;
+		uvec2 m_Size = { 0, 0 };
+		u32 m_NumChannels = 0;
+		u8* m_Bytes = nullptr;
 		bool m_YFlippedWhenLoaded;
+		bool m_AllocatedWithSTBI = false;
 
 		static constexpr u8 COLOR_DEPTH = 8;
 
@@ -127,7 +154,7 @@ namespace Poole
 		template<typename TColor>
 		IteratorGenerator<TColor> GetIterDontUnFlip() const		  { return IteratorGenerator<TColor>(m_Bytes, m_Size.x, m_Size.y, false); }
 
-		IteratorGenerator<u8> GetIterPerChannel() const			  { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumColorChannels, m_Size.y, m_YFlippedWhenLoaded); }
-		IteratorGenerator<u8> GetIterPerChannelDontUnFlip() const { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumColorChannels, m_Size.y, false); }
+		IteratorGenerator<u8> GetIterPerChannel() const			  { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
+		IteratorGenerator<u8> GetIterPerChannelDontUnFlip() const { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumChannels, m_Size.y, false); }
 	};
 }
