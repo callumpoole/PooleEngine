@@ -10,7 +10,7 @@ namespace Poole
 	class Image
 	{
 	public:
-		static Image s_invalid;
+		static Image s_Invalid;
 
 		Image(const char* path, bool* out_Successful = nullptr, bool printLogWhenLoaded = true);
 		Image(u8* bytes, uvec2 size, u32 channels, bool isYFlipped);
@@ -19,6 +19,7 @@ namespace Poole
 		Image& operator=(const Image& rhs);
 		Image(Image&& src);
 		Image& operator=(Image&& rhs);
+		Image() : Image(nullptr, { 0,0 }, 0, false) {}
 		~Image();
 	
 		//Stb reads top to bottom, openGL is bottom to top

@@ -197,12 +197,12 @@ namespace Poole::Rendering
 	}
 
 
-	TextureHandle Renderer2D::LoadTexture(const char* path)
+	TextureHandle Renderer2D::LoadTexture(const char* path, bool hasAlpha)
 	{
 		const TextureHandle outHandle = m_Textures.size();
 
 		std::shared_ptr<Texture> t;
-		t.reset(Texture::Create(path, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE));
+		t.reset(Texture::Create(path, GL_TEXTURE_2D, GL_TEXTURE0, hasAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
 		m_Textures.push_back(std::move(t));
 		return outHandle;
 	}

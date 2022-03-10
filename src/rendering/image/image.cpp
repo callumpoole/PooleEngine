@@ -5,7 +5,7 @@
 
 namespace Poole
 {
-	Image Image::s_invalid = Image(nullptr, { 0,0 }, 0, false);
+	Image Image::s_Invalid = Image();
 	bool Image::s_YFlip = false;
 	
 	Image::Image(const char* path, bool* out_Successful, bool printLogWhenLoaded)
@@ -146,7 +146,7 @@ namespace Poole
 			{
 				u8* newBytes = new u8[GetNumPixels()];
 				u32 iter = 0;
-				for (auto color : GetIterDontUnFlip<T>())
+				for (T color : GetIterDontUnFlip<T>())
 				{
 					const u8 mix = (u8)(func((f32)color.r, (f32)color.g, (f32)color.b));
 					newBytes[iter++] = mix;
@@ -158,7 +158,7 @@ namespace Poole
 		else
 		{
 			LOG_ERROR("Cannot Convert Image With {} Channels to Greyscale.", m_NumChannels);
-			return s_invalid;
+			return s_Invalid;
 		}
 	}
 	Image Image::GreyscaleToRGB() const
@@ -166,7 +166,7 @@ namespace Poole
 		if (m_NumChannels != 1)
 		{
 			LOG_ERROR("Current image is not greyscale, it has {} channels.", m_NumChannels);
-			return s_invalid;
+			return s_Invalid;
 		}
 
 		u8* newBytes = new u8[GetNumPixels() * 3];
@@ -184,7 +184,7 @@ namespace Poole
 		if (m_NumChannels != 1)
 		{
 			LOG_ERROR("Current image is not greyscale, it has {} channels.", m_NumChannels);
-			return s_invalid;
+			return s_Invalid;
 		}
 
 		u8* newBytes = new u8[GetNumPixels() * 4];

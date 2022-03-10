@@ -16,20 +16,20 @@ namespace Poole
 
 	void ProcessKeyEvent(GLFWwindow* /*window*/, i32 /*key*/, i32 /*scancode*/, i32 action, i32 /*mods*/)
 	{
-		static int i = 0;
-		if (action == GLFW_PRESS)
-		{
-			LOG("key = {}", i++);
-		}
+//		static int i = 0;
+//		if (action == GLFW_PRESS)
+//		{
+//			LOG("key = {}", i++);
+//		}
 	}
 
 	void ProcessMouseButtonEvent(GLFWwindow* /*window*/, i32 /*mouseButton*/, i32 action, i32 /*mods*/)
 	{
-		static int i = 0;
-		if (action == GLFW_PRESS)
-		{
-			LOG("mouse = {}", i++);
-		}
+//		static int i = 0;
+//		if (action == GLFW_PRESS)
+//		{
+//			LOG("mouse = {}", i++);
+//		}
 	}
 
 	void ProcessScrollEvent(GLFWwindow* /*window*/, double xOffset, double yOffset)
