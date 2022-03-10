@@ -13,6 +13,29 @@
 
 namespace Poole::Rendering
 {
+	//TO MOVE:
+	SubTexture::SubTexture(std::shared_ptr<Texture> texture, fvec2 min, fvec2 max)
+		: m_Texture(texture)
+	{
+		m_TexCoords[0] = { min.x, min.y };
+		m_TexCoords[1] = { max.x, min.y };
+		m_TexCoords[2] = { max.x, max.y };
+		m_TexCoords[3] = { min.x, max.y };
+	}
+
+	/*static*/ SubTexture* SubTexture::Create(std::shared_ptr<Texture> texture, fvec2 coords, fvec2 cellSize, fvec2 spriteSize)
+	{
+		const fvec2 min = { (coords.x * cellSize.x) / texture->GetWidth(), (coords.y * cellSize.y) / texture->GetHeight() };
+		const fvec2 max = { ((coords.x + spriteSize.x) * cellSize.x) / texture->GetWidth(), ((coords.y + spriteSize.y) * cellSize.y) / texture->GetHeight() };
+		return new SubTexture(texture, min, max);
+	}
+
+
+
+
+
+
+
 	namespace 
 	{
 		struct RenderData
@@ -68,6 +91,7 @@ namespace Poole::Rendering
 
 		//Textured Quad
 		{
+			
 			//Vertex Array (Texture)
 			s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
 			s_TextureRenderData.m_VertexArray->Bind();
@@ -197,12 +221,16 @@ namespace Poole::Rendering
 	}
 
 
-	TextureHandle Renderer2D::LoadTexture(const char* path, bool hasAlpha)
+	/*static*/ Texture* Renderer2D::LoadTextureTemp(const char* path, bool hasAlpha)
+	{
+		return Texture::Create(path, GL_TEXTURE_2D, GL_TEXTURE0, hasAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE);
+	}
+	/*static*/ TextureHandle Renderer2D::LoadTexture(const char* path, bool hasAlpha)
 	{
 		const TextureHandle outHandle = m_Textures.size();
 
 		std::shared_ptr<Texture> t;
-		t.reset(Texture::Create(path, GL_TEXTURE_2D, GL_TEXTURE0, hasAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
+		t.reset(LoadTextureTemp(path, hasAlpha));
 		m_Textures.push_back(std::move(t));
 		return outHandle;
 	}
@@ -211,6 +239,33 @@ namespace Poole::Rendering
 		if (handle >= 0 && handle < m_Textures.size())
 		{
 			s_TextureRenderData.m_VertexArray->Bind();
+
+			s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
+			s_TextureRenderData.m_VertexArray->Bind();
+			//Vertex Array
+			s_TextureRenderData.m_VertexArray->Bind();
+			//Vertex Buffer
+			s_TextureRenderData.m_VertexBuffer->Bind();
+			//Index Buffer
+			s_TextureRenderData.m_IndexBuffer->Bind();
+			f32 cornersForTexture[] =
+			{
+				-1, -1, 0.f,		0.f, 0.f,
+				 1, -1, 0.f,		1.f, 0.f,
+				 1,  1, 0.f,		1.f, 1.f,
+				-1,  1, 0.f,		0.f, 1.f,
+			};
+			s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
+			s_TextureRenderData.m_VertexBuffer->SetLayout({
+				{ ShaderDataType::Float3, "a_Position"},
+				{ ShaderDataType::Float2, "a_Texture"},
+				});
+			s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
+			u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+			s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+			s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
+
+
 
 			m_TextureShader->Bind();
 			m_TextureShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
@@ -230,7 +285,57 @@ namespace Poole::Rendering
 			LOG_ERROR("invalid texture handle {}", handle);
 		}
 	}
+	void Renderer2D::DrawSubTexturedQuad(const ftransform2D& transform, SubTexture* subTexture)
+	{
+		std::shared_ptr<Texture> texture = subTexture->GetTexture();
 
+		s_TextureRenderData.m_VertexArray->Bind();
+
+
+
+		s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
+		s_TextureRenderData.m_VertexArray->Bind();
+
+		//Vertex Array
+		s_TextureRenderData.m_VertexArray->Bind();
+		//Vertex Buffer
+		s_TextureRenderData.m_VertexBuffer->Bind();
+		//Index Buffer
+		s_TextureRenderData.m_IndexBuffer->Bind();
+		const std::array<fvec2, 4>& c = subTexture->GetTexCoords();
+
+		f32 cornersForTexture[] =
+		{
+			-1, -1, 0.f,		c[0].x, c[0].y,
+			 1, -1, 0.f,		c[1].x, c[1].y,
+			 1,  1, 0.f,		c[2].x, c[2].y,
+			-1,  1, 0.f,		c[3].x, c[3].y,
+		};
+		s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
+		s_TextureRenderData.m_VertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position"},
+			{ ShaderDataType::Float2, "a_Texture"},
+			});
+		s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
+		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+		s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+		s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
+
+
+		m_TextureShader->Bind();
+		m_TextureShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
+		m_TextureShader->SetUniform("u_Color", Colors::White<fcolor4>);
+		texture->Bind();
+		texture->SetTextureUnit(*m_TextureShader, "tex0", 0);
+
+		s_TextureRenderData.m_VertexArray->Bind();
+		s_TextureRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
+		s_TextureRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
+
+		GetRendererAPI()->DrawIndexed(6);
+
+		texture->Unbind();
+	}
 
 
 	//void Renderer2D::DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color)

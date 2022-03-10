@@ -4,6 +4,32 @@
 
 namespace Poole::Rendering
 {
+	class Texture; //WARNING THIS IS FORWARD DECL IS IN thE PRIVATe MODULE, but used by sandbox. shared pointer cant delete it!!!
+
+	//TO MOVE:
+	class SubTexture
+	{
+	public:
+		SubTexture(std::shared_ptr<Texture> texture, fvec2 min, fvec2 max);
+
+		static SubTexture* Create(std::shared_ptr<Texture> texture, fvec2 coords, fvec2 cellSize, fvec2 spriteSize = { 1,1 });
+
+		std::shared_ptr<Texture> GetTexture() const { return m_Texture; }
+		const std::array<fvec2, 4>& GetTexCoords() const { return m_TexCoords; }
+	private:
+		std::shared_ptr<Texture> m_Texture;
+		std::array<fvec2, 4> m_TexCoords;
+	};
+
+
+
+
+
+
+
+
+
+
 	using TextureHandle = u32;
 
 	class Renderer2D
@@ -33,11 +59,18 @@ namespace Poole::Rendering
 			return MakeTransformMatrix({ pos, scale, rotation, shear });
 		}
 
+		static Texture* LoadTextureTemp(const char* path, bool hasAlpha);
 		static TextureHandle LoadTexture(const char* path, bool hasAlpha);
 		static void DrawTexturedQuad(const ftransform2D& transform, TextureHandle handle);
 		static void DrawTexturedQuad(const fvec2& pos, const fvec2& scale, TextureHandle handle, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
 		{
 			DrawTexturedQuad({ pos, scale, rotation, shear }, handle);
+		}
+
+		static void DrawSubTexturedQuad(const ftransform2D& transform, SubTexture* subTexture);
+		static void DrawSubTexturedQuad(const fvec2& pos, const fvec2& scale, SubTexture* subTexture, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		{
+			DrawSubTexturedQuad({ pos, scale, rotation, shear }, subTexture);
 		}
 
 		//static void DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color);

@@ -26,5 +26,13 @@ namespace Poole::Rendering
 		/// <param name="uniform">"tex0"</param>
 		/// <param name="unit">0</param>
 		virtual void SetTextureUnit(GLShader& /*shader*/, const char* /*uniform*/, GLuint /*unit*/) {}
+
+		virtual uvec2 GetSize() const { return { 0,0 }; }
+		u32 GetWidth() const { return GetSize().x; }
+		u32 GetHeight() const { return GetSize().y; }
 	};
+
+
+
+	
 }

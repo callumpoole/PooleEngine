@@ -10,6 +10,7 @@ namespace Poole::Rendering
 
 		Image::SetYFlipBeforeLoad(true); //TODO: Move somewhere when OpenGL rendering is selected
 		Image image = Image(imagePath);
+		m_Size = image.GetSize();
 
 		//Generates an OpenGL texture object
 		glGenTextures(1, &ID);

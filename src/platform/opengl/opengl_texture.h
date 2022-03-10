@@ -29,8 +29,11 @@ namespace Poole::Rendering
 		virtual void Bind();
 		virtual void Unbind();
 
+		virtual uvec2 GetSize() const override { return m_Size; }
+
 	private:
 		GLuint ID;
 		GLenum type;
+		uvec2 m_Size;
 	};
 }
