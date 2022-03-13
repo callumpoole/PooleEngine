@@ -5,6 +5,7 @@
 
 #include "rendering/renderer2D.h"
 #include "rendering/graphics_api/renderer_api.h"
+#include "rendering/image/image.h"
 
 namespace Poole::Rendering
 {
@@ -24,6 +25,9 @@ namespace Poole::Rendering
 
 	void Renderer::Init()
 	{
+		//TODO: Move to OpenGL_RendererAPI:
+		Image::SetYFlipBeforeLoad(s_GraphicsAPI == EGraphicsAPI::OpenGL);
+
 		s_camera.EnableResizeWithWindow();
 		s_camera.SetZoomScale(1.f);
 		//m_camera.GetBounds();

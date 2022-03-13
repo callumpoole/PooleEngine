@@ -35,7 +35,7 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"include/poole/rendering/rendering_primitives.h"
 	"src/rendering/rendering_primitives.cpp"
 	"src/rendering/image/stb.cpp"
-	"src/rendering/image/image.h"
+	"include/poole/rendering/image/image.h"
 	"src/rendering/image/image.cpp"	
 	"src/rendering/graphics_api/vertex_array.h"
 	"src/rendering/graphics_api/vertex_array.cpp"

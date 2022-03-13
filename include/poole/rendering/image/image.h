@@ -5,7 +5,7 @@
 #include <iterator> // For std::forward_iterator_tag
 #include <cstddef>  // For std::ptrdiff_t
 
-namespace Poole
+namespace Poole::Rendering
 {
 	class Image
 	{

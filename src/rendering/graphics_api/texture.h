@@ -5,6 +5,7 @@
 
 namespace Poole::Rendering
 {
+	class Image;
 	class GLShader;
 
 	class Texture
@@ -20,7 +21,9 @@ namespace Poole::Rendering
 		/// <param name="slot">GL_TEXTURE0</param>
 		/// <param name="format">GL_RGBA</param>
 		/// <param name="pixelType">GL_UNSIGNED_BYTE</param>
-		static Texture* Create(const char* image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
+		static Texture* Create(const char* imagePath, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
+
+		static Texture* Create(const Image& image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
 
 		/// <param name="shaderID">shaderProgramID</param>
 		/// <param name="uniform">"tex0"</param>

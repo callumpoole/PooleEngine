@@ -3,6 +3,7 @@
 #include "graphics_api/buffer.h"
 #include "graphics_api/vertex_array.h"
 #include "graphics_api/texture.h"
+#include "poole/rendering/image/image.h"
 #include "rendering/renderer.h"
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/camera/orthographic_camera.h"
@@ -221,16 +222,16 @@ namespace Poole::Rendering
 	}
 
 
-	/*static*/ Texture* Renderer2D::LoadTextureTemp(const char* path, bool hasAlpha)
-	{
-		return Texture::Create(path, GL_TEXTURE_2D, GL_TEXTURE0, hasAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE);
-	}
 	/*static*/ TextureHandle Renderer2D::LoadTexture(const char* path, bool hasAlpha)
+	{
+		return LoadTexture(Image(path), hasAlpha);
+	}
+	/*static*/ TextureHandle Renderer2D::LoadTexture(const Image& image, bool hasAlpha)
 	{
 		const TextureHandle outHandle = m_Textures.size();
 
 		std::shared_ptr<Texture> t;
-		t.reset(LoadTextureTemp(path, hasAlpha));
+		t.reset(Texture::Create(image, GL_TEXTURE_2D, GL_TEXTURE0, hasAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
 		m_Textures.push_back(std::move(t));
 		return outHandle;
 	}

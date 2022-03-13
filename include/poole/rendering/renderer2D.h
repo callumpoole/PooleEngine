@@ -4,6 +4,7 @@
 
 namespace Poole::Rendering
 {
+	class Image;
 	class Texture; //WARNING THIS IS FORWARD DECL IS IN thE PRIVATe MODULE, but used by sandbox. shared pointer cant delete it!!!
 
 	//TO MOVE:
@@ -59,8 +60,8 @@ namespace Poole::Rendering
 			return MakeTransformMatrix({ pos, scale, rotation, shear });
 		}
 
-		static Texture* LoadTextureTemp(const char* path, bool hasAlpha);
 		static TextureHandle LoadTexture(const char* path, bool hasAlpha);
+		static TextureHandle LoadTexture(const Image& image, bool hasAlpha);
 		static void DrawTexturedQuad(const ftransform2D& transform, TextureHandle handle);
 		static void DrawTexturedQuad(const fvec2& pos, const fvec2& scale, TextureHandle handle, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
 		{

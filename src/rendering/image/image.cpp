@@ -1,9 +1,9 @@
-#include "image.h"
+#include "poole/rendering/image/image.h"
 
 #include "stb/stb_image.h"
 #include <sstream>
 
-namespace Poole
+namespace Poole::Rendering
 {
 	Image Image::s_Invalid = Image();
 	bool Image::s_YFlip = false;

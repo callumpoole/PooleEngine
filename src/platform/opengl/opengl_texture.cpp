@@ -1,15 +1,17 @@
 #include "opengl_texture.h"
-#include "rendering/image/image.h"
+#include "poole/rendering/image/image.h"
 #include "poole/rendering/shader_loader.h"
 
 namespace Poole::Rendering
 {
 	OpenGL_Texture::OpenGL_Texture(const char* imagePath, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
+		: OpenGL_Texture(Image(imagePath), texType, slot, format, pixelType)
+	{
+	}
+
+	OpenGL_Texture::OpenGL_Texture(const Image& image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
 	{
 		type = texType;
-
-		Image::SetYFlipBeforeLoad(true); //TODO: Move somewhere when OpenGL rendering is selected
-		Image image = Image(imagePath);
 		m_Size = image.GetSize();
 
 		//Generates an OpenGL texture object
