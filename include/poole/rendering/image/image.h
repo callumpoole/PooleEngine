@@ -19,14 +19,15 @@ namespace Poole::Rendering
 		Image& operator=(const Image& rhs);
 		Image(Image&& src);
 		Image& operator=(Image&& rhs);
-		Image() : Image(nullptr, { 0,0 }, 0, false) {}
+		Image() : Image(nullptr, { 0,0 }, 0, false) { }
 		~Image();
 	
 		//Stb reads top to bottom, openGL is bottom to top
 		static void SetYFlipBeforeLoad(bool bottomToTop);
 		static bool GetYFlipBeforeLoad() { return s_YFlip; }
 	
-		const bool IsValid() const { return m_Bytes != nullptr; }
+		u32 GetId() const { return m_Id; }
+		const bool IsValid() const { return m_Bytes != nullptr && m_Id > 0; }
 		operator bool() { return IsValid(); }
 		const u8* GetBytes() const { return m_Bytes; }
 		const std::vector<u8> YFlipBytes() const;
@@ -56,6 +57,9 @@ namespace Poole::Rendering
 		void DebugPrint() const;
 
 	private:
+		static u32 s_IdCounter;
+		u32 m_Id = 0;
+
 		static bool s_YFlip;
 		uvec2 m_Size = { 0, 0 };
 		u32 m_NumChannels = 0;

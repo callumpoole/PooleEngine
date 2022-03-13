@@ -5,33 +5,8 @@
 namespace Poole::Rendering
 {
 	class Image;
-	class Texture; //WARNING THIS IS FORWARD DECL IS IN thE PRIVATe MODULE, but used by sandbox. shared pointer cant delete it!!!
-
-	//TO MOVE:
-	class SubTexture
-	{
-	public:
-		SubTexture(std::shared_ptr<Texture> texture, fvec2 min, fvec2 max);
-
-		static SubTexture* Create(std::shared_ptr<Texture> texture, fvec2 coords, fvec2 cellSize, fvec2 spriteSize = { 1,1 });
-
-		std::shared_ptr<Texture> GetTexture() const { return m_Texture; }
-		const std::array<fvec2, 4>& GetTexCoords() const { return m_TexCoords; }
-	private:
-		std::shared_ptr<Texture> m_Texture;
-		std::array<fvec2, 4> m_TexCoords;
-	};
-
-
-
-
-
-
-
-
-
-
-	using TextureHandle = u32;
+	class SubImage;
+	class Texture; //Warning, this is a forward decl for something that isn't publicly accessible
 
 	class Renderer2D
 	{
@@ -60,19 +35,22 @@ namespace Poole::Rendering
 			return MakeTransformMatrix({ pos, scale, rotation, shear });
 		}
 
-		static TextureHandle LoadTexture(const char* path, bool hasAlpha);
-		static TextureHandle LoadTexture(const Image& image, bool hasAlpha);
-		static void DrawTexturedQuad(const ftransform2D& transform, TextureHandle handle);
-		static void DrawTexturedQuad(const fvec2& pos, const fvec2& scale, TextureHandle handle, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+	private:
+		static std::shared_ptr<Texture> GetOrLoadTexture(const Image& image);
+	public:
+		static void DrawTexturedQuad(const ftransform2D& transform, const Image& image);
+		static void DrawTexturedQuad(const fvec2& pos, const fvec2& scale, const Image& image, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
 		{
-			DrawTexturedQuad({ pos, scale, rotation, shear }, handle);
+			DrawTexturedQuad({ pos, scale, rotation, shear }, image);
 		}
 
-		static void DrawSubTexturedQuad(const ftransform2D& transform, SubTexture* subTexture);
-		static void DrawSubTexturedQuad(const fvec2& pos, const fvec2& scale, SubTexture* subTexture, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		static void DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage);
+		static void DrawSubTexturedQuad(const fvec2& pos, const fvec2& scale, const SubImage& subImage, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
 		{
-			DrawSubTexturedQuad({ pos, scale, rotation, shear }, subTexture);
+			DrawSubTexturedQuad({ pos, scale, rotation, shear }, subImage);
 		}
+
+
 
 		//static void DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color);
 		//static void DrawTriangle(fvec2 p1, fvec2 p2, fvec2 p3, fcolor4 color, f32 zLayer = 0.f);

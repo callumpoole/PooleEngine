@@ -6,14 +6,16 @@
 namespace Poole::Rendering
 {
 	Image Image::s_Invalid = Image();
+	u32 Image::s_IdCounter = 1;
 	bool Image::s_YFlip = false;
-	
+
 	Image::Image(const char* path, bool* out_Successful, bool printLogWhenLoaded)
+		: m_AllocatedWithSTBI(true)
+		, m_YFlippedWhenLoaded(s_YFlip)
+		, m_Id(path ? s_IdCounter++ : 0)
 	{
-		m_YFlippedWhenLoaded = s_YFlip;
 		i32 width = -1, height = -1, channels = -1;
 		m_Bytes = stbi_load(path, &width, &height, &channels, 0);
-		m_AllocatedWithSTBI = true;
 	
 		if (!m_Bytes || width <= 0 || height <= 0 || channels <= 0)
 		{
@@ -43,6 +45,7 @@ namespace Poole::Rendering
 		, m_Size(size)
 		, m_NumChannels(channels)
 		, m_YFlippedWhenLoaded(isYFlipped)
+		, m_Id(s_IdCounter++)
 	{ }
 
 	Image::Image(const Image& src)
@@ -50,6 +53,7 @@ namespace Poole::Rendering
 		, m_Size(src.m_Size)
 		, m_NumChannels(src.m_NumChannels)
 		, m_YFlippedWhenLoaded(src.m_YFlippedWhenLoaded)
+		, m_Id(s_IdCounter++)
 	{
 		const u32 NumBytes = src.GetNumBytes();
 		m_Bytes = new u8[NumBytes];
@@ -80,6 +84,7 @@ namespace Poole::Rendering
 		m_Size = rhs.m_Size;
 		m_NumChannels = rhs.m_NumChannels;
 		m_YFlippedWhenLoaded = rhs.m_YFlippedWhenLoaded;
+		m_Id = s_IdCounter++;
 
 		return *this;
 	}
@@ -90,8 +95,10 @@ namespace Poole::Rendering
 		, m_NumChannels(src.m_NumChannels)
 		, m_YFlippedWhenLoaded(src.m_YFlippedWhenLoaded)
 		, m_Bytes(src.m_Bytes)
+		, m_Id(src.m_Id)
 	{ 
 		src.m_Bytes = nullptr;
+		src.m_Id = 0;
 	}
 
 	Image& Image::operator=(Image&& rhs)
@@ -104,8 +111,10 @@ namespace Poole::Rendering
 		m_NumChannels = rhs.m_NumChannels;
 		m_YFlippedWhenLoaded = rhs.m_YFlippedWhenLoaded;
 		m_Bytes = rhs.m_Bytes;
+		m_Id = rhs.m_Id;
 
 		rhs.m_Bytes = nullptr;
+		rhs.m_Id = 0;
 
 		return *this;
 	}

@@ -4,6 +4,7 @@
 #include "graphics_api/vertex_array.h"
 #include "graphics_api/texture.h"
 #include "poole/rendering/image/image.h"
+#include "poole/rendering/image/sub_image.h"
 #include "rendering/renderer.h"
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/camera/orthographic_camera.h"
@@ -14,29 +15,6 @@
 
 namespace Poole::Rendering
 {
-	//TO MOVE:
-	SubTexture::SubTexture(std::shared_ptr<Texture> texture, fvec2 min, fvec2 max)
-		: m_Texture(texture)
-	{
-		m_TexCoords[0] = { min.x, min.y };
-		m_TexCoords[1] = { max.x, min.y };
-		m_TexCoords[2] = { max.x, max.y };
-		m_TexCoords[3] = { min.x, max.y };
-	}
-
-	/*static*/ SubTexture* SubTexture::Create(std::shared_ptr<Texture> texture, fvec2 coords, fvec2 cellSize, fvec2 spriteSize)
-	{
-		const fvec2 min = { (coords.x * cellSize.x) / texture->GetWidth(), (coords.y * cellSize.y) / texture->GetHeight() };
-		const fvec2 max = { ((coords.x + spriteSize.x) * cellSize.x) / texture->GetWidth(), ((coords.y + spriteSize.y) * cellSize.y) / texture->GetHeight() };
-		return new SubTexture(texture, min, max);
-	}
-
-
-
-
-
-
-
 	namespace 
 	{
 		struct RenderData
@@ -48,7 +26,7 @@ namespace Poole::Rendering
 		static RenderData s_QuadRenderData;
 		static RenderData s_TextureRenderData;
 
-		std::vector<std::shared_ptr<Texture>> m_Textures;
+		std::unordered_map<u32, std::shared_ptr<Texture>> m_Textures; //Key is Image ID
 
 		GLShader* m_QuadShader;
 		GLShader* m_CircleShader;
@@ -222,77 +200,71 @@ namespace Poole::Rendering
 	}
 
 
-	/*static*/ TextureHandle Renderer2D::LoadTexture(const char* path, bool hasAlpha)
+	/*static*/ std::shared_ptr<Texture> Renderer2D::GetOrLoadTexture(const Image& image)
 	{
-		return LoadTexture(Image(path), hasAlpha);
-	}
-	/*static*/ TextureHandle Renderer2D::LoadTexture(const Image& image, bool hasAlpha)
-	{
-		const TextureHandle outHandle = m_Textures.size();
-
 		std::shared_ptr<Texture> t;
-		t.reset(Texture::Create(image, GL_TEXTURE_2D, GL_TEXTURE0, hasAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
-		m_Textures.push_back(std::move(t));
-		return outHandle;
-	}
-	void Renderer2D::DrawTexturedQuad(const ftransform2D& transform, TextureHandle handle)
-	{
-		if (handle >= 0 && handle < m_Textures.size())
+		if (m_Textures.contains(image.GetId()))
 		{
-			s_TextureRenderData.m_VertexArray->Bind();
-
-			s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
-			s_TextureRenderData.m_VertexArray->Bind();
-			//Vertex Array
-			s_TextureRenderData.m_VertexArray->Bind();
-			//Vertex Buffer
-			s_TextureRenderData.m_VertexBuffer->Bind();
-			//Index Buffer
-			s_TextureRenderData.m_IndexBuffer->Bind();
-			f32 cornersForTexture[] =
-			{
-				-1, -1, 0.f,		0.f, 0.f,
-				 1, -1, 0.f,		1.f, 0.f,
-				 1,  1, 0.f,		1.f, 1.f,
-				-1,  1, 0.f,		0.f, 1.f,
-			};
-			s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
-			s_TextureRenderData.m_VertexBuffer->SetLayout({
-				{ ShaderDataType::Float3, "a_Position"},
-				{ ShaderDataType::Float2, "a_Texture"},
-				});
-			s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
-			u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-			s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-			s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
-
-
-
-			m_TextureShader->Bind();
-			m_TextureShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
-			m_TextureShader->SetUniform("u_Color", Colors::White<fcolor4>);
-			m_Textures[handle]->Bind();
-			m_Textures[handle]->SetTextureUnit(*m_TextureShader, "tex0", 0);
-
-			s_TextureRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
-			s_TextureRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
-
-			GetRendererAPI()->DrawIndexed(6);
-
-			m_Textures[handle]->Unbind();
+			return m_Textures[image.GetId()];
 		}
 		else
 		{
-			LOG_ERROR("invalid texture handle {}", handle);
+			t.reset(Texture::Create(image, GL_TEXTURE_2D, GL_TEXTURE0, (image.GetNumChannels() == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
+			m_Textures.insert({ image.GetId(), t });
+			return t;
 		}
 	}
-	void Renderer2D::DrawSubTexturedQuad(const ftransform2D& transform, SubTexture* subTexture)
+	void Renderer2D::DrawTexturedQuad(const ftransform2D& transform, const Image& image)
 	{
-		std::shared_ptr<Texture> texture = subTexture->GetTexture();
+		std::shared_ptr<Texture> texture = GetOrLoadTexture(image);
 
 		s_TextureRenderData.m_VertexArray->Bind();
 
+		s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
+		s_TextureRenderData.m_VertexArray->Bind();
+		//Vertex Array
+		s_TextureRenderData.m_VertexArray->Bind();
+		//Vertex Buffer
+		s_TextureRenderData.m_VertexBuffer->Bind();
+		//Index Buffer
+		s_TextureRenderData.m_IndexBuffer->Bind();
+		f32 cornersForTexture[] =
+		{
+			-1, -1, 0.f,		0.f, 0.f,
+			 1, -1, 0.f,		1.f, 0.f,
+			 1,  1, 0.f,		1.f, 1.f,
+			-1,  1, 0.f,		0.f, 1.f,
+		};
+		s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
+		s_TextureRenderData.m_VertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position"},
+			{ ShaderDataType::Float2, "a_Texture"},
+			});
+		s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
+		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+		s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+		s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
 
+
+
+		m_TextureShader->Bind();
+		m_TextureShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
+		m_TextureShader->SetUniform("u_Color", Colors::White<fcolor4>);
+		texture->Bind();
+		texture->SetTextureUnit(*m_TextureShader, "tex0", 0);
+
+		s_TextureRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
+		s_TextureRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
+
+		GetRendererAPI()->DrawIndexed(6);
+
+		texture->Unbind();
+	}
+	void Renderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage)
+	{
+		std::shared_ptr<Texture> texture = GetOrLoadTexture(*subImage.GetImage());
+
+		s_TextureRenderData.m_VertexArray->Bind();
 
 		s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
 		s_TextureRenderData.m_VertexArray->Bind();
@@ -303,7 +275,7 @@ namespace Poole::Rendering
 		s_TextureRenderData.m_VertexBuffer->Bind();
 		//Index Buffer
 		s_TextureRenderData.m_IndexBuffer->Bind();
-		const std::array<fvec2, 4>& c = subTexture->GetTexCoords();
+		const std::array<fvec2, 4>& c = subImage.GetTexCoords();
 
 		f32 cornersForTexture[] =
 		{
