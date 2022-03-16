@@ -151,7 +151,7 @@ namespace Poole::Rendering
 		}
 		if (m_NumChannels == 3 || m_NumChannels == 4)
 		{
-			auto Do = [this, &func]<typename T>(T)
+			auto Do = [this, &func]<typename T>()
 			{
 				u8* newBytes = new u8[GetNumPixels()];
 				u32 iter = 0;
@@ -162,7 +162,7 @@ namespace Poole::Rendering
 				}
 				return Image(newBytes, m_Size, 1, m_YFlippedWhenLoaded);
 			};
-			return (m_NumChannels == 3) ? Do(u8color3{}) : Do(u8color4{});
+			return (m_NumChannels == 3) ? InvokeTemplatedLambda<u8color3>(Do) : InvokeTemplatedLambda<u8color4>(Do);
 		}
 		else
 		{

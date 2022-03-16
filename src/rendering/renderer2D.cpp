@@ -151,9 +151,6 @@ namespace Poole::Rendering
 		m_QuadShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
 		m_QuadShader->SetUniform("u_Color", color);
 
-		s_QuadRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
-		s_QuadRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
-
 		GetRendererAPI()->DrawIndexed(6);
 	}
 
@@ -171,9 +168,6 @@ namespace Poole::Rendering
 		m_CircleShader->SetUniform("u_Color", color);
 		m_CircleShader->SetUniform("u_Thickness", thickness);
 		m_CircleShader->SetUniform("u_Fade", std::max(fade, 0.000001f));
-
-		s_QuadRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
-		s_QuadRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
 
 		GetRendererAPI()->DrawIndexed(6);
 	}
@@ -218,16 +212,10 @@ namespace Poole::Rendering
 	{
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(image);
 
-		s_TextureRenderData.m_VertexArray->Bind();
-
+		//HORRIBLE AND TEMP CODE THAT SHOULDN'T BE HERE
 		s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
 		s_TextureRenderData.m_VertexArray->Bind();
-		//Vertex Array
-		s_TextureRenderData.m_VertexArray->Bind();
-		//Vertex Buffer
-		s_TextureRenderData.m_VertexBuffer->Bind();
-		//Index Buffer
-		s_TextureRenderData.m_IndexBuffer->Bind();
+
 		f32 cornersForTexture[] =
 		{
 			-1, -1, 0.f,		0.f, 0.f,
@@ -238,7 +226,7 @@ namespace Poole::Rendering
 		s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
 		s_TextureRenderData.m_VertexBuffer->SetLayout({
 			{ ShaderDataType::Float3, "a_Position"},
-			{ ShaderDataType::Float2, "a_Texture"},
+			{ ShaderDataType::Float2, "a_TexChords"},
 			});
 		s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
 		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
@@ -246,15 +234,11 @@ namespace Poole::Rendering
 		s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
 
 
-
 		m_TextureShader->Bind();
 		m_TextureShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
 		m_TextureShader->SetUniform("u_Color", Colors::White<fcolor4>);
 		texture->Bind();
 		texture->SetTextureUnit(*m_TextureShader, "tex0", 0);
-
-		s_TextureRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
-		s_TextureRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
 
 		GetRendererAPI()->DrawIndexed(6);
 
@@ -264,18 +248,17 @@ namespace Poole::Rendering
 	{
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(*subImage.GetImage());
 
-		s_TextureRenderData.m_VertexArray->Bind();
-
+		//HORRIBLE AND TEMP CODE THAT SHOULDN'T BE HERE
 		s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
 		s_TextureRenderData.m_VertexArray->Bind();
 
-		//Vertex Array
-		s_TextureRenderData.m_VertexArray->Bind();
-		//Vertex Buffer
-		s_TextureRenderData.m_VertexBuffer->Bind();
-		//Index Buffer
-		s_TextureRenderData.m_IndexBuffer->Bind();
 		const std::array<fvec2, 4>& c = subImage.GetTexCoords();
+
+		//TO FIX:
+		//Refer to: 
+		// - https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Renderer/Renderer2D.cpp
+		// AND
+		// - https://github.com/TheCherno/Hazel/blob/master/Sandbox/assets/shaders/Texture.glsl
 
 		f32 cornersForTexture[] =
 		{
@@ -287,7 +270,7 @@ namespace Poole::Rendering
 		s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
 		s_TextureRenderData.m_VertexBuffer->SetLayout({
 			{ ShaderDataType::Float3, "a_Position"},
-			{ ShaderDataType::Float2, "a_Texture"},
+			{ ShaderDataType::Float2, "a_TexChords"},
 			});
 		s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
 		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
@@ -301,9 +284,6 @@ namespace Poole::Rendering
 		texture->Bind();
 		texture->SetTextureUnit(*m_TextureShader, "tex0", 0);
 
-		s_TextureRenderData.m_VertexArray->Bind();
-		s_TextureRenderData.m_VertexBuffer->Bind(); //Probably unnecessary
-		s_TextureRenderData.m_IndexBuffer->Bind();	 //Probably unnecessary
 
 		GetRendererAPI()->DrawIndexed(6);
 

@@ -34,6 +34,14 @@
 #include "core/core_types.h"
 #include "core/core_logging.h"
 
+
+template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
+decltype(auto) InvokeTemplatedLambda(Lambda&& lambda, FunctionParam && ... functionParam)
+{
+	return std::forward<Lambda>(lambda).template operator() < TemplateParam... > (std::forward<FunctionParam>(functionParam)...);
+}
+
+
 namespace Poole::Math
 {
 	template<bool incZero = false>
