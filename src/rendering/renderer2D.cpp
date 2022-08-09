@@ -213,25 +213,27 @@ namespace Poole::Rendering
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(image);
 
 		//HORRIBLE AND TEMP CODE THAT SHOULDN'T BE HERE
-		s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
+	//	s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
 		s_TextureRenderData.m_VertexArray->Bind();
 
-		f32 cornersForTexture[] =
-		{
-			-1, -1, 0.f,		0.f, 0.f,
-			 1, -1, 0.f,		1.f, 0.f,
-			 1,  1, 0.f,		1.f, 1.f,
-			-1,  1, 0.f,		0.f, 1.f,
-		};
-		s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
-		s_TextureRenderData.m_VertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position"},
-			{ ShaderDataType::Float2, "a_TexChords"},
-			});
+	//	f32 cornersForTexture[] =
+	//	{
+	//		-1, -1, 0.f,		0.f, 0.f,
+	//		 1, -1, 0.f,		1.f, 0.f,
+	//		 1,  1, 0.f,		1.f, 1.f,
+	//		-1,  1, 0.f,		0.f, 1.f,
+	//	};
+	//	s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
+	//	s_TextureRenderData.m_VertexBuffer->SetLayout({
+	//		{ ShaderDataType::Float3, "a_Position"},
+	//		{ ShaderDataType::Float2, "a_TexChords"},
+	//		});
+	//	s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
+	//	u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+	//	s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+	//	s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
+
 		s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
-		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-		s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-		s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
 
 
 		m_TextureShader->Bind();
@@ -243,39 +245,40 @@ namespace Poole::Rendering
 		GetRendererAPI()->DrawIndexed(6);
 
 		texture->Unbind();
+		s_TextureRenderData.m_VertexArray->Unbind();
 	}
 	void Renderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage)
 	{
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(*subImage.GetImage());
 
 		//HORRIBLE AND TEMP CODE THAT SHOULDN'T BE HERE
-		s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
+	//	s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
 		s_TextureRenderData.m_VertexArray->Bind();
 
-		const std::array<fvec2, 4>& c = subImage.GetTexCoords();
-
-		//TO FIX:
-		//Refer to: 
-		// - https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Renderer/Renderer2D.cpp
-		// AND
-		// - https://github.com/TheCherno/Hazel/blob/master/Sandbox/assets/shaders/Texture.glsl
-
-		f32 cornersForTexture[] =
-		{
-			-1, -1, 0.f,		c[0].x, c[0].y,
-			 1, -1, 0.f,		c[1].x, c[1].y,
-			 1,  1, 0.f,		c[2].x, c[2].y,
-			-1,  1, 0.f,		c[3].x, c[3].y,
-		};
-		s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
-		s_TextureRenderData.m_VertexBuffer->SetLayout({
-			{ ShaderDataType::Float3, "a_Position"},
-			{ ShaderDataType::Float2, "a_TexChords"},
-			});
-		s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
-		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-		s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-		s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
+	//	const std::array<fvec2, 4>& c = subImage.GetTexCoords();
+	//
+	//	//TO FIX:
+	//	//Refer to: 
+	//	// - https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Renderer/Renderer2D.cpp
+	//	// AND
+	//	// - https://github.com/TheCherno/Hazel/blob/master/Sandbox/assets/shaders/Texture.glsl
+	//
+	//	f32 cornersForTexture[] =
+	//	{
+	//		-1, -1, 0.f,		c[0].x, c[0].y,
+	//		 1, -1, 0.f,		c[1].x, c[1].y,
+	//		 1,  1, 0.f,		c[2].x, c[2].y,
+	//		-1,  1, 0.f,		c[3].x, c[3].y,
+	//	};
+	//	s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
+	//	s_TextureRenderData.m_VertexBuffer->SetLayout({
+	//		{ ShaderDataType::Float3, "a_Position"},
+	//		{ ShaderDataType::Float2, "a_TexChords"},
+	//		});
+	//	s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
+	//	u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+	//	s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+	//	s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
 
 
 		m_TextureShader->Bind();
@@ -288,6 +291,7 @@ namespace Poole::Rendering
 		GetRendererAPI()->DrawIndexed(6);
 
 		texture->Unbind();
+		s_TextureRenderData.m_VertexArray->Unbind();
 	}
 
 
