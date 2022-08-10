@@ -11,15 +11,16 @@ namespace Poole::Rendering
 	{
 	public:
 		static Image s_Invalid;
+		static Image s_White1x1rgba;
 
 		Image(const char* path, bool* out_Successful = nullptr, bool printLogWhenLoaded = true);
-		Image(u8* bytes, uvec2 size, u32 channels, bool isYFlipped);
-		Image(u8* bytes, u32 width, u32 height, u32 channels, bool isYFlipped) : Image(bytes, {width, height}, channels, isYFlipped) {}
+		Image(u8* bytes, uvec2 size, u32 channels, bool isYFlipped, bool ownsMemory = true);
+		Image(u8* bytes, u32 width, u32 height, u32 channels, bool isYFlipped, bool ownsMemory = true) : Image(bytes, {width, height}, channels, isYFlipped, ownsMemory) {}
 		Image(const Image& src);
 		Image& operator=(const Image& rhs);
 		Image(Image&& src);
 		Image& operator=(Image&& rhs);
-		Image() : Image(nullptr, { 0,0 }, 0, false) { }
+		Image() : Image(nullptr, { 0,0 }, 0, false, false) { }
 		~Image();
 	
 		//Stb reads top to bottom, openGL is bottom to top
@@ -66,6 +67,7 @@ namespace Poole::Rendering
 		u8* m_Bytes = nullptr;
 		bool m_YFlippedWhenLoaded;
 		bool m_AllocatedWithSTBI = false;
+		bool m_OwnsMemory = false;
 
 		static constexpr u8 COLOR_DEPTH = 8;
 

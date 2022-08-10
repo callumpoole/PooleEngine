@@ -4,6 +4,18 @@
 
 namespace Poole::Rendering
 {
+	VertexBuffer* VertexBuffer::Create(u32 size)
+	{
+		switch (Renderer::s_GraphicsAPI)
+		{
+		case EGraphicsAPI::None: assert(false); return nullptr;
+		case EGraphicsAPI::OpenGL: return new OpenGL_VertexBuffer(size);
+		}
+
+		assert(false);
+		return nullptr;
+	}
+
 	VertexBuffer* VertexBuffer::Create(f32* verts, u32 size)
 	{
 		switch (Renderer::s_GraphicsAPI)

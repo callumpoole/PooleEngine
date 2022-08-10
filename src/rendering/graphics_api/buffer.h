@@ -110,9 +110,14 @@ namespace Poole::Rendering
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 
+		virtual void SetData(const void* data, uint32_t size) = 0;
+
 		virtual const VertexBufferLayout& GetLayout() const = 0;
 		virtual void SetLayout(const VertexBufferLayout& layout) = 0;
 
+		//Dynamic Draw
+		static VertexBuffer* Create(u32 size); 
+		//Static Draw
 		static VertexBuffer* Create(f32* verts, u32 size);
 	};
 

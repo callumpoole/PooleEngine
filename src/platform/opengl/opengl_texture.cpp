@@ -11,15 +11,15 @@ namespace Poole::Rendering
 
 	OpenGL_Texture::OpenGL_Texture(const Image& image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
 	{
-		type = texType;
+		m_Type = texType;
 		m_Size = image.GetSize();
 
 		//Generates an OpenGL texture object
-		glGenTextures(1, &ID);
+		glGenTextures(1, &m_ID);
 
 		//Assigns texture to the texture unit
 		glActiveTexture(slot);
-		glBindTexture(texType, ID);
+		glBindTexture(texType, m_ID);
 
 		//Set minification and magnification algo (could also use GL_NEAREST or GL_LINEAR)
 		glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -61,15 +61,19 @@ namespace Poole::Rendering
 
 	OpenGL_Texture::~OpenGL_Texture()
 	{
-		glDeleteTextures(1, &ID);
+		glDeleteTextures(1, &m_ID);
 	}
 
+	void OpenGL_Texture::Bind(u32 slot)
+	{
+		glBindTextureUnit(slot, m_ID);
+	}
 	void OpenGL_Texture::Bind()
 	{
-		glBindTexture(type, ID);
+		glBindTexture(m_Type, m_ID);
 	}
 	void OpenGL_Texture::Unbind()
 	{
-		glBindTexture(type, 0);
+		glBindTexture(m_Type, 0);
 	}
 }

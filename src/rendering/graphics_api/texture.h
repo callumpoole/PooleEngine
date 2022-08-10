@@ -13,7 +13,11 @@ namespace Poole::Rendering
 	public:
 		virtual ~Texture() {}
 
+		virtual void Bind(u32 slot) = 0;
+
+		//Deprecated
 		virtual void Bind() = 0;
+		//Deprecated
 		virtual void Unbind() = 0;
 
 		/// <param name="image">Path</param>

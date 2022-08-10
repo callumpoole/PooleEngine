@@ -27,14 +27,17 @@ namespace Poole::Rendering
 
 		virtual ~OpenGL_Texture();
 
+		virtual void Bind(u32 slot);
+		//Deprecated
 		virtual void Bind();
+		//Deprecated
 		virtual void Unbind();
 
 		virtual uvec2 GetSize() const override { return m_Size; }
 
 	private:
-		GLuint ID;
-		GLenum type;
+		GLuint m_ID;
+		GLenum m_Type;
 		uvec2 m_Size;
 	};
 }
