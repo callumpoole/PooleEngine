@@ -1,4 +1,4 @@
-#include "rendering/renderer2D_New.h"
+#include "rendering/batched_renderer2D.h"
 
 #include "graphics_api/buffer.h"
 #include "graphics_api/vertex_array.h"

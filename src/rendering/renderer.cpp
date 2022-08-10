@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "rendering/renderer2D.h"
+#include "rendering/batched_renderer2D.h"
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/image/image.h"
 
@@ -35,6 +36,7 @@ namespace Poole::Rendering
 		LoadShaders();
 
 		Renderer2D::Init();
+		BatchedRenderer2D::Init();
 	}
 	void Renderer::BeginScene()
 	{
@@ -45,6 +47,7 @@ namespace Poole::Rendering
 		RenderMeshesOldWay();
 
 		Renderer2D::BeginScene();
+		BatchedRenderer2D::BeginScene();
 	}
 	void Renderer::RenderScene()
 	{
@@ -53,6 +56,7 @@ namespace Poole::Rendering
 	void Renderer::EndScene(GLFWwindow* window)
 	{
 		Renderer2D::EndScene();
+		BatchedRenderer2D::EndScene();
 
 		//Swap front and back buffers
 		glfwSwapBuffers(window);
