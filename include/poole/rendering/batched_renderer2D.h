@@ -27,10 +27,24 @@ namespace Poole::Rendering
 			DrawQuad({ pos, scale, rotation, shear }, color);
 		}
 
-		static void DrawQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>);
-		static void DrawQuad(const ftransform2D& transform, const Image& image, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>)
+		static void DrawSubTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, const fvec2 textureCoords[4], float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>);
+
+		static void DrawTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>)
 		{
-			DrawQuad(transform, GetOrLoadTexture(image), tilingFactor, tintColor);
+			constexpr fvec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+			DrawSubTexturedQuad(transform, texture, textureCoords, tilingFactor, tintColor);
+		}
+		static void DrawTexturedQuad(const ftransform2D& transform, const Image& image, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>)
+		{
+			DrawTexturedQuad(transform, GetOrLoadTexture(image), tilingFactor, tintColor);
+		}
+		static void DrawTexturedQuad(const fvec2& pos, const fvec2& scale, const std::shared_ptr<Texture>& texture, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		{
+			DrawTexturedQuad({ pos, scale, rotation, shear }, texture, tilingFactor, tintColor);
+		}
+		static void DrawTexturedQuad(const fvec2& pos, const fvec2& scale, const Image& image, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		{
+			DrawTexturedQuad({ pos, scale, rotation, shear }, GetOrLoadTexture(image), tilingFactor, tintColor);
 		}
 
 		static std::shared_ptr<Texture> GetOrLoadTexture(const Image& image);

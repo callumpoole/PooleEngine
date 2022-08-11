@@ -203,10 +203,9 @@ namespace Poole::Rendering
 		}
 	}
 
-	/*static*/ void BatchedRenderer2D::DrawQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, float tilingFactor, const fcolor4& tintColor)
+	/*static*/ void BatchedRenderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, const fvec2 textureCoords[4], float tilingFactor, const fcolor4& tintColor)
 	{
 		constexpr size_t quadVertexCount = 4;
-		constexpr fvec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 
 		if (s_Data.m_QuadIndexCount >= RenderData2D::k_MaxIndices)
 			NextBatch();
