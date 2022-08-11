@@ -20,5 +20,11 @@ namespace Poole::Rendering
 		static void StartBatch();
 		static void FlushBatch();
 		static void NextBatch();
+
+		static void DrawQuad(const ftransform2D& transform, const fcolor4& color);
+		static void DrawQuad(const fvec2& pos, const fvec2& scale, const fcolor4& color, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		{
+			DrawQuad({ pos, scale, rotation, shear }, color);
+		}
 	};
 }

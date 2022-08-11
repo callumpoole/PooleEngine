@@ -14,7 +14,7 @@ namespace Poole
 	fvec2 Input::m_LastScrollDelta{};
 	u64 Input::m_KeepLastScrollDataTickID{};
 
-	void ProcessKeyEvent(GLFWwindow* /*window*/, i32 /*key*/, i32 /*scancode*/, i32 action, i32 /*mods*/)
+	void ProcessKeyEvent(GLFWwindow* /*window*/, i32 /*key*/, i32 /*scancode*/, i32 /*action*/, i32 /*mods*/)
 	{
 //		static int i = 0;
 //		if (action == GLFW_PRESS)
@@ -23,7 +23,7 @@ namespace Poole
 //		}
 	}
 
-	void ProcessMouseButtonEvent(GLFWwindow* /*window*/, i32 /*mouseButton*/, i32 action, i32 /*mods*/)
+	void ProcessMouseButtonEvent(GLFWwindow* /*window*/, i32 /*mouseButton*/, i32 /*action*/, i32 /*mods*/)
 	{
 //		static int i = 0;
 //		if (action == GLFW_PRESS)

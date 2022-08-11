@@ -1,12 +1,12 @@
 #type vertex
-#version 330 core
+#version 450 core
 layout(location = 0) in vec3 a_Position;
 void main() {
 	gl_Position = vec4(a_Position, 1.0);
 }
 
 #type fragment
-#version 330 core
+#version 450 core
 uniform vec4 u_Color;
 uniform vec2 u_WindowSize;
 uniform mat4 u_InvTransform_InvCameraViewProj;

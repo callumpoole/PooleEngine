@@ -12,6 +12,7 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"include/poole/core/core_logging.h"
 	"include/poole/core/core_types.h"
 	"src/core/core_logging.cpp"
+	"src/core/core_types.cpp"
 	"include/poole/engine.h"
 	"include/poole/entry_point.h"
 	"src/engine.cpp"

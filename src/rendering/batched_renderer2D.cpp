@@ -40,6 +40,7 @@ namespace Poole::Rendering
 			QuadVertex* m_QuadVertexBufferBase = nullptr;
 			QuadVertex* m_QuadVertexBufferPtr = nullptr;
 			GLShader* m_QuadShader = nullptr;
+			glm::vec4 m_QuadVertexPositions[4];
 
 			std::shared_ptr<Texture> m_WhiteTexture = nullptr;
 			std::array<std::shared_ptr<Texture>, k_MaxTextureSlots> m_TextureSlots;
@@ -91,13 +92,19 @@ namespace Poole::Rendering
 		delete[] quadIndices;
 
 		//Textures
-		s_Data.m_WhiteTexture.reset(Texture::Create(Image::s_White1x1rgba, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE));
+		s_Data.m_WhiteTexture.reset(Texture::Create(1u, 1u));
+		//s_Data.m_WhiteTexture.reset(Texture::Create(Image::s_White1x1rgba, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE));
+		uint32_t whiteTextureData = 0xffffffff;
+		s_Data.m_WhiteTexture->SetData(&whiteTextureData, sizeof(uint32_t));
 		s_Data.m_TextureSlots[0] = s_Data.m_WhiteTexture;
 
 		//Quad Shader
 		s_Data.m_QuadShader = &Renderer::s_shaderTextureBatchedTransform2D;
 
-
+		s_Data.m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+		s_Data.m_QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
+		s_Data.m_QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
+		s_Data.m_QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 	}
 	/*static*/ void BatchedRenderer2D::Shutdown()
 	{
@@ -148,4 +155,31 @@ namespace Poole::Rendering
 		StartBatch();
 	}
 
+
+	/*static*/ void BatchedRenderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
+	{
+		constexpr size_t quadVertexCount = 4;
+		const float textureIndex = 0.0f; // White Texture
+		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		const float tilingFactor = 1.0f;
+
+		if (s_Data.m_QuadIndexCount >= RenderData2D::k_MaxIndices)
+			NextBatch();
+
+
+		for (size_t i = 0; i < quadVertexCount; i++)
+		{
+			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadVertexPositions[i];
+			s_Data.m_QuadVertexBufferPtr->Color = color;
+			s_Data.m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
+			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
+			//s_Data.m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+			//s_Data.m_QuadVertexBufferPtr->EntityID = entityID;
+			s_Data.m_QuadVertexBufferPtr++;
+		}
+
+		s_Data.m_QuadIndexCount += 6;
+
+		//s_Data.Stats.QuadCount++;
+	}
 }

@@ -4,6 +4,15 @@
 
 namespace Poole::Rendering
 {
+	//===BOTH===
+
+	OpenGL_Texture::~OpenGL_Texture()
+	{
+		glDeleteTextures(1, &m_ID);
+	}
+
+	//===OLD===
+
 	OpenGL_Texture::OpenGL_Texture(const char* imagePath, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
 		: OpenGL_Texture(Image(imagePath), texType, slot, format, pixelType)
 	{
@@ -59,15 +68,8 @@ namespace Poole::Rendering
 		glUniform1i(texUni, unit);
 	}
 
-	OpenGL_Texture::~OpenGL_Texture()
-	{
-		glDeleteTextures(1, &m_ID);
-	}
 
-	void OpenGL_Texture::Bind(u32 slot)
-	{
-		glBindTextureUnit(slot, m_ID);
-	}
+
 	void OpenGL_Texture::Bind()
 	{
 		glBindTexture(m_Type, m_ID);
@@ -75,5 +77,38 @@ namespace Poole::Rendering
 	void OpenGL_Texture::Unbind()
 	{
 		glBindTexture(m_Type, 0);
+	}
+
+	//====NEW====
+
+
+	OpenGL_Texture::OpenGL_Texture(u32 width, u32 height)
+		: m_Size({width, height})
+	{
+		m_InternalFormat = GL_RGBA8;
+		m_DataFormat = GL_RGBA;
+
+		glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
+		//glGenTextures(1, &m_ID);
+		//glBindTexture(GL_TEXTURE_2D, m_ID);
+		glTextureStorage2D(m_ID, 1, m_InternalFormat, width, height);
+
+		glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	
+		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+
+	void OpenGL_Texture::SetData(void* data, u32 size)
+	{
+		const u32 bpp = m_DataFormat == GL_RGBA ? 4 : 3;
+		//assert(size == GetWidth() * GetHeight() * bpp, "Data must be an entire texture!");
+		glTextureSubImage2D(m_ID, 0, 0, 0, GetWidth(), GetHeight(), m_DataFormat, GL_UNSIGNED_BYTE, data);
+	}
+
+	void OpenGL_Texture::Bind(u32 slot)
+	{
+		glBindTextureUnit(slot, m_ID);
 	}
 }

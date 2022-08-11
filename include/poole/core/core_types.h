@@ -69,6 +69,8 @@ struct ftransform2D
 		, shear(std::move(shear))
 	{}
 
+	fmat4 MakeTransformMatrix() const;
+
 	fvec3 position = fvec3(0.0f);
 	fvec2 scale = fvec2(1.0f);
 	f32 rotation = 0;

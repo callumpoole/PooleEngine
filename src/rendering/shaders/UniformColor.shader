@@ -1,5 +1,5 @@
 #type vertex
-#version 330 core
+#version 450 core
 layout(location = 0) in vec3 a_Position;
 uniform mat4 u_CameraViewProjection;
 void main() {
@@ -9,7 +9,7 @@ void main() {
 
 
 #type fragment
-#version 330 core
+#version 450 core
 uniform vec4 u_Color;
 out vec4 o_Color;
 void main() {

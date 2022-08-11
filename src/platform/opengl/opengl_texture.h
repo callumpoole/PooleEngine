@@ -11,6 +11,16 @@ namespace Poole::Rendering
 	//A lot of this code was sources by VictorGordan: https://github.com/VictorGordan/opengl-tutorials/tree/main/YoutubeOpenGL%206%20-%20Textures
 	class OpenGL_Texture : public Texture
 	{
+		//===BOTH===
+	public:
+		virtual ~OpenGL_Texture();
+		virtual uvec2 GetSize() const override { return m_Size; }
+	private:
+		GLuint m_ID;
+		uvec2 m_Size;
+
+		//===OLD===
+
 	public:
 		/// <param name="imagePath">Path</param>
 		/// <param name="texType">GL_TEXTURE_2D</param>
@@ -25,19 +35,23 @@ namespace Poole::Rendering
 		/// <param name="unit">0</param>
 		virtual void SetTextureUnit(GLShader& shader, const char* uniform, GLuint unit) override;
 
-		virtual ~OpenGL_Texture();
 
-		virtual void Bind(u32 slot);
 		//Deprecated
-		virtual void Bind();
+		virtual void Bind() override;
 		//Deprecated
-		virtual void Unbind();
-
-		virtual uvec2 GetSize() const override { return m_Size; }
+		virtual void Unbind() override;
 
 	private:
-		GLuint m_ID;
 		GLenum m_Type;
-		uvec2 m_Size;
+
+
+		//===NEW===
+	public:
+		OpenGL_Texture(u32 width, u32 height);
+		virtual void SetData(void* data, u32 size) override;
+		virtual void Bind(u32 slot);
+
+		GLenum m_InternalFormat;
+		GLenum m_DataFormat;
 	};
 }

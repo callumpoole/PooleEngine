@@ -26,7 +26,7 @@ namespace Poole
     {
         //Create a windowed mode window and its OpenGL context
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
         GLFWwindow* window = glfwCreateWindow(size.x, size.y, title, NULL, NULL);

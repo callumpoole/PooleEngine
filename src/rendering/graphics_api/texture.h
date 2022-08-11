@@ -10,11 +10,16 @@ namespace Poole::Rendering
 
 	class Texture
 	{
+		//===BOTH===
 	public:
 		virtual ~Texture() {}
 
-		virtual void Bind(u32 slot) = 0;
-
+		virtual uvec2 GetSize() const { return { 0,0 }; }
+		u32 GetWidth() const { return GetSize().x; }
+		u32 GetHeight() const { return GetSize().y; }
+		
+		//===OLD===
+	public:
 		//Deprecated
 		virtual void Bind() = 0;
 		//Deprecated
@@ -34,12 +39,11 @@ namespace Poole::Rendering
 		/// <param name="unit">0</param>
 		virtual void SetTextureUnit(GLShader& /*shader*/, const char* /*uniform*/, GLuint /*unit*/) {}
 
-		virtual uvec2 GetSize() const { return { 0,0 }; }
-		u32 GetWidth() const { return GetSize().x; }
-		u32 GetHeight() const { return GetSize().y; }
+
+		//===NEW===
+	public:
+		static Texture* Create(u32 Width, u32 Height);
+		virtual void SetData(void* data, u32 size) = 0;
+		virtual void Bind(u32 slot) = 0;
 	};
-
-
-
-	
 }
