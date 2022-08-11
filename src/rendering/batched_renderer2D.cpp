@@ -19,6 +19,9 @@ namespace Poole::Rendering
 {
 	namespace
 	{
+		//HACKY
+		std::unordered_map<u32, std::shared_ptr<Texture>> m_Textures; //Key is Image ID
+
 		struct QuadVertex
 		{
 			fvec3 Position;
@@ -171,6 +174,66 @@ namespace Poole::Rendering
 		{
 			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadVertexPositions[i];
 			s_Data.m_QuadVertexBufferPtr->Color = color;
+			s_Data.m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
+			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
+			//s_Data.m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+			//s_Data.m_QuadVertexBufferPtr->EntityID = entityID;
+			s_Data.m_QuadVertexBufferPtr++;
+		}
+
+		s_Data.m_QuadIndexCount += 6;
+
+		//s_Data.Stats.QuadCount++;
+	}
+
+	//HACKY
+	/*static*/ std::shared_ptr<Texture> BatchedRenderer2D::GetOrLoadTexture(const Image& image)
+	{
+		std::shared_ptr<Texture> t;
+		if (m_Textures.contains(image.GetId()))
+		{
+			return m_Textures[image.GetId()];
+		}
+		else
+		{
+			t.reset(Texture::Create(image, GL_TEXTURE_2D, GL_TEXTURE0, (image.GetNumChannels() == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
+			m_Textures.insert({ image.GetId(), t });
+			return t;
+		}
+	}
+
+	/*static*/ void BatchedRenderer2D::DrawQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, float tilingFactor, const fcolor4& tintColor)
+	{
+		constexpr size_t quadVertexCount = 4;
+		constexpr fvec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+
+		if (s_Data.m_QuadIndexCount >= RenderData2D::k_MaxIndices)
+			NextBatch();
+
+		float textureIndex = 0.0f;
+		for (uint32_t i = 1; i < s_Data.m_TextureSlotIndex; i++)
+		{
+			if (s_Data.m_TextureSlots[i] == texture)
+			{
+				textureIndex = (float)i;
+				break;
+			}
+		}
+
+		if (textureIndex == 0.0f)
+		{
+			if (s_Data.m_TextureSlotIndex >= RenderData2D::k_MaxTextureSlots)
+				NextBatch();
+
+			textureIndex = (float)s_Data.m_TextureSlotIndex;
+			s_Data.m_TextureSlots[s_Data.m_TextureSlotIndex] = texture;
+			s_Data.m_TextureSlotIndex++;
+		}
+
+		for (size_t i = 0; i < quadVertexCount; i++)
+		{
+			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadVertexPositions[i];
+			s_Data.m_QuadVertexBufferPtr->Color = tintColor;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
 			//s_Data.m_QuadVertexBufferPtr->TilingFactor = tilingFactor;

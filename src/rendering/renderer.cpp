@@ -35,7 +35,7 @@ namespace Poole::Rendering
 		//m_camera.GetBounds();
 		LoadShaders();
 
-		//Renderer2D::Init();
+		Renderer2D::Init();
 		BatchedRenderer2D::Init();
 	}
 	void Renderer::BeginScene()
@@ -46,16 +46,16 @@ namespace Poole::Rendering
 
 		RenderMeshesOldWay();
 
-		//Renderer2D::BeginScene();
+		Renderer2D::BeginScene();
 		BatchedRenderer2D::BeginScene();
 	}
 	void Renderer::RenderScene()
 	{
-		//Renderer2D::RenderScene();
+		Renderer2D::RenderScene();
 	}
 	void Renderer::EndScene(GLFWwindow* window)
 	{
-		//Renderer2D::EndScene();
+		Renderer2D::EndScene();
 		BatchedRenderer2D::EndScene();
 
 		//Swap front and back buffers
