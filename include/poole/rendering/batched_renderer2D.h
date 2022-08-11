@@ -27,8 +27,8 @@ namespace Poole::Rendering
 			DrawQuad({ pos, scale, rotation, shear }, color);
 		}
 
-		static void DrawQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, float tilingFactor, const fcolor4& tintColor = Colors::White<fcolor4>);
-		static void DrawQuad(const ftransform2D& transform, const Image& image, float tilingFactor, const fcolor4& tintColor = Colors::White<fcolor4>)
+		static void DrawQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>);
+		static void DrawQuad(const ftransform2D& transform, const Image& image, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>)
 		{
 			DrawQuad(transform, GetOrLoadTexture(image), tilingFactor, tintColor);
 		}

@@ -28,6 +28,7 @@ namespace Poole::Rendering
 			fvec4 Color;
 			fvec2 TexCoord;
 			float TexIndex; //GPUs like floats
+			float TilingFactor;
 		};
 
 		struct RenderData2D
@@ -65,7 +66,7 @@ namespace Poole::Rendering
 			{ ShaderDataType::Float4, "a_Color"        },
 			{ ShaderDataType::Float2, "a_TexCoord"     },
 			{ ShaderDataType::Float,  "a_TexIndex"     },
-			//{ ShaderDataType::Float,  "a_TilingFactor" },
+			{ ShaderDataType::Float,  "a_TilingFactor" },
 			//{ ShaderDataType::Int,    "a_EntityID"     }
 		});
 		s_Data.m_QuadVertexArray->AddVertexBuffer(s_Data.m_QuadVertexBuffer);
@@ -176,7 +177,7 @@ namespace Poole::Rendering
 			s_Data.m_QuadVertexBufferPtr->Color = color;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
-			//s_Data.m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+			s_Data.m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
 			//s_Data.m_QuadVertexBufferPtr->EntityID = entityID;
 			s_Data.m_QuadVertexBufferPtr++;
 		}
@@ -236,7 +237,7 @@ namespace Poole::Rendering
 			s_Data.m_QuadVertexBufferPtr->Color = tintColor;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
-			//s_Data.m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
+			s_Data.m_QuadVertexBufferPtr->TilingFactor = tilingFactor;
 			//s_Data.m_QuadVertexBufferPtr->EntityID = entityID;
 			s_Data.m_QuadVertexBufferPtr++;
 		}
