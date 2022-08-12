@@ -19,9 +19,6 @@ namespace Poole::Rendering
 {
 	namespace
 	{
-		//HACKY
-		std::unordered_map<u32, std::shared_ptr<Texture>> m_Textures; //Key is Image ID
-
 		struct QuadVertex
 		{
 			fvec3 Position;
@@ -49,6 +46,8 @@ namespace Poole::Rendering
 			std::shared_ptr<Texture> m_WhiteTexture = nullptr;
 			std::array<std::shared_ptr<Texture>, k_MaxTextureSlots> m_TextureSlots;
 			u32 m_TextureSlotIndex = 1; //texture ID counter, [0] is white.
+
+			std::unordered_map<u32, std::shared_ptr<Texture>> m_TextureIdMap; //Key is Image ID
 		};
 
 		static RenderData2D s_Data;
@@ -187,20 +186,24 @@ namespace Poole::Rendering
 		//s_Data.Stats.QuadCount++;
 	}
 
-	//HACKY
 	/*static*/ std::shared_ptr<Texture> BatchedRenderer2D::GetOrLoadTexture(const Image& image)
 	{
 		std::shared_ptr<Texture> t;
-		if (m_Textures.contains(image.GetId()))
+		if (s_Data.m_TextureIdMap.contains(image.GetId()))
 		{
-			return m_Textures[image.GetId()];
+			return s_Data.m_TextureIdMap[image.GetId()];
 		}
 		else
 		{
 			t.reset(Texture::Create(image, GL_TEXTURE_2D, GL_TEXTURE0, (image.GetNumChannels() == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
-			m_Textures.insert({ image.GetId(), t });
+			s_Data.m_TextureIdMap.insert({ image.GetId(), t });
 			return t;
 		}
+	}
+
+	/*static*/ void BatchedRenderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage, float tilingFactor, const fcolor4& tintColor)
+	{
+		DrawSubTexturedQuad(transform, GetOrLoadTexture(*subImage.GetImage()), subImage.GetTexCoords().data(), tilingFactor, tintColor);
 	}
 
 	/*static*/ void BatchedRenderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, const fvec2 textureCoords[4], float tilingFactor, const fcolor4& tintColor)

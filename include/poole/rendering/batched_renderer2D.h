@@ -28,6 +28,7 @@ namespace Poole::Rendering
 		}
 
 		static void DrawSubTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, const fvec2 textureCoords[4], float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>);
+		static void DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>);
 
 		static void DrawTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>)
 		{

@@ -26,7 +26,7 @@ namespace Poole::Rendering
 		static RenderData s_QuadRenderData;
 		static RenderData s_TextureRenderData;
 
-		std::unordered_map<u32, std::shared_ptr<Texture>> m_Textures; //Key is Image ID
+		std::unordered_map<u32, std::shared_ptr<Texture>> m_TextureIdMap; //Key is Image ID
 
 		GLShader* m_QuadShader;
 		GLShader* m_CircleShader;
@@ -197,14 +197,14 @@ namespace Poole::Rendering
 	/*static*/ std::shared_ptr<Texture> Renderer2D::GetOrLoadTexture(const Image& image)
 	{
 		std::shared_ptr<Texture> t;
-		if (m_Textures.contains(image.GetId()))
+		if (m_TextureIdMap.contains(image.GetId()))
 		{
-			return m_Textures[image.GetId()];
+			return m_TextureIdMap[image.GetId()];
 		}
 		else
 		{
 			t.reset(Texture::Create(image, GL_TEXTURE_2D, GL_TEXTURE0, (image.GetNumChannels() == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
-			m_Textures.insert({ image.GetId(), t });
+			m_TextureIdMap.insert({ image.GetId(), t });
 			return t;
 		}
 	}
