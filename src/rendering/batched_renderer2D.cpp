@@ -98,7 +98,7 @@ namespace Poole::Rendering
 
 		//Circle Vertex Array
 		s_Data.m_CircleVertexArray.reset(VertexArray::Create());
-		s_Data.m_CircleShader = &Renderer::s_shaderTextureBatchedTransform2D;
+		s_Data.m_CircleShader = &Renderer::s_shaderCircleBatchedTransform2D;
 
 		//Circle Verts
 		{
