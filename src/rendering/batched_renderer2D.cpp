@@ -30,8 +30,11 @@ namespace Poole::Rendering
 
 		struct CircleVertex
 		{
-			fvec3 Position;
+			fvec3 WorldPosition;
+			fvec3 LocalPosition;
 			fvec4 Color;
+			float Thickness;
+			float Fade;
 		};
 
 		struct RenderData2D
@@ -46,6 +49,12 @@ namespace Poole::Rendering
 				fvec4{ 0.5f,  0.5f, 0.0f, 1.0f },
 				fvec4{ -0.5f,  0.5f, 0.0f, 1.0f }
 			};
+
+			//Texture Stuff
+			std::shared_ptr<Texture> m_WhiteTexture = nullptr;
+			std::array<std::shared_ptr<Texture>, k_MaxTextureSlots> m_TextureSlots;
+			u32 m_TextureSlotIndex = 1; //texture ID counter, [0] is white.
+			std::unordered_map<u32, std::shared_ptr<Texture>> m_TextureIdMap; //Key is Image ID
 
 			//Quad Stuff
 			std::shared_ptr<VertexArray> m_QuadVertexArray;
@@ -62,12 +71,6 @@ namespace Poole::Rendering
 			CircleVertex* m_CircleVertexBufferBase = nullptr;
 			CircleVertex* m_CircleVertexBufferPtr = nullptr;
 			GLShader* m_CircleShader = nullptr;
-
-			//Texture Stuff
-			std::shared_ptr<Texture> m_WhiteTexture = nullptr;
-			std::array<std::shared_ptr<Texture>, k_MaxTextureSlots> m_TextureSlots;
-			u32 m_TextureSlotIndex = 1; //texture ID counter, [0] is white.
-			std::unordered_map<u32, std::shared_ptr<Texture>> m_TextureIdMap; //Key is Image ID
 
 			//Stats
 			struct {
@@ -110,8 +113,11 @@ namespace Poole::Rendering
 		{
 			s_Data.m_CircleVertexBuffer.reset(VertexBuffer::Create(s_Data.k_MaxVertices * sizeof(CircleVertex)));
 			s_Data.m_CircleVertexBuffer->SetLayout({
-				{ ShaderDataType::Float3, "a_Position"     },
-				{ ShaderDataType::Float4, "a_Color"        },
+				{ ShaderDataType::Float3, "a_WorldPosition"},
+				{ ShaderDataType::Float3, "a_LocalPosition"},
+				{ ShaderDataType::Float4, "a_Color"},
+				{ ShaderDataType::Float, "a_Thickness"},
+				{ ShaderDataType::Float, "a_Fade"},
 				//{ ShaderDataType::Int,    "a_EntityID"     }
 				});
 			s_Data.m_CircleVertexArray->AddVertexBuffer(s_Data.m_CircleVertexBuffer);
@@ -331,7 +337,7 @@ namespace Poole::Rendering
 		s_Data.m_Stats.m_QuadCount++;
 	}
 
-	/*static*/ void BatchedRenderer2D::DrawCircle(const ftransform2D& transform, const fcolor4& color)
+	/*static*/ void BatchedRenderer2D::DrawCircle(const ftransform2D& transform, const fcolor4& color, float thickness, float fade)
 	{
 		SCOPED_PROFILER();
 
@@ -340,8 +346,11 @@ namespace Poole::Rendering
 
 		for (size_t i = 0; i < k_FullTextureCoords.size(); i++)
 		{
-			s_Data.m_CircleVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
+			s_Data.m_CircleVertexBufferPtr->WorldPosition = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
+			s_Data.m_CircleVertexBufferPtr->LocalPosition = s_Data.m_QuadAndCircleVertexPositions[i] * 2.f;
 			s_Data.m_CircleVertexBufferPtr->Color = color;
+			s_Data.m_CircleVertexBufferPtr->Thickness = thickness;
+			s_Data.m_CircleVertexBufferPtr->Fade = fade;
 			//s_Data.m_CircleVertexBufferPtr->EntityID = entityID;
 			s_Data.m_CircleVertexBufferPtr++;
 		}

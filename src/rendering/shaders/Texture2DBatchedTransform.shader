@@ -1,3 +1,5 @@
+//CREDIT TO: TheCherno / Hazel Engine for this
+
 #type vertex
 #version 450 core
 layout(location = 0) in vec3 a_Position;
