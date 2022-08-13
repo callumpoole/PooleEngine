@@ -34,24 +34,40 @@ namespace Poole::Rendering
 			static constexpr u32 k_MaxVertices = k_MaxQuads * 4;
 			static constexpr u32 k_MaxIndices = k_MaxQuads * 6;
 			static constexpr u32 k_MaxTextureSlots = 32; //[0] is white texture, so 31 others
+			static constexpr std::array<fvec4, 4> m_QuadAndCircleVertexPositions = {
+				fvec4{ -0.5f, -0.5f, 0.0f, 1.0f },
+				fvec4{ 0.5f, -0.5f, 0.0f, 1.0f },
+				fvec4{ 0.5f,  0.5f, 0.0f, 1.0f },
+				fvec4{ -0.5f,  0.5f, 0.0f, 1.0f }
+			};
 
+			//Quad Stuff
 			std::shared_ptr<VertexArray> m_QuadVertexArray;
 			std::shared_ptr<VertexBuffer> m_QuadVertexBuffer;
 			u32 m_QuadIndexCount = 0;
 			QuadVertex* m_QuadVertexBufferBase = nullptr;
 			QuadVertex* m_QuadVertexBufferPtr = nullptr;
 			GLShader* m_QuadShader = nullptr;
-			glm::vec4 m_QuadVertexPositions[4];
 
+			//Circle Stuff
+			std::shared_ptr<VertexArray> m_CircleVertexArray;
+			std::shared_ptr<VertexBuffer> m_CircleVertexBuffer;
+			u32 m_CircleIndexCount = 0;
+			QuadVertex* m_CircleVertexBufferBase = nullptr;
+			QuadVertex* m_CircleVertexBufferPtr = nullptr;
+			GLShader* m_CircleShader = nullptr;
+
+			//Texture Stuff
 			std::shared_ptr<Texture> m_WhiteTexture = nullptr;
 			std::array<std::shared_ptr<Texture>, k_MaxTextureSlots> m_TextureSlots;
 			u32 m_TextureSlotIndex = 1; //texture ID counter, [0] is white.
-
 			std::unordered_map<u32, std::shared_ptr<Texture>> m_TextureIdMap; //Key is Image ID
 
+			//Stats
 			struct {
 				u32 m_DrawCalls = 0;
 				u32 m_QuadCount = 0;
+				u32 m_CircleCount = 0;
 			} m_Stats;
 		};
 
@@ -60,7 +76,9 @@ namespace Poole::Rendering
 
 	/*static*/ void BatchedRenderer2D::Init()
 	{
+		//Quad Vertex Array
 		s_Data.m_QuadVertexArray.reset(VertexArray::Create());
+		s_Data.m_QuadShader = &Renderer::s_shaderTextureBatchedTransform2D;
 
 		//Quad Verts
 		{
@@ -77,28 +95,59 @@ namespace Poole::Rendering
 			s_Data.m_QuadVertexBufferBase = new QuadVertex[s_Data.k_MaxVertices];
 		}
 
-		//Quad Indicies
+
+		//Circle Vertex Array
+		s_Data.m_CircleVertexArray.reset(VertexArray::Create());
+		s_Data.m_CircleShader = &Renderer::s_shaderTextureBatchedTransform2D;
+
+		//Circle Verts
 		{
-			u32* quadIndices = new u32[s_Data.k_MaxIndices];
+			s_Data.m_CircleVertexBuffer.reset(VertexBuffer::Create(s_Data.k_MaxVertices * sizeof(QuadVertex)));
+			s_Data.m_CircleVertexBuffer->SetLayout({
+				{ ShaderDataType::Float3, "a_Position"     },
+				{ ShaderDataType::Float4, "a_Color"        },
+				{ ShaderDataType::Float2, "a_TexCoord"     },
+				{ ShaderDataType::Float,  "a_TexIndex"     },
+				{ ShaderDataType::Float,  "a_TilingFactor" },
+				//{ ShaderDataType::Int,    "a_EntityID"     }
+				});
+			s_Data.m_CircleVertexArray->AddVertexBuffer(s_Data.m_CircleVertexBuffer);
+			s_Data.m_CircleVertexBufferBase = new QuadVertex[s_Data.k_MaxVertices];
+		}
+
+
+		//Quad & Circle Indicies
+		{
+			u32* quadAndCircleIndices = new u32[s_Data.k_MaxIndices];
 
 			u32 offset = 0;
 			for (u32 i = 0; i < s_Data.k_MaxIndices; i += 6)
 			{
-				quadIndices[i + 0] = offset + 0;
-				quadIndices[i + 1] = offset + 1;
-				quadIndices[i + 2] = offset + 2;
+				quadAndCircleIndices[i + 0] = offset + 0;
+				quadAndCircleIndices[i + 1] = offset + 1;
+				quadAndCircleIndices[i + 2] = offset + 2;
 
-				quadIndices[i + 3] = offset + 2;
-				quadIndices[i + 4] = offset + 3;
-				quadIndices[i + 5] = offset + 0;
+				quadAndCircleIndices[i + 3] = offset + 2;
+				quadAndCircleIndices[i + 4] = offset + 3;
+				quadAndCircleIndices[i + 5] = offset + 0;
 
 				offset += 4;
 			}
 
-			std::shared_ptr<IndexBuffer> quadIB;
-			quadIB.reset(IndexBuffer::Create(quadIndices, s_Data.k_MaxIndices));
-			s_Data.m_QuadVertexArray->SetIndexBuffer(quadIB);
-			delete[] quadIndices;
+			//Quad Indicies
+			{
+				std::shared_ptr<IndexBuffer> quadIB;
+				quadIB.reset(IndexBuffer::Create(quadAndCircleIndices, s_Data.k_MaxIndices));
+				s_Data.m_QuadVertexArray->SetIndexBuffer(quadIB);
+			}
+			//Circle Indicies
+			{
+				std::shared_ptr<IndexBuffer> circleIB;
+				circleIB.reset(IndexBuffer::Create(quadAndCircleIndices, s_Data.k_MaxIndices));
+				s_Data.m_CircleVertexArray->SetIndexBuffer(circleIB);
+			}
+
+			delete[] quadAndCircleIndices;
 		}
 
 		//Textures
@@ -107,16 +156,6 @@ namespace Poole::Rendering
 			const u32 whiteTextureData = 0xffffffff;
 			s_Data.m_WhiteTexture->SetData(&whiteTextureData, sizeof(u32));
 			s_Data.m_TextureSlots[0] = s_Data.m_WhiteTexture;
-		}
-
-		//Quad Shader
-		{
-			s_Data.m_QuadShader = &Renderer::s_shaderTextureBatchedTransform2D;
-
-			s_Data.m_QuadVertexPositions[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
-			s_Data.m_QuadVertexPositions[1] = { 0.5f, -0.5f, 0.0f, 1.0f };
-			s_Data.m_QuadVertexPositions[2] = { 0.5f,  0.5f, 0.0f, 1.0f };
-			s_Data.m_QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
 		}
 	}
 	/*static*/ void BatchedRenderer2D::Shutdown()
@@ -127,10 +166,14 @@ namespace Poole::Rendering
 	/*static*/ void BatchedRenderer2D::BeginScene()
 	{
 		s_Data.m_Stats.m_QuadCount = 0;
+		s_Data.m_Stats.m_CircleCount = 0;
 		s_Data.m_Stats.m_DrawCalls = 0;
 
 		s_Data.m_QuadShader->Bind();
 		s_Data.m_QuadShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+
+		s_Data.m_CircleShader->Bind();
+		s_Data.m_CircleShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
 
 		StartBatch();
 	}
@@ -138,7 +181,7 @@ namespace Poole::Rendering
 	{
 		FlushBatch();
 
-		//std::cout << "Quad Count: " << s_Data.m_Stats.m_QuadCount << "  Draw Calls: " << s_Data.m_Stats.m_DrawCalls << "\r\n";
+		//LOG("Quads: {}, Circles: {}, DrawCalls: {}", s_Data.m_Stats.m_QuadCount, s_Data.m_Stats.m_CircleCount, s_Data.m_Stats.m_DrawCalls);
 	}
 
 	/*static*/ void BatchedRenderer2D::StartBatch()
@@ -146,10 +189,16 @@ namespace Poole::Rendering
 		s_Data.m_QuadIndexCount = 0;
 		s_Data.m_QuadVertexBufferPtr = s_Data.m_QuadVertexBufferBase;
 
+		s_Data.m_CircleIndexCount = 0;
+		s_Data.m_CircleVertexBufferPtr = s_Data.m_CircleVertexBufferBase;
+
 		s_Data.m_TextureSlotIndex = 1;
 	}
 	/*static*/ void BatchedRenderer2D::FlushBatch()
 	{
+		//TODO: There is an inefficiency that can't flush independantly of each other
+
+		//Flush Quads
 		if (s_Data.m_QuadIndexCount)
 		{
 			const u32 dataSize = (u32)((u8*)s_Data.m_QuadVertexBufferPtr - (u8*)s_Data.m_QuadVertexBufferBase);
@@ -164,6 +213,25 @@ namespace Poole::Rendering
 			//TODO: Look into passing vertex array to DrawIndexed() and binding within
 			s_Data.m_QuadVertexArray->Bind();
 			GetRendererAPI()->DrawIndexed(s_Data.m_QuadIndexCount);
+
+			s_Data.m_Stats.m_DrawCalls++;
+		}
+
+		//Flush Circles
+		if (s_Data.m_CircleIndexCount)
+		{
+			const u32 dataSize = (u32)((u8*)s_Data.m_CircleVertexBufferPtr - (u8*)s_Data.m_CircleVertexBufferBase);
+			s_Data.m_CircleVertexBuffer->SetData(s_Data.m_CircleVertexBufferBase, dataSize);
+
+			// Bind textures
+			for (u32 i = 0; i < s_Data.m_TextureSlotIndex; i++)
+				s_Data.m_TextureSlots[i]->Bind(i);
+
+			s_Data.m_CircleShader->Bind();
+
+			//TODO: Look into passing vertex array to DrawIndexed() and binding within
+			s_Data.m_CircleVertexArray->Bind();
+			GetRendererAPI()->DrawIndexed(s_Data.m_CircleIndexCount);
 
 			s_Data.m_Stats.m_DrawCalls++;
 		}
@@ -187,7 +255,7 @@ namespace Poole::Rendering
 
 		for (size_t i = 0; i < k_FullTextureCoords.size(); i++)
 		{
-			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadVertexPositions[i];
+			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
 			s_Data.m_QuadVertexBufferPtr->Color = color;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = k_FullTextureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
@@ -250,7 +318,7 @@ namespace Poole::Rendering
 
 		for (size_t i = 0; i < textureCoords.size(); i++)
 		{
-			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadVertexPositions[i];
+			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
 			s_Data.m_QuadVertexBufferPtr->Color = tintColor;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
@@ -262,5 +330,31 @@ namespace Poole::Rendering
 		s_Data.m_QuadIndexCount += 6;
 
 		s_Data.m_Stats.m_QuadCount++;
+	}
+
+	/*static*/ void BatchedRenderer2D::DrawCircle(const ftransform2D& transform, const fcolor4& color)
+	{
+		SCOPED_PROFILER();
+
+		const float textureIndex = 0.0f; // White Texture
+		const float tilingFactor = 1.0f;
+
+		if (s_Data.m_CircleIndexCount >= RenderData2D::k_MaxIndices)
+			NextBatch();
+
+		for (size_t i = 0; i < k_FullTextureCoords.size(); i++)
+		{
+			s_Data.m_CircleVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
+			s_Data.m_CircleVertexBufferPtr->Color = color;
+			s_Data.m_CircleVertexBufferPtr->TexCoord = k_FullTextureCoords[i];
+			s_Data.m_CircleVertexBufferPtr->TexIndex = textureIndex;
+			s_Data.m_CircleVertexBufferPtr->TilingFactor = tilingFactor;
+			//s_Data.m_CircleVertexBufferPtr->EntityID = entityID;
+			s_Data.m_CircleVertexBufferPtr++;
+		}
+
+		s_Data.m_CircleIndexCount += 6;
+
+		s_Data.m_Stats.m_CircleCount++;
 	}
 }

@@ -50,5 +50,11 @@ namespace Poole::Rendering
 		static std::shared_ptr<Texture> GetOrLoadTexture(const Image& image);
 
 		static constexpr std::array<fvec2, 4> k_FullTextureCoords = { fvec2{ 0.0f, 0.0f }, fvec2{ 1.0f, 0.0f }, fvec2{ 1.0f, 1.0f }, fvec2{ 0.0f, 1.0f } };
+
+		static void DrawCircle(const ftransform2D& transform, const fcolor4& color);
+		static void DrawCircle(const fvec2& pos, const fvec2& scale, const fcolor4& color, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		{
+			DrawCircle({ pos, scale, rotation, shear }, color);
+		}
 	};
 }

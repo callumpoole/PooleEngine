@@ -8,7 +8,7 @@ namespace Poole
 	size_t CharactersToRemoveFromPath();
 	std::string_view ShortenFilename(const char* fullFileName);
 
-#define DO_PROFILE_LOGGING 1
+#define DO_PROFILE_LOGGING 0
 #define DO_PROFILE_LOGGING_WITH_AVG 1
 
 	class ScopedProfiler {
