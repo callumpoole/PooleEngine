@@ -28,6 +28,12 @@ namespace Poole::Rendering
 			float TilingFactor; //default is 1
 		};
 
+		struct CircleVertex
+		{
+			fvec3 Position;
+			fvec4 Color;
+		};
+
 		struct RenderData2D
 		{
 			static constexpr u32 k_MaxQuads = 2000;
@@ -53,8 +59,8 @@ namespace Poole::Rendering
 			std::shared_ptr<VertexArray> m_CircleVertexArray;
 			std::shared_ptr<VertexBuffer> m_CircleVertexBuffer;
 			u32 m_CircleIndexCount = 0;
-			QuadVertex* m_CircleVertexBufferBase = nullptr;
-			QuadVertex* m_CircleVertexBufferPtr = nullptr;
+			CircleVertex* m_CircleVertexBufferBase = nullptr;
+			CircleVertex* m_CircleVertexBufferPtr = nullptr;
 			GLShader* m_CircleShader = nullptr;
 
 			//Texture Stuff
@@ -102,17 +108,14 @@ namespace Poole::Rendering
 
 		//Circle Verts
 		{
-			s_Data.m_CircleVertexBuffer.reset(VertexBuffer::Create(s_Data.k_MaxVertices * sizeof(QuadVertex)));
+			s_Data.m_CircleVertexBuffer.reset(VertexBuffer::Create(s_Data.k_MaxVertices * sizeof(CircleVertex)));
 			s_Data.m_CircleVertexBuffer->SetLayout({
 				{ ShaderDataType::Float3, "a_Position"     },
 				{ ShaderDataType::Float4, "a_Color"        },
-				{ ShaderDataType::Float2, "a_TexCoord"     },
-				{ ShaderDataType::Float,  "a_TexIndex"     },
-				{ ShaderDataType::Float,  "a_TilingFactor" },
 				//{ ShaderDataType::Int,    "a_EntityID"     }
 				});
 			s_Data.m_CircleVertexArray->AddVertexBuffer(s_Data.m_CircleVertexBuffer);
-			s_Data.m_CircleVertexBufferBase = new QuadVertex[s_Data.k_MaxVertices];
+			s_Data.m_CircleVertexBufferBase = new CircleVertex[s_Data.k_MaxVertices];
 		}
 
 
@@ -189,10 +192,10 @@ namespace Poole::Rendering
 		s_Data.m_QuadIndexCount = 0;
 		s_Data.m_QuadVertexBufferPtr = s_Data.m_QuadVertexBufferBase;
 
+		s_Data.m_TextureSlotIndex = 1;
+
 		s_Data.m_CircleIndexCount = 0;
 		s_Data.m_CircleVertexBufferPtr = s_Data.m_CircleVertexBufferBase;
-
-		s_Data.m_TextureSlotIndex = 1;
 	}
 	/*static*/ void BatchedRenderer2D::FlushBatch()
 	{
@@ -222,10 +225,6 @@ namespace Poole::Rendering
 		{
 			const u32 dataSize = (u32)((u8*)s_Data.m_CircleVertexBufferPtr - (u8*)s_Data.m_CircleVertexBufferBase);
 			s_Data.m_CircleVertexBuffer->SetData(s_Data.m_CircleVertexBufferBase, dataSize);
-
-			// Bind textures
-			for (u32 i = 0; i < s_Data.m_TextureSlotIndex; i++)
-				s_Data.m_TextureSlots[i]->Bind(i);
 
 			s_Data.m_CircleShader->Bind();
 
@@ -336,9 +335,6 @@ namespace Poole::Rendering
 	{
 		SCOPED_PROFILER();
 
-		const float textureIndex = 0.0f; // White Texture
-		const float tilingFactor = 1.0f;
-
 		if (s_Data.m_CircleIndexCount >= RenderData2D::k_MaxIndices)
 			NextBatch();
 
@@ -346,9 +342,6 @@ namespace Poole::Rendering
 		{
 			s_Data.m_CircleVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
 			s_Data.m_CircleVertexBufferPtr->Color = color;
-			s_Data.m_CircleVertexBufferPtr->TexCoord = k_FullTextureCoords[i];
-			s_Data.m_CircleVertexBufferPtr->TexIndex = textureIndex;
-			s_Data.m_CircleVertexBufferPtr->TilingFactor = tilingFactor;
 			//s_Data.m_CircleVertexBufferPtr->EntityID = entityID;
 			s_Data.m_CircleVertexBufferPtr++;
 		}

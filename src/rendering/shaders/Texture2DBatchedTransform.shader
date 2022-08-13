@@ -7,13 +7,11 @@ layout(location = 3) in float a_TexIndex;
 layout(location = 4) in float a_TilingFactor;
 uniform mat4 u_CameraViewProjection;
 out vec4 v_Color;
-out vec2 v_TexCoord;
 out vec2 v_TexChords;
 out float v_TexIndex;
 out float v_TilingFactor;
 void main() {
 	gl_Position = u_CameraViewProjection * vec4(a_Position, 1.0);
-	v_TexCoord = a_TexChords;
 	v_Color = a_Color;
 	v_TexChords = a_TexChords;
 	v_TexIndex = a_TexIndex;
@@ -25,7 +23,6 @@ void main() {
 #version 450 core
 layout(binding = 0) uniform sampler2D u_Textures[32];
 in vec4 v_Color;
-in vec2 v_TexCoord;
 in vec2 v_TexChords;
 in float v_TexIndex;
 in float v_TilingFactor;
