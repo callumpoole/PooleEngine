@@ -100,7 +100,7 @@ namespace Poole::Rendering
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	void OpenGL_Texture::SetData(void* data, u32 size)
+	void OpenGL_Texture::SetData(const void* data, u32 size)
 	{
 		const u32 bpp = m_DataFormat == GL_RGBA ? 4 : 3;
 		//assert(size == GetWidth() * GetHeight() * bpp, "Data must be an entire texture!");

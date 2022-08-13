@@ -148,7 +148,7 @@ namespace Poole::Rendering
 		s_QuadRenderData.m_VertexArray->Bind(); 
 
 		m_QuadShader->Bind();
-		m_QuadShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
+		m_QuadShader->SetUniform("u_Transform", transform.MakeTransformMatrix());
 		m_QuadShader->SetUniform("u_Color", color);
 
 		GetRendererAPI()->DrawIndexed(6);
@@ -161,7 +161,7 @@ namespace Poole::Rendering
 		m_CircleShader->Bind();
 
 		//It's cheaper to process in C++, than in each fragment
-		const fmat4 Transform = MakeTransformMatrix(transform);
+		const fmat4 Transform = transform.MakeTransformMatrix();
 		const fmat4 CameraViewProj = Renderer::GetCamera().GetViewProjectionMatrix();
 		m_CircleShader->SetUniform("u_InvTransform_InvCameraViewProj", glm::inverse(Transform) * glm::inverse(CameraViewProj));
 
@@ -174,25 +174,6 @@ namespace Poole::Rendering
 
 
 	
-
-	fmat4 Renderer2D::MakeTransformMatrix(const ftransform2D& transform)
-	{
-		//TODO: Optimise, can probably only modify the first 2 rows/columns perhaps
-		const fmat4 shearMat = {
-							1, transform.shear.y, 0, 0,
-			transform.shear.x,				   1, 0, 0,
-							0,				   0, 1, 0,
-							0,				   0, 0, 1,
-		};
-
-		//TODO: Optimise, put one func inside the next instead of the identity fmat4
-		return
-			glm::translate(fmat4(1.0f), transform.position) *
-			glm::rotate(fmat4(1.0f), transform.rotation, fvec3{0,0,1}) *
-			shearMat *
-			glm::scale(fmat4(1.0f), fvec3{ transform.scale.x, transform.scale.y, 1.f });
-	}
-
 
 	/*static*/ std::shared_ptr<Texture> Renderer2D::GetOrLoadTexture(const Image& image)
 	{
@@ -237,7 +218,7 @@ namespace Poole::Rendering
 
 
 		m_TextureShader->Bind();
-		m_TextureShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
+		m_TextureShader->SetUniform("u_Transform", transform.MakeTransformMatrix());
 		m_TextureShader->SetUniform("u_Color", Colors::White<fcolor4>);
 		texture->Bind();
 		texture->SetTextureUnit(*m_TextureShader, "tex0", 0);
@@ -282,7 +263,7 @@ namespace Poole::Rendering
 
 
 		m_TextureShader->Bind();
-		m_TextureShader->SetUniform("u_Transform", MakeTransformMatrix(transform));
+		m_TextureShader->SetUniform("u_Transform", transform.MakeTransformMatrix());
 		m_TextureShader->SetUniform("u_Color", Colors::White<fcolor4>);
 		texture->Bind();
 		texture->SetTextureUnit(*m_TextureShader, "tex0", 0);

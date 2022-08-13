@@ -48,7 +48,7 @@ namespace Poole::Rendering
 		//===NEW===
 	public:
 		OpenGL_Texture(u32 width, u32 height);
-		virtual void SetData(void* data, u32 size) override;
+		virtual void SetData(const void* data, u32 size) override;
 		virtual void Bind(u32 slot);
 
 		GLenum m_InternalFormat;

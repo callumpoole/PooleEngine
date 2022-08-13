@@ -28,12 +28,6 @@ namespace Poole::Rendering
 		{
 			DrawCircle({ pos, scale, rotation, shear }, color, thickness, fade);
 		}
-		 
-		static fmat4 MakeTransformMatrix(const ftransform2D& transform);
-		static fmat4 MakeTransformMatrix(const fvec2& pos, const fvec2& scale, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
-		{
-			return MakeTransformMatrix({ pos, scale, rotation, shear });
-		}
 
 	private:
 		static std::shared_ptr<Texture> GetOrLoadTexture(const Image& image);

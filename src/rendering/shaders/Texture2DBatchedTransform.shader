@@ -33,6 +33,7 @@ out vec4 o_Color;
 void main() {
 	vec4 texColor = v_Color;
 
+
 	switch (int(v_TexIndex))
 	{
 	case  0: texColor *= texture(u_Textures[ 0], v_TexChords * v_TilingFactor); break;

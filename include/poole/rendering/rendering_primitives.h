@@ -86,7 +86,7 @@ namespace Poole::Rendering
 		void SetInternalUniforms(Shader& shader)
 		{
 			IMeshDecoratorBase::SetInternalUniforms(shader); /*Super*/
-			shader.SetUniform("u_Transform", Renderer2D::MakeTransformMatrix(m_position, m_scale, m_rotation, m_shear)); 
+			shader.SetUniform("u_Transform", ftransform2D(m_position, m_scale, m_rotation, m_shear).MakeTransformMatrix());
 		}
 		fvec2 m_position{ 0.f, 0.f };
 		fvec2 m_scale{1.f, 1.f};

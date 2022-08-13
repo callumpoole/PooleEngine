@@ -43,7 +43,7 @@ namespace Poole::Rendering
 		//===NEW===
 	public:
 		static Texture* Create(u32 Width, u32 Height);
-		virtual void SetData(void* data, u32 size) = 0;
+		virtual void SetData(const void* data, u32 size) = 0;
 		virtual void Bind(u32 slot) = 0;
 	};
 }
