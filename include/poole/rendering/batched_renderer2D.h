@@ -21,14 +21,25 @@ namespace Poole::Rendering
 		static void FlushBatch();
 		static void NextBatch();
 
+
 		static void DrawQuad(const ftransform2D& transform, const fcolor4& color);
 		static void DrawQuad(const fvec2& pos, const fvec2& scale, const fcolor4& color, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
 		{
 			DrawQuad({ pos, scale, rotation, shear }, color);
 		}
 
+
 		static void DrawSubTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, const std::array<fvec2, 4> textureCoords, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>);
 		static void DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>);
+		static void DrawSubTexturedQuad(const fvec2& pos, const fvec2& scale, const std::shared_ptr<Texture>& texture, const std::array<fvec2, 4> textureCoords, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		{
+			DrawSubTexturedQuad({ pos, scale, rotation, shear }, texture, textureCoords, tilingFactor, tintColor);
+		}
+		static void DrawSubTexturedQuad(const fvec2& pos, const fvec2& scale, const SubImage& subImage, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>, f32 rotation = 0, const fvec2& shear = fvec2(0.f))
+		{
+			DrawSubTexturedQuad({ pos, scale, rotation, shear }, subImage, tilingFactor, tintColor);
+		}
+
 
 		static void DrawTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, float tilingFactor = 1.f, const fcolor4& tintColor = Colors::White<fcolor4>)
 		{
@@ -47,9 +58,11 @@ namespace Poole::Rendering
 			DrawTexturedQuad({ pos, scale, rotation, shear }, GetOrLoadTexture(image), tilingFactor, tintColor);
 		}
 
+
 		static std::shared_ptr<Texture> GetOrLoadTexture(const Image& image);
 
 		static constexpr std::array<fvec2, 4> k_FullTextureCoords = { fvec2{ 0.0f, 0.0f }, fvec2{ 1.0f, 0.0f }, fvec2{ 1.0f, 1.0f }, fvec2{ 0.0f, 1.0f } };
+
 
 		static void DrawCircle(const ftransform2D& transform, const fcolor4& color, float thickness = 1.f, float fade = 0.f);
 		static void DrawCircle(const fvec2& pos, const fvec2& scale, const fcolor4& color, f32 rotation = 0, const fvec2& shear = fvec2(0.f), float thickness = 1.f, float fade = 0.f)

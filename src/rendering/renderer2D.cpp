@@ -78,10 +78,10 @@ namespace Poole::Rendering
 			//Vertex Buffer (Texture)
 			f32 cornersForTexture[] =
 			{
-				-1, -1, 0.f,		0.f, 0.f,
-				 1, -1, 0.f,		1.f, 0.f,
-				 1,  1, 0.f,		1.f, 1.f,
-				-1,  1, 0.f,		0.f, 1.f,
+				-0.5, -0.5, 0.f,		0.f, 0.f,
+				 0.5, -0.5, 0.f,		1.f, 0.f,
+				 0.5,  0.5, 0.f,		1.f, 1.f,
+				-0.5,  0.5, 0.f,		0.f, 1.f,
 			};
 			s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
 			s_TextureRenderData.m_VertexBuffer->SetLayout({
@@ -197,29 +197,7 @@ namespace Poole::Rendering
 
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(image);
 
-		//HORRIBLE AND TEMP CODE THAT SHOULDN'T BE HERE
-	//	s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
 		s_TextureRenderData.m_VertexArray->Bind();
-
-	//	f32 cornersForTexture[] =
-	//	{
-	//		-1, -1, 0.f,		0.f, 0.f,
-	//		 1, -1, 0.f,		1.f, 0.f,
-	//		 1,  1, 0.f,		1.f, 1.f,
-	//		-1,  1, 0.f,		0.f, 1.f,
-	//	};
-	//	s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
-	//	s_TextureRenderData.m_VertexBuffer->SetLayout({
-	//		{ ShaderDataType::Float3, "a_Position"},
-	//		{ ShaderDataType::Float2, "a_TexChords"},
-	//		});
-	//	s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
-	//	u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-	//	s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-	//	s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
-
-		s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
-
 
 		m_TextureShader->Bind();
 		m_TextureShader->SetUniform("u_Transform", transform.MakeTransformMatrix());
@@ -236,35 +214,7 @@ namespace Poole::Rendering
 	{
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(*subImage.GetImage());
 
-		//HORRIBLE AND TEMP CODE THAT SHOULDN'T BE HERE
-	//	s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
 		s_TextureRenderData.m_VertexArray->Bind();
-
-	//	const std::array<fvec2, 4>& c = subImage.GetTexCoords();
-	//
-	//	//TO FIX:
-	//	//Refer to: 
-	//	// - https://github.com/TheCherno/Hazel/blob/master/Hazel/src/Hazel/Renderer/Renderer2D.cpp
-	//	// AND
-	//	// - https://github.com/TheCherno/Hazel/blob/master/Sandbox/assets/shaders/Texture.glsl
-	//
-	//	f32 cornersForTexture[] =
-	//	{
-	//		-1, -1, 0.f,		c[0].x, c[0].y,
-	//		 1, -1, 0.f,		c[1].x, c[1].y,
-	//		 1,  1, 0.f,		c[2].x, c[2].y,
-	//		-1,  1, 0.f,		c[3].x, c[3].y,
-	//	};
-	//	s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
-	//	s_TextureRenderData.m_VertexBuffer->SetLayout({
-	//		{ ShaderDataType::Float3, "a_Position"},
-	//		{ ShaderDataType::Float2, "a_TexChords"},
-	//		});
-	//	s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
-	//	u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
-	//	s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-	//	s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
-
 
 		m_TextureShader->Bind();
 		m_TextureShader->SetUniform("u_Transform", transform.MakeTransformMatrix());
@@ -278,34 +228,4 @@ namespace Poole::Rendering
 		texture->Unbind();
 		s_TextureRenderData.m_VertexArray->Unbind();
 	}
-
-
-	//void Renderer2D::DrawTriangle(fvec3 p1, fvec3 p2, fvec3 p3, fcolor4 color)
-	//{
-	//
-	//}
-	//void Renderer2D::DrawTriangle(fvec2 p1, fvec2 p2, fvec2 p3, fcolor4 color, f32 zLayer)
-	//{
-	//	DrawTriangle(fvec3{ p1.x, p1.y, zLayer }, fvec3{ p2.x, p2.y, zLayer }, fvec3{ p3.x, p3.y, zLayer }, color);
-	//}
-	//void Renderer2D::DrawTriangle(fvec2 p1, fvec2 p2, fvec2 p3, fcolor3 color, f32 zLayer)
-	//{
-	//	DrawTriangle(p1, p2, p3, fcolor4(color, 1.f), zLayer);
-	//}
-	//void Renderer2D::DrawTriangle(Vertex3Color4 p1, Vertex3Color4 p2, Vertex3Color4 p3)
-	//{
-	//
-	//}
-	//void Renderer2D::DrawTriangle(Vertex3Color3 p1, Vertex3Color3 p2, Vertex3Color3 p3)
-	//{
-	//	DrawTriangle(ToVertex3Color4(p1), ToVertex3Color4(p2), ToVertex3Color4(p3));
-	//}
-	//void Renderer2D::DrawTriangle(Vertex2Color4 p1, Vertex2Color4 p2, Vertex2Color4 p3, f32 zLayer)
-	//{
-	//	DrawTriangle(ToVertex3Color4(p1, zLayer), ToVertex3Color4(p2, zLayer), ToVertex3Color4(p3, zLayer));
-	//}
-	//void Renderer2D::DrawTriangle(Vertex2Color3 p1, Vertex2Color3 p2, Vertex2Color3 p3, f32 zLayer)
-	//{
-	//	DrawTriangle(ToVertex3Color4(p1, zLayer), ToVertex3Color4(p2, zLayer), ToVertex3Color4(p3, zLayer));
-	//}
 }
