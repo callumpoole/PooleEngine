@@ -2,6 +2,7 @@
 
 #include "core.h"
 #include <filesystem>
+#include <chrono>
 #include "engine.h"
 
 namespace Poole
@@ -45,5 +46,31 @@ namespace Poole
 
 		const size_t ToRemove = CharactersToRemoveFromPath();
 		return fullFileView.substr(ToRemove);
+	}
+
+	
+#if DO_PROFILE_LOGGING_WITH_AVG
+	/*static*/ u64 ScopedProfiler::m_TotalTicks = 0;
+	/*static*/ u64 ScopedProfiler::m_TickCount = 0;
+#endif
+
+	ScopedProfiler::ScopedProfiler(const char* functionName)
+		: m_TicksSinceEpoch(std::chrono::system_clock::now().time_since_epoch().count())
+		, m_FunctionName(functionName)
+	{		
+	}
+	ScopedProfiler::~ScopedProfiler()
+	{
+		const u64 newNow = std::chrono::system_clock::now().time_since_epoch().count();
+		const u64 deltaTicks = newNow - m_TicksSinceEpoch;
+
+#if DO_PROFILE_LOGGING_WITH_AVG
+		m_TotalTicks += deltaTicks;
+		m_TickCount++;
+
+		LOG("FUNCTION PROFILER: {} -> {}ticks (average: {}ticks)", m_FunctionName, deltaTicks, m_TotalTicks / (float)m_TickCount);
+#else
+		LOG("FUNCTION PROFILER: {} -> {}ticks", m_FunctionName, deltaTicks);
+#endif
 	}
 }

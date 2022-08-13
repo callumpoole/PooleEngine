@@ -138,7 +138,7 @@ namespace Poole::Rendering
 	{
 		FlushBatch();
 
-		std::cout << "Quad Count: " << s_Data.m_Stats.m_QuadCount << "  Draw Calls: " << s_Data.m_Stats.m_DrawCalls << "\r\n";
+		//std::cout << "Quad Count: " << s_Data.m_Stats.m_QuadCount << "  Draw Calls: " << s_Data.m_Stats.m_DrawCalls << "\r\n";
 	}
 
 	/*static*/ void BatchedRenderer2D::StartBatch()
@@ -177,6 +177,8 @@ namespace Poole::Rendering
 
 	/*static*/ void BatchedRenderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
 	{
+		SCOPED_PROFILER();
+
 		const float textureIndex = 0.0f; // White Texture
 		const float tilingFactor = 1.0f;
 
@@ -221,6 +223,8 @@ namespace Poole::Rendering
 
 	/*static*/ void BatchedRenderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, const std::array<fvec2, 4> textureCoords, float tilingFactor, const fcolor4& tintColor)
 	{
+		SCOPED_PROFILER();
+
 		if (s_Data.m_QuadIndexCount >= RenderData2D::k_MaxIndices)
 			NextBatch();
 
