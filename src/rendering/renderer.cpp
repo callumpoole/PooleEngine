@@ -23,7 +23,6 @@ namespace Poole::Rendering
 	GLShader Renderer::s_shaderExperimental1;
 	GLShader Renderer::s_shaderExperimental2;
 	GLShader Renderer::s_shaderExperimental3;
-	std::vector<std::unique_ptr<IMeshBase>> Renderer::s_meshes;
 
 	void Renderer::Init()
 	{
@@ -57,8 +56,6 @@ namespace Poole::Rendering
 		GetRendererAPI()->SetClearColor({ 0.2f, 0.3f, 0.3f, 1.0f });
 		GetRendererAPI()->Clear();
 
-		RenderMeshesOldWay();
-
 #if UNBATCHED_RENDERER
 		UnbatchedRenderer2D::BeginScene();
 #endif
@@ -77,39 +74,6 @@ namespace Poole::Rendering
 
 		//Swap front and back buffers
 		glfwSwapBuffers(window);
-	}
-
-	void Renderer::RenderMeshesOldWay()
-	{
-		for (std::unique_ptr<IMeshBase>& ptr : s_meshes)
-		{
-			Shader* shader;
-			if (ptr->Uses2DTransform())
-			{
-				shader = ptr->UsesUniformColor4() ? &s_shaderUniformColorTransform2D
-												  : &s_shaderVertexColorTransform2D;
-			}
-			else
-			{
-				shader = ptr->UsesUniformColor4() ? &s_shaderUniformColor
-												  : &s_shaderVertexColor;
-			}
-
-			ptr->Render(*shader);
-		}
-	}
-
-	IMeshBase* Renderer::GetMesh(i32 index) 
-	{ 
-		if (index >= 0 && index < s_meshes.size())
-		{
-			return s_meshes[index].get();
-		}
-		else
-		{
-			LOG_ERROR("tried to access mesh at index: {} but size is {}", index, s_meshes.size());
-			return nullptr;
-		}
 	}
 
 	void Renderer::LoadShaders()

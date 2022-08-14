@@ -38,8 +38,6 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/renderer.cpp"
 	"src/rendering/unbatched_renderer2D.cpp"
 	"src/rendering/batched_renderer2D.cpp"
-	"include/poole/rendering/rendering_primitives.h"
-	"src/rendering/rendering_primitives.cpp"
 	"src/rendering/image/stb.cpp"
 	"include/poole/rendering/image/image.h"
 	"src/rendering/image/image.cpp"	

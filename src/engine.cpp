@@ -3,7 +3,6 @@
 #include <memory>
 #include <chrono>
 #include "rendering/renderer.h"
-#include "rendering/rendering_primitives.h"
 #include "input/input.h"
 #include "window/window.h"
 #include "engine/command_args.h"
