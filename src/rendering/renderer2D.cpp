@@ -24,6 +24,7 @@ namespace Poole::Rendering
 			std::shared_ptr<IndexBuffer> m_IndexBuffer;
 		};
 		static RenderData s_QuadRenderData;
+		static RenderData s_CircleRenderData;
 		static RenderData s_TextureRenderData;
 
 		std::unordered_map<u32, std::shared_ptr<Texture>> m_TextureIdMap; //Key is Image ID
@@ -31,6 +32,39 @@ namespace Poole::Rendering
 		GLShader* m_QuadShader;
 		GLShader* m_CircleShader;
 		GLShader* m_TextureShader;
+
+
+		static constexpr u32 k_CornersOnAQuad = 4;
+		static constexpr fvec3 k_CornersForQuad[k_CornersOnAQuad] =
+		{
+			{-0.5, -0.5, 0.f},
+			{ 0.5, -0.5, 0.f},
+			{ 0.5,  0.5, 0.f},
+			{-0.5,  0.5, 0.f},
+		};
+		static constexpr fvec3 k_CornersForCircle[k_CornersOnAQuad] =
+		{
+			{-1, -1, 0.f},
+			{ 1, -1, 0.f},
+			{ 1,  1, 0.f},
+			{-1,  1, 0.f},
+		};
+		struct TexturedVertex { fvec3 pos; fvec2 uv; };
+		static constexpr TexturedVertex k_CornersForTexture[k_CornersOnAQuad] =
+		{
+			fvec3{-0.5, -0.5, 0.f},	fvec2{0.f, 0.f},
+			fvec3{ 0.5, -0.5, 0.f},	fvec2{1.f, 0.f},
+			fvec3{ 0.5,  0.5, 0.f},	fvec2{1.f, 1.f},
+			fvec3{-0.5,  0.5, 0.f},	fvec2{0.f, 1.f},
+		};
+		////Will be modified, UVs can be overwritten
+		static TexturedVertex s_CornersForSubTexture[k_CornersOnAQuad] =
+		{
+			fvec3{-0.5, -0.5, 0.f},	fvec2{0.f, 0.f},
+			fvec3{ 0.5, -0.5, 0.f},	fvec2{1.f, 0.f},
+			fvec3{ 0.5,  0.5, 0.f},	fvec2{1.f, 1.f},
+			fvec3{-0.5,  0.5, 0.f},	fvec2{0.f, 1.f},
+		};
 	}
 
 	void Renderer2D::Init()
@@ -40,60 +74,42 @@ namespace Poole::Rendering
 		m_CircleShader = &Renderer::s_shaderCircleTransform2D;
 		m_TextureShader = &Renderer::s_shaderTextureTransform2D;
 
-		u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
+		constexpr u32 indices[6] = { 0, 1, 2, 2, 3, 0 };
 
-		//Colored Quad
+		auto SetupData = [indices](RenderData& data, const f32* corners, u32 cornersSize, VertexBufferLayout&& VBLayout)
 		{
 			//Vertex Array
-			s_QuadRenderData.m_VertexArray.reset(VertexArray::Create());
-			s_QuadRenderData.m_VertexArray->Bind();
+			data.m_VertexArray.reset(VertexArray::Create());
+			data.m_VertexArray->Bind();
 
 			//Vertex Buffer
-			fvec3 corners[4] =
-			{
-				{-1, -1, 0.f},
-				{ 1, -1, 0.f},
-				{ 1,  1, 0.f},
-				{-1,  1, 0.f},
-			};
-			s_QuadRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, sizeof(corners)));
-			s_QuadRenderData.m_VertexBuffer->SetLayout({
-				{ ShaderDataType::Float3, "a_Position"},
-			});
-			s_QuadRenderData.m_VertexArray->AddVertexBuffer(s_QuadRenderData.m_VertexBuffer);
+			data.m_VertexBuffer.reset(VertexBuffer::Create((f32*)corners, cornersSize));
+			data.m_VertexBuffer->SetLayout(VBLayout);
+			data.m_VertexArray->AddVertexBuffer(data.m_VertexBuffer);
 
 			//Index Buffer
-			s_QuadRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-			s_QuadRenderData.m_VertexArray->SetIndexBuffer(s_QuadRenderData.m_IndexBuffer);
-		}
+			data.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
+			data.m_VertexArray->SetIndexBuffer(data.m_IndexBuffer);
+		};
 
+		//Quad
+		SetupData(s_QuadRenderData, (f32*)k_CornersForQuad, sizeof(k_CornersForQuad), 
+			VertexBufferLayout{
+				{ ShaderDataType::Float3, "a_Position"},
+			});
 
 		//Textured Quad
-		{
-			
-			//Vertex Array (Texture)
-			s_TextureRenderData.m_VertexArray.reset(VertexArray::Create());
-			s_TextureRenderData.m_VertexArray->Bind();
-
-			//Vertex Buffer (Texture)
-			f32 cornersForTexture[] =
-			{
-				-0.5, -0.5, 0.f,		0.f, 0.f,
-				 0.5, -0.5, 0.f,		1.f, 0.f,
-				 0.5,  0.5, 0.f,		1.f, 1.f,
-				-0.5,  0.5, 0.f,		0.f, 1.f,
-			};
-			s_TextureRenderData.m_VertexBuffer.reset(VertexBuffer::Create((f32*)cornersForTexture, sizeof(cornersForTexture)));
-			s_TextureRenderData.m_VertexBuffer->SetLayout({
+		SetupData(s_TextureRenderData, (f32*)k_CornersForTexture, sizeof(k_CornersForTexture),
+			VertexBufferLayout{
 				{ ShaderDataType::Float3, "a_Position"},
 				{ ShaderDataType::Float2, "a_Texture"},
 			});
-			s_TextureRenderData.m_VertexArray->AddVertexBuffer(s_TextureRenderData.m_VertexBuffer);
 
-			//Index Buffer (Texture)
-			s_TextureRenderData.m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(u32)));
-			s_TextureRenderData.m_VertexArray->SetIndexBuffer(s_TextureRenderData.m_IndexBuffer);
-		}
+		//Circle
+		SetupData(s_CircleRenderData, (f32*)k_CornersForCircle, sizeof(k_CornersForCircle),
+			VertexBufferLayout{
+				{ ShaderDataType::Float3, "a_Position"},
+			});
 	}
 	void Renderer2D::Shutdown()
 	{
@@ -101,42 +117,31 @@ namespace Poole::Rendering
 	}
 	void Renderer2D::BeginScene()
 	{
+		auto Begin = [](RenderData& Data)
+		{
+			//Vertex Array
+			Data.m_VertexArray->Bind();
+			//Vertex Buffer
+			Data.m_VertexBuffer->Bind();
+			//Index Buffer
+			Data.m_IndexBuffer->Bind();
+		};
+
 		//Colored Quad
-		{
-			//Vertex Array
-			s_QuadRenderData.m_VertexArray->Bind();
-			//Vertex Buffer
-			s_QuadRenderData.m_VertexBuffer->Bind();
-			//Index Buffer
-			s_QuadRenderData.m_IndexBuffer->Bind();
-		
-			//Shader
-			m_QuadShader->Bind();
-			m_QuadShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
-		}
-		
+		Begin(s_QuadRenderData);
+		m_QuadShader->Bind();
+		m_QuadShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+
 		//Textured Quad
-		{
-			//Vertex Array
-			s_TextureRenderData.m_VertexArray->Bind();
-			//Vertex Buffer
-			s_TextureRenderData.m_VertexBuffer->Bind();
-			//Index Buffer
-			s_TextureRenderData.m_IndexBuffer->Bind();
-		
-			m_TextureShader->Bind();
-			m_TextureShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
-		}
+		Begin(s_TextureRenderData);
+		m_TextureShader->Bind();
+		m_TextureShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
 		
 		//Circles
-		{
-			m_CircleShader->Bind();
-			m_CircleShader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
-		}
-	}
-	void Renderer2D::RenderScene()
-	{
-
+		Begin(s_CircleRenderData);
+		m_CircleShader->Bind();
+		m_CircleShader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
+		
 	}
 	void Renderer2D::EndScene()
 	{
@@ -158,12 +163,12 @@ namespace Poole::Rendering
 
 	void Renderer2D::DrawCircle(const ftransform2D& transform, const fcolor4& color, float thickness, float fade)
 	{
-		s_QuadRenderData.m_VertexArray->Bind();
+		s_CircleRenderData.m_VertexArray->Bind();
 
 		m_CircleShader->Bind();
 
 		//It's cheaper to process in C++, than in each fragment
-		const fmat4 Transform = transform.MakeTransformMatrix();
+		const fmat4 Transform = glm::scale(transform.MakeTransformMatrix(), fvec3{ 0.5f, 0.5f, 1.f });
 		const fmat4 CameraViewProj = Renderer::GetCamera().GetViewProjectionMatrix();
 		m_CircleShader->SetUniform("u_InvTransform_InvCameraViewProj", glm::inverse(Transform) * glm::inverse(CameraViewProj));
 
@@ -198,6 +203,8 @@ namespace Poole::Rendering
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(image);
 
 		s_TextureRenderData.m_VertexArray->Bind();
+		s_TextureRenderData.m_VertexBuffer->Bind();
+		s_TextureRenderData.m_VertexBuffer->SetData(k_CornersForTexture, sizeof(k_CornersForTexture));
 
 		m_TextureShader->Bind();
 		m_TextureShader->SetUniform("u_Transform", transform.MakeTransformMatrix());
@@ -216,12 +223,21 @@ namespace Poole::Rendering
 
 		s_TextureRenderData.m_VertexArray->Bind();
 
+		const std::array<fvec2, k_CornersOnAQuad>& coords = subImage.GetTexCoords();
+		for (u32 i = 0; i < k_CornersOnAQuad; i++)
+		{
+			s_CornersForSubTexture[i].uv.x = coords[i].x;
+			s_CornersForSubTexture[i].uv.y = coords[i].y;
+		}
+		
+		s_TextureRenderData.m_VertexBuffer->Bind();
+		s_TextureRenderData.m_VertexBuffer->SetData(s_CornersForSubTexture, sizeof(s_CornersForSubTexture));
+
 		m_TextureShader->Bind();
 		m_TextureShader->SetUniform("u_Transform", transform.MakeTransformMatrix());
 		m_TextureShader->SetUniform("u_Color", Colors::White<fcolor4>);
 		texture->Bind();
 		texture->SetTextureUnit(*m_TextureShader, "tex0", 0);
-
 
 		GetRendererAPI()->DrawIndexed(6);
 

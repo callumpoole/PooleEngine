@@ -79,7 +79,6 @@ namespace Poole
 
             UpdateApp(m_TimeData.s_DeltaTime);
 
-            Rendering::Renderer::RenderScene();
             Rendering::Renderer::EndScene(window);
 
             Window::Tick();

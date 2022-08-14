@@ -50,10 +50,6 @@ namespace Poole::Rendering
 		Renderer2D::BeginScene();
 		BatchedRenderer2D::BeginScene();
 	}
-	void Renderer::RenderScene()
-	{
-		Renderer2D::RenderScene();
-	}
 	void Renderer::EndScene(GLFWwindow* window)
 	{
 		Renderer2D::EndScene();

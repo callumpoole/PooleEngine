@@ -39,7 +39,7 @@ namespace Poole::Rendering
 
 	////////////////////////////////////////////////////////
 
-	OpenGL_IndexBuffer::OpenGL_IndexBuffer(u32* indices, u32 count)
+	OpenGL_IndexBuffer::OpenGL_IndexBuffer(const u32* indices, u32 count)
 		: m_Count(count)
 	{
 		//glCreateBuffers(1, &m_RendererID);

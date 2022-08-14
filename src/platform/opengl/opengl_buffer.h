@@ -29,7 +29,7 @@ namespace Poole::Rendering
 	class OpenGL_IndexBuffer : public IndexBuffer
 	{
 	public:
-		OpenGL_IndexBuffer(u32* indices, u32 count);
+		OpenGL_IndexBuffer(const u32* indices, u32 count);
 		virtual ~OpenGL_IndexBuffer();
 
 		virtual void Bind();

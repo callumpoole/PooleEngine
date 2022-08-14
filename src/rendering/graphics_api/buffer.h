@@ -128,6 +128,6 @@ namespace Poole::Rendering
 		virtual void Bind() = 0;
 		virtual void Unbind() = 0;
 		virtual u32 GetCount() const = 0;
-		static IndexBuffer* Create(u32* indices, u32 count);
+		static IndexBuffer* Create(const u32* indices, u32 count);
 	};
 }

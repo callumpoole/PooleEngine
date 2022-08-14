@@ -27,7 +27,6 @@ namespace Poole::Rendering {
 
 		static void Init();
 		static void BeginScene();
-		static void RenderScene();
 		static void EndScene(GLFWwindow* window);
 
 		static IMeshBase* GetMesh(i32 index);

@@ -28,7 +28,7 @@ namespace Poole::Rendering
 		return nullptr;
 	}
 
-	IndexBuffer* IndexBuffer::Create(u32* indices, u32 count)
+	IndexBuffer* IndexBuffer::Create(const u32* indices, u32 count)
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{

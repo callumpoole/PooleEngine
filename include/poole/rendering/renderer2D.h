@@ -14,7 +14,6 @@ namespace Poole::Rendering
 		static void Init();
 		static void Shutdown();
 		static void BeginScene();
-		static void RenderScene();
 		static void EndScene();
 
 		static void DrawQuad(const ftransform2D& transform, const fcolor4& color);
