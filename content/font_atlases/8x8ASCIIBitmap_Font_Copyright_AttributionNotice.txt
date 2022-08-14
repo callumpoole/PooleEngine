@@ -1,0 +1,4 @@
+To satisfy: GPLv2 and CC-BY-SA, it says I just need to link back to the source here:
+Source: https://opengameart.org/content/8x8-ascii-bitmap-font-with-c-source
+
+(I and Basto in the comments also did some modifications to it)

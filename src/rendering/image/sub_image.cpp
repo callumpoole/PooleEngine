@@ -15,8 +15,16 @@ namespace Poole::Rendering
 
 	/*static*/ SubImage* SubImage::Create(std::shared_ptr<Image> image, fvec2 coords, fvec2 cellSize, fvec2 spriteSize)
 	{
-		const fvec2 min = { (coords.x * cellSize.x) / image->GetWidth(), (coords.y * cellSize.y) / image->GetHeight() };
-		const fvec2 max = { ((coords.x + spriteSize.x) * cellSize.x) / image->GetWidth(), ((coords.y + spriteSize.y) * cellSize.y) / image->GetHeight() };
+		fvec2 min = { (coords.x * cellSize.x) / image->GetWidth(), (coords.y * cellSize.y) / image->GetHeight() };
+		fvec2 max = { ((coords.x + spriteSize.x) * cellSize.x) / image->GetWidth(), ((coords.y + spriteSize.y) * cellSize.y) / image->GetHeight() };
+
+		if (image->WasYFlippedWhenLoaded())
+		{
+			min.y = image->GetHeight() - min.y;
+			max.y = image->GetHeight() - max.y;
+			std::swap(min.y, max.y);
+		}
+
 		return new SubImage(image, min, max);
 	}
 }

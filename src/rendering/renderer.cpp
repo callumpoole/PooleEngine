@@ -6,6 +6,7 @@
 #include "rendering/renderer2D.h"
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/image/image.h"
+#include "rendering/text/render_text_factory.h"
 
 namespace Poole::Rendering
 {
@@ -40,6 +41,8 @@ namespace Poole::Rendering
 #if BATCHED_RENDERER
 		BatchedRenderer2D::Init();
 #endif
+
+		RenderTextFactory::Init();
 	}
 	void Renderer::Shutdown()
 	{

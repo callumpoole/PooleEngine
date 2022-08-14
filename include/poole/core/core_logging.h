@@ -58,31 +58,42 @@ namespace Poole
 #define LOG_ERROR(msg, ...) \
 	std::cerr << std::format("ERROR: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
 
+#define LOG_NOT_IMPL() \
+	std::cerr << std::format("ERROR: " INTERNAL_LOG_LITERALS "Hit Not Implemented. \n", INTERNAL_LOG_PARAMS);
+
 #define ASSERT(cond) assert(cond);
-
-#define LOG_FATAL(msg, ...) /*TODO: Use C++23 std::basic_stacktrace*/ \
-	{ \
-		std::cerr << std::format("FATAL ERROR: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__); \
-		ASSERT(false); \
-	}
-
-#define ASSERT_MSG(cond, msg, ...)		\
-	if (!cond)							\
-	{									\
-		LOG_FATAL(msg, __VA_ARGS__);	\
-	}
 
 #define HALT() ASSERT(false);
 
-#define ENSURE_MSG(cond, msg, ...)										\
-	[](bool inCond)->bool												\
+#define LOG_FATAL_INTERNAL(msg, ...) \
+	std::cerr << std::format("FATAL ERROR: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
+
+#define LOG_FATAL(msg, ...) /*TODO: Use C++23 std::basic_stacktrace*/	\
 	{																	\
-		if (!inCond)													\
-		{																\
-			LOG_ERROR("Ensure Failed: " #cond ". " msg, __VA_ARGS__);	\
-			return false;												\
-		}																\
-		return true;													\
+		LOG_FATAL_INTERNAL(msg, __VA_ARGS__);							\
+		HALT();															\
+	}
+
+#define ASSERT_MSG(cond, msg, ...)				\
+	if (!bool(cond))							\
+	{											\
+		LOG_FATAL_INTERNAL(msg, __VA_ARGS__);	\
+		ASSERT(cond);							\
+	}
+
+#define IF_ASSERT(ifCond, assertCond) ASSERT(!bool(ifCond) || bool(assertCond))
+#define IF_ASSERT_MSG(ifCond, assertCond, msg, ...) ASSERT_MSG(!bool(ifCond) || bool(assertCond), msg, __VA_ARGS__)
+
+
+#define ENSURE_MSG(cond, msg, ...)																				\
+	[](bool inCond)->bool																						\
+	{																											\
+		if (!inCond)																							\
+		{																										\
+			std::cerr << std::format("ENSURE FAILED: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS);	\
+			return false;																						\
+		}																										\
+		return true;																							\
 	}(cond)
 
 #define ENSURE(cond) ENSURE_MSG(cond, "")

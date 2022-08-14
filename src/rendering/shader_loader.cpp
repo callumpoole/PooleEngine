@@ -16,7 +16,7 @@ namespace Poole::Rendering {
 
 			if (Success)
 			{
-				LOG("Loaded {}", combinedPath.data());
+				LOG("Loaded Shader: {}", combinedPath.data());
 			}
 		}
 	}

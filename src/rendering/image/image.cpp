@@ -39,7 +39,7 @@ namespace Poole::Rendering
 
 		if (printLogWhenLoaded)
 		{
-			LOG("Loaded: {}, W: {}, H: {}, Channels: {}", path, m_Size.x, m_Size.y, m_NumChannels);
+			LOG("Loaded Image: {}, W: {}, H: {}, Channels: {}", path, m_Size.x, m_Size.y, m_NumChannels);
 		}
 	}
 
