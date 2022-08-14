@@ -1,6 +1,6 @@
 #pragma once
 
-#define UNBATCHED_RENDERER 1
+#define UNBATCHED_RENDERER 0
 #if UNBATCHED_RENDERER
 	#include "unbatched_renderer2D.h"
 #endif
