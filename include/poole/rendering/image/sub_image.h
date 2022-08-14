@@ -10,13 +10,15 @@ namespace Poole::Rendering
 	class SubImage
 	{
 	public:
-		SubImage(std::shared_ptr<Image> image, fvec2 min, fvec2 max);
+		//Kinda ugly having the array[2], but it's due to overload resolution conflict, and this one is less likely to be used
+		SubImage(std::shared_ptr<Image> image, fvec2 minMax[2]); 
 
-		static SubImage* Create(std::shared_ptr<Image> texture, fvec2 coords, fvec2 cellSize, fvec2 spriteSize = { 1,1 });
+		SubImage(std::shared_ptr<Image> image, fvec2 coords, fvec2 cellSize, fvec2 spriteSize = { 1,1 });
 
 		std::shared_ptr<Image> GetImage() const { return m_Image; }
 		const std::array<fvec2, 4>& GetTexCoords() const { return m_TexCoords; }
 	private:
+		void InitTexChoords(fvec2 min, fvec2 max);
 		std::shared_ptr<Image> m_Image;
 		std::array<fvec2, 4> m_TexCoords;
 	};

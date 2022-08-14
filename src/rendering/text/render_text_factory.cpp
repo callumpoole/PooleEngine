@@ -1,11 +1,12 @@
 #include "poole/rendering/text/render_text_factory.h"
 
 #include "poole/rendering/image/image.h"
+#include "poole/rendering/text/render_font.h"
 #include "poole/rendering/text/render_text.h"
 
 namespace Poole::Rendering
 {
-	/*static*/ std::unique_ptr<RenderFont> RenderTextFactory::DefaultFont = nullptr;
+	/*static*/ std::shared_ptr<RenderFont> RenderTextFactory::DefaultFont = nullptr;
 
 	/*static*/ void RenderTextFactory::Init()
 	{
@@ -17,4 +18,10 @@ namespace Poole::Rendering
 #undef IMAGE_PATH
 	}
 
+	/*static*/ std::shared_ptr<RenderText> RenderTextFactory::MakeRenderText()
+	{
+		RenderText* rt = new RenderText();
+		rt->m_Font = DefaultFont;
+		return std::shared_ptr<RenderText>{rt};
+	}
 }
