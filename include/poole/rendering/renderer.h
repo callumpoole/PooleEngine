@@ -26,6 +26,8 @@ namespace Poole::Rendering {
 		static MeshType* Submit(MeshType&& meshAndColor);
 
 		static void Init();
+		static void Shutdown();
+
 		static void BeginScene();
 		static void EndScene(GLFWwindow* window);
 

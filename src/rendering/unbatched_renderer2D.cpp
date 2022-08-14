@@ -1,4 +1,4 @@
-#include "rendering/renderer2D.h"
+#include "rendering/unbatched_renderer2D.h"
 
 #include "graphics_api/buffer.h"
 #include "graphics_api/vertex_array.h"
@@ -15,7 +15,7 @@
 
 namespace Poole::Rendering
 {
-	namespace 
+	namespace
 	{
 		struct RenderData
 		{
@@ -67,7 +67,7 @@ namespace Poole::Rendering
 		};
 	}
 
-	void Renderer2D::Init()
+	void UnbatchedRenderer2D::Init()
 	{
 		//Shader
 		m_QuadShader = &Renderer::s_shaderUniformColorTransform2D;
@@ -93,7 +93,7 @@ namespace Poole::Rendering
 		};
 
 		//Quad
-		SetupData(s_QuadRenderData, (f32*)k_CornersForQuad, sizeof(k_CornersForQuad), 
+		SetupData(s_QuadRenderData, (f32*)k_CornersForQuad, sizeof(k_CornersForQuad),
 			VertexBufferLayout{
 				{ ShaderDataType::Float3, "a_Position"},
 			});
@@ -111,11 +111,11 @@ namespace Poole::Rendering
 				{ ShaderDataType::Float3, "a_Position"},
 			});
 	}
-	void Renderer2D::Shutdown()
+	void UnbatchedRenderer2D::Shutdown()
 	{
 
 	}
-	void Renderer2D::BeginScene()
+	void UnbatchedRenderer2D::BeginScene()
 	{
 		auto Begin = [](RenderData& Data)
 		{
@@ -136,23 +136,23 @@ namespace Poole::Rendering
 		Begin(s_TextureRenderData);
 		m_TextureShader->Bind();
 		m_TextureShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
-		
+
 		//Circles
 		Begin(s_CircleRenderData);
 		m_CircleShader->Bind();
 		m_CircleShader->SetUniform("u_WindowSize", (fvec2)Window::GetWindowSize());
-		
+
 	}
-	void Renderer2D::EndScene()
+	void UnbatchedRenderer2D::EndScene()
 	{
 
 	}
 
-	void Renderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
+	void UnbatchedRenderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
 	{
 		SCOPED_PROFILER();
 
-		s_QuadRenderData.m_VertexArray->Bind(); 
+		s_QuadRenderData.m_VertexArray->Bind();
 
 		m_QuadShader->Bind();
 		m_QuadShader->SetUniform("u_Transform", transform.MakeTransformMatrix());
@@ -161,16 +161,18 @@ namespace Poole::Rendering
 		GetRendererAPI()->DrawIndexed(6);
 	}
 
-	void Renderer2D::DrawCircle(const ftransform2D& transform, const fcolor4& color, float thickness, float fade)
+	void UnbatchedRenderer2D::DrawCircle(const ftransform2D& transform, const fcolor4& color, float thickness, float fade)
 	{
 		s_CircleRenderData.m_VertexArray->Bind();
 
 		m_CircleShader->Bind();
 
 		//It's cheaper to process in C++, than in each fragment
-		const fmat4 Transform = glm::scale(transform.MakeTransformMatrix(), fvec3{ 0.5f, 0.5f, 1.f });
-		const fmat4 CameraViewProj = Renderer::GetCamera().GetViewProjectionMatrix();
-		m_CircleShader->SetUniform("u_InvTransform_InvCameraViewProj", glm::inverse(Transform) * glm::inverse(CameraViewProj));
+		ftransform2D halvedTransform = transform;
+		halvedTransform.scale *= 0.5f;
+		const fmat4 transformMat = halvedTransform.MakeTransformMatrix();
+		const fmat4 cameraViewProjMat = Renderer::GetCamera().GetViewProjectionMatrix();
+		m_CircleShader->SetUniform("u_InvTransform_InvCameraViewProj", glm::inverse(transformMat) * glm::inverse(cameraViewProjMat));
 
 		m_CircleShader->SetUniform("u_Color", color);
 		m_CircleShader->SetUniform("u_Thickness", thickness);
@@ -179,10 +181,7 @@ namespace Poole::Rendering
 		GetRendererAPI()->DrawIndexed(6);
 	}
 
-
-	
-
-	/*static*/ std::shared_ptr<Texture> Renderer2D::GetOrLoadTexture(const Image& image)
+	/*static*/ std::shared_ptr<Texture> UnbatchedRenderer2D::GetOrLoadTexture(const Image& image)
 	{
 		std::shared_ptr<Texture> t;
 		if (m_TextureIdMap.contains(image.GetId()))
@@ -196,7 +195,7 @@ namespace Poole::Rendering
 			return t;
 		}
 	}
-	void Renderer2D::DrawTexturedQuad(const ftransform2D& transform, const Image& image)
+	void UnbatchedRenderer2D::DrawTexturedQuad(const ftransform2D& transform, const Image& image)
 	{
 		SCOPED_PROFILER();
 
@@ -217,7 +216,7 @@ namespace Poole::Rendering
 		texture->Unbind();
 		s_TextureRenderData.m_VertexArray->Unbind();
 	}
-	void Renderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage)
+	void UnbatchedRenderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage)
 	{
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(*subImage.GetImage());
 
@@ -229,7 +228,7 @@ namespace Poole::Rendering
 			s_CornersForSubTexture[i].uv.x = coords[i].x;
 			s_CornersForSubTexture[i].uv.y = coords[i].y;
 		}
-		
+
 		s_TextureRenderData.m_VertexBuffer->Bind();
 		s_TextureRenderData.m_VertexBuffer->SetData(s_CornersForSubTexture, sizeof(s_CornersForSubTexture));
 

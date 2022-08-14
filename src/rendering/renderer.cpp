@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "rendering/renderer2D.h"
-#include "rendering/batched_renderer2D.h"
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/image/image.h"
 
@@ -36,8 +35,21 @@ namespace Poole::Rendering
 		//m_camera.GetBounds();
 		LoadShaders();
 
-		Renderer2D::Init();
+#if UNBATCHED_RENDERER
+		UnbatchedRenderer2D::Init();
+#endif
+#if BATCHED_RENDERER
 		BatchedRenderer2D::Init();
+#endif
+	}
+	void Renderer::Shutdown()
+	{
+#if UNBATCHED_RENDERER
+		UnbatchedRenderer2D::Shutdown();
+#endif
+#if BATCHED_RENDERER
+		BatchedRenderer2D::Shutdown();
+#endif
 	}
 	void Renderer::BeginScene()
 	{
@@ -47,13 +59,21 @@ namespace Poole::Rendering
 
 		RenderMeshesOldWay();
 
-		Renderer2D::BeginScene();
+#if UNBATCHED_RENDERER
+		UnbatchedRenderer2D::BeginScene();
+#endif
+#if BATCHED_RENDERER
 		BatchedRenderer2D::BeginScene();
+#endif
 	}
 	void Renderer::EndScene(GLFWwindow* window)
 	{
-		Renderer2D::EndScene();
+#if UNBATCHED_RENDERER
+		UnbatchedRenderer2D::EndScene();
+#endif
+#if BATCHED_RENDERER
 		BatchedRenderer2D::EndScene();
+#endif
 
 		//Swap front and back buffers
 		glfwSwapBuffers(window);
@@ -98,17 +118,17 @@ namespace Poole::Rendering
 		// Create and compile our GLSL program from the shaders
 
 		#define shader_path "../../poole_engine/src/rendering/shaders/"
-		s_shaderUniformColor = Rendering::GLShader(shader_path "UniformColor.shader");
-		s_shaderVertexColor = Rendering::GLShader(shader_path "VertexColor.shader");
-		s_shaderUniformColorTransform2D = Rendering::GLShader(shader_path "UniformColor2DTransform.shader");
-		s_shaderVertexColorTransform2D = Rendering::GLShader(shader_path "VertexColor2DTransform.shader");
-		s_shaderCircleTransform2D = Rendering::GLShader(shader_path "Circle2DTransform.shader");
-		s_shaderCircleBatchedTransform2D = Rendering::GLShader(shader_path "Circle2DBatchedTransform.shader");
-		s_shaderTextureTransform2D = Rendering::GLShader(shader_path "Texture2DTransform.shader");
-		s_shaderTextureBatchedTransform2D = Rendering::GLShader(shader_path "Texture2DBatchedTransform.shader");
-		//s_shaderExperimental1 = Rendering::GLShader(shader_path "Experimental1.shader");
-		//s_shaderExperimental2 = Rendering::GLShader(shader_path "Experimental2.shader");
-		//s_shaderExperimental3 = Rendering::GLShader(shader_path "Experimental3.shader");
+		s_shaderUniformColor				= Rendering::GLShader(shader_path "UniformColor.shader");
+		s_shaderVertexColor					= Rendering::GLShader(shader_path "VertexColor.shader");
+		s_shaderUniformColorTransform2D		= Rendering::GLShader(shader_path "UniformColor2DTransform.shader");
+		s_shaderVertexColorTransform2D		= Rendering::GLShader(shader_path "VertexColor2DTransform.shader");
+		s_shaderCircleTransform2D			= Rendering::GLShader(shader_path "Circle2DTransform.shader");
+		s_shaderCircleBatchedTransform2D	= Rendering::GLShader(shader_path "Circle2DBatchedTransform.shader");
+		s_shaderTextureTransform2D			= Rendering::GLShader(shader_path "Texture2DTransform.shader");
+		s_shaderTextureBatchedTransform2D	= Rendering::GLShader(shader_path "Texture2DBatchedTransform.shader");
+		//s_shaderExperimental1				= Rendering::GLShader(shader_path "Experimental1.shader");
+		//s_shaderExperimental2				= Rendering::GLShader(shader_path "Experimental2.shader");
+		//s_shaderExperimental3				= Rendering::GLShader(shader_path "Experimental3.shader");
 		#undef shader_path
 	}
 }

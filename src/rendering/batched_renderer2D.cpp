@@ -169,6 +169,7 @@ namespace Poole::Rendering
 	}
 	/*static*/ void BatchedRenderer2D::Shutdown()
 	{
+		delete[] s_Data.m_CircleVertexBufferBase;
 		delete[] s_Data.m_QuadVertexBufferBase;
 	}
 

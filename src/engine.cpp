@@ -84,6 +84,7 @@ namespace Poole
             Window::Tick();
         }
 
+        Rendering::Renderer::Shutdown();
         EndApp();
         Window::Close();
     }
