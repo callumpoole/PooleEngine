@@ -54,6 +54,7 @@ namespace Poole::Rendering
 		Image ToGreyscale(GreyScaleFunc func = &GreyscaleColorAdj) const;
 		Image GreyscaleToRGB() const;
 		Image GreyscaleToRGBA() const;
+		Image ReplaceBlackWithAlpha() const;
 
 		void DebugPrint() const;
 

@@ -15,6 +15,7 @@ namespace Poole::Rendering
 		s_DefaultFont.reset(new FontRenderer());
 		s_DefaultFont->m_ImageAtlas.reset(new Poole::Rendering::Image(IMAGE_PATH "8x8ASCIIBitmapFont.png"));
 		s_DefaultFont->m_GridSize = { 16, 8 };
+		s_DefaultFont->ConvertBlackToAlpha();
 		s_DefaultFont->GenerateSubImages();
 #undef IMAGE_PATH
 	}

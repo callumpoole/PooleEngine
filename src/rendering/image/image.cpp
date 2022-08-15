@@ -231,6 +231,70 @@ namespace Poole::Rendering
 		}
 		return Image(newBytes, m_Size, 4, m_YFlippedWhenLoaded);
 	}
+	Image Image::ReplaceBlackWithAlpha() const
+	{
+		u8color4* newBytes = new u8color4[GetNumBytes()];
+		u32 iter = 0;
+
+		if (m_NumChannels == 1)
+		{
+			for (u8 grey : GetIterDontUnFlip<u8>())
+			{
+				if (grey == 0)
+				{
+					newBytes[iter++] = u8color4{ 0 };
+				}
+				else
+				{
+					newBytes[iter++] = u8color4{ grey, grey, grey, 255 };
+				}
+			}
+		}
+		else if (m_NumChannels == 2)
+		{
+			for (u8color3 rg : GetIterDontUnFlip<u8color3>())
+			{
+				if (rg.r + rg.g == 0)
+				{
+					newBytes[iter++] = u8color4{ 0 };
+				}
+				else
+				{
+					newBytes[iter++] = u8color4{ rg.r, rg.g, 0, 255 };
+				}
+			}
+		}
+		else if (m_NumChannels == 3)
+		{
+			for (u8color3 rgb : GetIterDontUnFlip<u8color3>())
+			{
+				if (rgb.r + rgb.g + rgb.b == 0)
+				{
+					newBytes[iter++] = u8color4{ 0 };
+				}
+				else
+				{
+					newBytes[iter++] = u8color4{ rgb.r, rgb.g, rgb.b, 255 };
+				}
+			}
+		}
+		else if (m_NumChannels == 4)
+		{
+			for (u8color4 rgba : GetIterDontUnFlip<u8color4>())
+			{
+				if (rgba.r + rgba.g + rgba.b == 0)
+				{
+					newBytes[iter++] = u8color4{ 0 };
+				}
+				else
+				{
+					newBytes[iter++] = rgba;
+				}
+			}
+		}
+
+		return Image((u8*)newBytes, m_Size, 4, m_YFlippedWhenLoaded);
+	}
 
 	void Image::DebugPrint() const
 	{

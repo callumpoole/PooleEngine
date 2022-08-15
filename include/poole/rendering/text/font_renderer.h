@@ -14,6 +14,7 @@ namespace Poole::Rendering
 		friend class TextRendererFactory;
 	private:
 		FontRenderer() = default;
+		void ConvertBlackToAlpha();
 		void GenerateSubImages(u32 reserve = 128);
 
 	public:

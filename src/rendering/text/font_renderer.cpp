@@ -5,6 +5,14 @@
 
 namespace Poole::Rendering
 {
+	void FontRenderer::ConvertBlackToAlpha()
+	{
+		if (m_ImageAtlas)
+		{
+			m_ImageAtlas.reset(new Image(m_ImageAtlas->ReplaceBlackWithAlpha()));
+		}
+	}
+
 	void FontRenderer::GenerateSubImages(u32 reserve)
 	{
 		ASSERT(m_GridSize.x * m_GridSize.y > 0);
