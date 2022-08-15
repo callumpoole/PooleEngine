@@ -1,6 +1,7 @@
 #include "poole/rendering/text/font_renderer.h"
 
 #include "poole/rendering/image/image.h"
+#include "poole/rendering/image/image_utils.h"
 #include "poole/rendering/image/sub_image.h"
 
 namespace Poole::Rendering
@@ -9,7 +10,7 @@ namespace Poole::Rendering
 	{
 		if (m_ImageAtlas)
 		{
-			m_ImageAtlas.reset(new Image(m_ImageAtlas->ReplaceBlackWithAlpha()));
+			m_ImageAtlas.reset(ImageUtils::ReplaceBlackWithAlpha(m_ImageAtlas.get()));
 		}
 	}
 
