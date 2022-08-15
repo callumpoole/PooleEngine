@@ -1,11 +1,11 @@
-#include "poole/rendering/text/render_font.h"
+#include "poole/rendering/text/font_renderer.h"
 
 #include "poole/rendering/image/image.h"
 #include "poole/rendering/image/sub_image.h"
 
 namespace Poole::Rendering
 {
-	void RenderFont::GenerateSubImages(u32 reserve)
+	void FontRenderer::GenerateSubImages(u32 reserve)
 	{
 		ASSERT(m_GridSize.x * m_GridSize.y > 0);
 		IF_ASSERT(HasCustomGlyphMappings(), m_GlyphMappings.size() == m_GridSize.x * m_GridSize.y);
@@ -24,7 +24,7 @@ namespace Poole::Rendering
 		}
 	}
 
-	std::shared_ptr<SubImage> RenderFont::Convert(const char c)
+	std::shared_ptr<SubImage> FontRenderer::Convert(const char c)
 	{
 		ASSERT(!m_SubImages.empty());
 		ASSERT_MSG(size_t(c) < m_SubImages.size(), "Character {} ({}) out of bounds (0 to {}).", c, u32(c), m_SubImages.size() - 1);

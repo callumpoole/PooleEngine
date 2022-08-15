@@ -6,7 +6,7 @@
 #include "rendering/renderer2D.h"
 #include "rendering/graphics_api/renderer_api.h"
 #include "rendering/image/image.h"
-#include "rendering/text/render_text_factory.h"
+#include "rendering/text/text_renderer_factory.h"
 
 namespace Poole::Rendering
 {
@@ -42,7 +42,7 @@ namespace Poole::Rendering
 		BatchedRenderer2D::Init();
 #endif
 
-		RenderTextFactory::Init();
+		TextRendererFactory::Init();
 	}
 	void Renderer::Shutdown()
 	{
@@ -65,9 +65,13 @@ namespace Poole::Rendering
 #if BATCHED_RENDERER
 		BatchedRenderer2D::BeginScene();
 #endif
+
 	}
 	void Renderer::EndScene(GLFWwindow* window)
 	{
+		//Render text on top since it's in EndScene
+		TextRendererFactory::RenderAllTextRenderers();
+
 #if UNBATCHED_RENDERER
 		UnbatchedRenderer2D::EndScene();
 #endif

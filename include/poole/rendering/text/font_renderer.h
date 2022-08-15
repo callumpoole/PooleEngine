@@ -9,11 +9,11 @@ namespace Poole::Rendering
 	class Image;
 	class SubImage;
 
-	class RenderFont
+	class FontRenderer
 	{
-		friend class RenderTextFactory;
+		friend class TextRendererFactory;
 	private:
-		RenderFont() = default;
+		FontRenderer() = default;
 		void GenerateSubImages(u32 reserve = 128);
 
 	public:

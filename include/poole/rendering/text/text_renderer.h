@@ -2,15 +2,13 @@
 
 #include "poole/core.h"
 
-#include <string_view>
-
 namespace Poole::Rendering
 {
-	class RenderFont;
+	class FontRenderer;
 
-	class RenderText
+	class TextRenderer
 	{
-		friend class RenderTextFactory;
+		friend class TextRendererFactory;
 	public:
 		enum class EHorizontalAlignment {
 			Left, Center, Right
@@ -19,11 +17,14 @@ namespace Poole::Rendering
 		void SetSize(float size);
 		void SetText(std::string_view text);
 
+		void RenderText();
+
 		ftransform2D m_Transform;
 
 	private:
-		RenderText() = default;
-		std::shared_ptr<RenderFont> m_Font;
+		TextRenderer() = default;
+		std::shared_ptr<FontRenderer> m_Font;
 		EHorizontalAlignment m_HorizontalAlign = EHorizontalAlignment::Left;
+		std::string_view m_Text;
 	};
 }
