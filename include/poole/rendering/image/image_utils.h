@@ -15,9 +15,14 @@ namespace Poole::Rendering
 
 		using GreyScaleFunc = f32(*)(f32 r, f32 g, f32 b);
 
-		static Image* ToGreyscale(const Image* Src, GreyScaleFunc func = &GreyscaleColorAdj);
-		static Image* GreyscaleToRGB(const Image* Src);
-		static Image* GreyscaleToRGBA(const Image* Src);
-		static Image* ReplaceBlackWithAlpha(const Image* Src);
+		static Image* ToGreyscale(const Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
+		static Image* ToGreyscaleRG(const Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
+		static Image* ToGreyscaleRGB(const Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
+		static Image* ToGreyscaleRGBA(const Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
+
+		static Image* GreyscaleToRGB(const Image* src);
+		static Image* GreyscaleToRGBA(const Image* src);
+
+		static Image* ReplaceBlackWithAlpha(const Image* src);
 	};
 }

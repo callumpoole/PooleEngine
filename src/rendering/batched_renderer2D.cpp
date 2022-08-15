@@ -277,6 +277,8 @@ namespace Poole::Rendering
 
 	/*static*/ std::shared_ptr<Texture> BatchedRenderer2D::GetOrLoadTexture(const Image& image)
 	{
+		ASSERT(image.GetNumChannels() == 3 || image.GetNumChannels() == 4);
+
 		std::shared_ptr<Texture> t;
 		if (s_Data.m_TextureIdMap.contains(image.GetId()))
 		{
