@@ -10,21 +10,35 @@ namespace Poole::Rendering
 	{
 		friend class TextRendererFactory;
 	public:
-		enum class EHorizontalAlignment {
+		enum class EHorizontalAlignment : u8 {
 			Left, Center, Right
 		};
 
+		void SetTextView(std::string_view textView);
+		void SetText(const std::string& text);
+		void SetText(std::string&& text);
+		std::string_view GetTextOrView() const { return m_TextView; }
+
+		void SetColor(const fcolor4& tintColor);
+		const fcolor4& GetColor() const { return m_TintColor; }
+
+		void SetPosition(fvec3 pos);
+		fvec3 GetPosition() const { return m_Transform.position; }
+
 		void SetSize(float size);
-		void SetText(std::string_view text);
+		fvec2 GetSize() const { return m_Transform.scale; }
+
 
 		void RenderText();
 
-		ftransform2D m_Transform;
 
 	private:
 		TextRenderer() = default;
 		std::shared_ptr<FontRenderer> m_Font;
+		ftransform2D m_Transform;
 		EHorizontalAlignment m_HorizontalAlign = EHorizontalAlignment::Left;
-		std::string_view m_Text;
+		std::string_view m_TextView;
+		std::string m_Text;
+		fcolor4 m_TintColor = Colors::White<fcolor4>;
 	};
 }

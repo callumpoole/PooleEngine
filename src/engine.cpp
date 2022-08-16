@@ -6,6 +6,7 @@
 #include "input/input.h"
 #include "window/window.h"
 #include "engine/command_args.h"
+#include "debug/debug_overlay.h"
 
 namespace Poole 
 {
@@ -26,7 +27,7 @@ namespace Poole
 
     void Engine::Run()
     {
-        m_TimeData.s_LaunchSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        m_TimeData.m_LaunchSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
         CommandArgs().Apply(*this);
         
@@ -61,9 +62,11 @@ namespace Poole
         BeginApp();
 
         //Init time stuff (after client code)
-        m_TimeData.s_FirstTickSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        m_TimeData.m_FirstTickSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
         auto previousFrameTime = std::chrono::high_resolution_clock::now();
+
+        Poole::Debug::DebugOverlay DebugOverlay;
 
         //Loop until the user closes the window
         while (!glfwWindowShouldClose(window))
@@ -76,7 +79,9 @@ namespace Poole
 
             Rendering::Renderer::BeginScene();
 
-            UpdateApp(m_TimeData.s_DeltaTime);
+            UpdateApp(m_TimeData.m_DeltaTime);
+
+            DebugOverlay.Update(*this);
 
             Rendering::Renderer::EndScene(window);
 
@@ -93,29 +98,29 @@ namespace Poole
         const i64 NowTimeSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
         const i64 DeltaTimeDuration = NowTimeSinceEpochNS - PreviousFrameTimeSinceEpochNS;
 
-        m_TimeData.s_FrameNS = DeltaTimeDuration;
-        m_TimeData.s_FrameMS = m_TimeData.s_FrameNS / 1000'000.f;
-        m_TimeData.s_DeltaTime = m_TimeData.s_FrameMS / 1000.f;
-        m_TimeData.s_FPS = 1 / m_TimeData.s_DeltaTime;
-        m_TimeData.s_TickCount++;
+        m_TimeData.m_FrameNS = DeltaTimeDuration;
+        m_TimeData.m_FrameMS = m_TimeData.m_FrameNS / 1000'000.f;
+        m_TimeData.m_DeltaTime = m_TimeData.m_FrameMS / 1000.f;
+        m_TimeData.m_FPS = 1 / m_TimeData.m_DeltaTime;
+        m_TimeData.m_TickCount++;
 
-        const f32 PrevSecondsSinceLaunch = m_TimeData.s_SecondsSinceLaunch;
-        m_TimeData.s_SecondsSinceLaunch    = (NowTimeSinceEpochNS - m_TimeData.s_LaunchSinceEpochNS)    / 1000'000'000.f;
-        m_TimeData.s_SecondsSinceFirstTick = (NowTimeSinceEpochNS - m_TimeData.s_FirstTickSinceEpochNS) / 1000'000'000.f;
+        const f32 PrevSecondsSinceLaunch = m_TimeData.m_SecondsSinceLaunch;
+        m_TimeData.m_SecondsSinceLaunch    = (NowTimeSinceEpochNS - m_TimeData.m_LaunchSinceEpochNS)    / 1000'000'000.f;
+        m_TimeData.m_SecondsSinceFirstTick = (NowTimeSinceEpochNS - m_TimeData.m_FirstTickSinceEpochNS) / 1000'000'000.f;
 
-        m_TimeData.s_AccDeltaTimeThisSecond += m_TimeData.s_DeltaTime;
-        m_TimeData.s_AccTicksThisSecond++;
+        m_TimeData.m_AccDeltaTimeThisSecond += m_TimeData.m_DeltaTime;
+        m_TimeData.m_AccTicksThisSecond++;
 
         //If a new second occoured (not an exact science if multiple seconds are skipped, but it's only an approx)
-        if (std::floor(PrevSecondsSinceLaunch) != std::floor(m_TimeData.s_SecondsSinceLaunch))
+        if (std::floor(PrevSecondsSinceLaunch) != std::floor(m_TimeData.m_SecondsSinceLaunch))
         {
-            m_TimeData.s_AvgDeltaTime = m_TimeData.s_AccDeltaTimeThisSecond / m_TimeData.s_AccTicksThisSecond;
-            m_TimeData.s_AvgFPS = 1 / m_TimeData.s_AvgDeltaTime;
-            m_TimeData.s_AccDeltaTimeThisSecond = 0.f;
-            m_TimeData.s_AccTicksThisSecond = 0;
+            m_TimeData.m_AvgDeltaTime = m_TimeData.m_AccDeltaTimeThisSecond / m_TimeData.m_AccTicksThisSecond;
+            m_TimeData.m_AvgFPS = 1 / m_TimeData.m_AvgDeltaTime;
+            m_TimeData.m_AccDeltaTimeThisSecond = 0.f;
+            m_TimeData.m_AccTicksThisSecond = 0;
 
             Window::SetWindowTitle((Window::GetCurrentTitle() + std::format(" - AvgFPS: {:5.1f}, AvgDTime: {:6.5f}s, Open: {:.0f}s",
-                m_TimeData.s_AvgFPS, m_TimeData.s_AvgDeltaTime, m_TimeData.s_SecondsSinceLaunch)).c_str());
+                m_TimeData.m_AvgFPS, m_TimeData.m_AvgDeltaTime, m_TimeData.m_SecondsSinceLaunch)).c_str());
         }
 
         //LOG("MS: {:7.3f}, DTime: {:8.5f}, FPS: {:7.1f}, AvgDTime: {:8.5f}, AvgFPS: {:7.1f}, Open: {:.2f}",

@@ -16,6 +16,8 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"include/poole/engine.h"
 	"include/poole/entry_point.h"
 	"src/engine.cpp"
+	"src/debug/debug_overlay.h"
+	"src/debug/debug_overlay.cpp"
 	"include/poole/rendering/shader_loader.h"
 	"src/rendering/shader_loader.cpp"
 	"src/rendering/shaders/UniformColor.shader"

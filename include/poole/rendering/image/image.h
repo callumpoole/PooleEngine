@@ -29,7 +29,7 @@ namespace Poole::Rendering
 	
 		u32 GetId() const { return m_Id; }
 		const bool IsValid() const { return m_Bytes != nullptr && m_Id > 0; }
-		operator bool() { return IsValid(); }
+		operator bool() const { return IsValid(); }
 		const u8* GetBytes() const { return m_Bytes; }
 		const std::vector<u8> YFlipBytes() const;
 		const uvec2& GetSize() const { return m_Size; }

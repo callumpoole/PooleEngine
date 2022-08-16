@@ -36,7 +36,12 @@ namespace Poole::Rendering
 	std::shared_ptr<SubImage> FontRenderer::Convert(const char c)
 	{
 		ASSERT(!m_SubImages.empty());
-		ASSERT_MSG(size_t(c) < m_SubImages.size(), "Character {} ({}) out of bounds (0 to {}).", c, u32(c), m_SubImages.size() - 1);
+
+		if (size_t(c) >= m_SubImages.size())
+		{
+			LOG_WARNING("Character {} ({}) out of bounds (0 to {}).", c, u32(c), m_SubImages.size() - 1);
+			return nullptr;
+		}
 
 		if (HasCustomGlyphMappings())
 		{
