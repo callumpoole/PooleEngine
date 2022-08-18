@@ -26,8 +26,17 @@ namespace Poole::Rendering
 		fvec3 GetPosition() const { return m_Transform.position; }
 
 		void SetSize(float size);
+		void SetSize(fvec2 size);
 		fvec2 GetSize() const { return m_Transform.scale; }
 
+		void SetRotationRadians(float radians);
+		float GetRotationRadians() const { return m_Transform.rotation; }
+
+		void SetShadowOffset(fvec2 pos);
+		fvec2 GetShadowOffset() const { return m_ShadowOffset; }
+
+		void SetShadowColor(fcolor4 col);
+		fcolor4 GetShadowColor() const { return m_ShadowTintColor; }
 
 		void RenderText();
 
@@ -35,10 +44,13 @@ namespace Poole::Rendering
 	private:
 		TextRenderer() = default;
 		std::shared_ptr<FontRenderer> m_Font;
+
 		ftransform2D m_Transform;
+		fvec2 m_ShadowOffset = { 0.05f, -0.05f };
 		EHorizontalAlignment m_HorizontalAlign = EHorizontalAlignment::Left;
 		std::string_view m_TextView;
 		std::string m_Text;
 		fcolor4 m_TintColor = Colors::White<fcolor4>;
+		fcolor4 m_ShadowTintColor = Colors::Black<fcolor4>;
 	};
 }

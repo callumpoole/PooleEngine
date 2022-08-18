@@ -12,20 +12,20 @@ namespace Poole
 		f32 GetVolatileFPS() const { return m_FPS; }
 		f32 GetAvgFPS() const { return m_AvgFPS; }
 	private:
-		u64 m_TickCount;
-		u64 m_FrameNS;
-		f32 m_FrameMS;
-		f32 m_DeltaTime;
-		f32 m_FPS;
+		u64 m_TickCount = 0;
+		u64 m_FrameNS = 0;
+		f32 m_FrameMS = 0;
+		f32 m_DeltaTime = 0;
+		f32 m_FPS = 0;
 	
-		i64 m_LaunchSinceEpochNS;
-		i64 m_FirstTickSinceEpochNS;
-		f32 m_SecondsSinceLaunch;
-		f32 m_SecondsSinceFirstTick;
+		i64 m_LaunchSinceEpochNS = 0;
+		i64 m_FirstTickSinceEpochNS = 0;
+		f32 m_SecondsSinceLaunch = 0;
+		f32 m_SecondsSinceFirstTick = 0;
 	
-		f32 m_AccDeltaTimeThisSecond;
-		u64 m_AccTicksThisSecond;
-		f32 m_AvgDeltaTime;
-		f32 m_AvgFPS;
+		f32 m_AccDeltaTimeThisSecond = 0;
+		u64 m_AccTicksThisSecond = 0;
+		f32 m_AvgDeltaTime = 0;
+		f32 m_AvgFPS = 0;
 	};
 }

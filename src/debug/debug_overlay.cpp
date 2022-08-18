@@ -10,7 +10,7 @@ namespace Poole::Debug
     {
         m_DebugText = Poole::Rendering::TextRendererFactory::MakeRenderText();
         m_DebugText->SetSize(0.05f);
-        m_DebugText->SetTextView("0 FPS");
+        m_DebugText->SetTextView("0fps");
         m_DebugText->SetColor(Colors::Blue<fcolor4>);
         m_DebugText->SetPosition(fvec3{ -1.25f, 0.9f, 0 });
     }
@@ -23,14 +23,8 @@ namespace Poole::Debug
     void DebugOverlay::Update(const Poole::Engine& engine)
     {
         const EngineTime& timeData = engine.GetTimeData();
-        float fps = timeData.GetVolatileFPS();
-        fps = std::floor(fps);
-
-        //Float to String, remove trailing zeros. TODO make it less shit. printf or something!
-        std::string fpsStr = std::to_string(fps);
-        fpsStr.erase(fpsStr.find_last_not_of('0') + 1, std::string::npos);
-        fpsStr.erase(fpsStr.find_last_not_of('.') + 1, std::string::npos);
-        fpsStr += " FPS";
+        const float fps = timeData.GetAvgFPS();
+        const std::string fpsStr = std::format("{:.0f}fps", fps);
 
         m_DebugText->SetText(fpsStr);
     }
