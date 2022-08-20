@@ -41,6 +41,8 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/unbatched_renderer2D.cpp"
 	"src/rendering/batched_renderer2D.cpp"
 	"src/rendering/image/stb.cpp"
+	"include/poole/rendering/image/svg.h"
+	"src/rendering/image/svg.cpp"	
 	"include/poole/rendering/image/image.h"
 	"src/rendering/image/image.cpp"	
 	"include/poole/rendering/image/sub_image.h"
@@ -108,6 +110,7 @@ add_library(
 	3rd_party/glad/include/KHR/khrplatform.h
 	3rd_party/glad/src/glad.c
 	3rd_party/stb/stb/stb_image.h
+	3rd_party/stb/stb/stb_truetype.h
 	3rd_party/entt/include/entt/entt.hpp
 	
 
