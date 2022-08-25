@@ -3,6 +3,7 @@
 #include "poole/core.h"
 
 #include "poole/rendering/image/image.h"
+#include "poole/rendering/image/sub_image.h"
 
 namespace Poole::Rendering
 {
@@ -10,8 +11,9 @@ namespace Poole::Rendering
 	{
 	public:
 		SvgFontRenderer(const char* fontLocation);
-		Image* GetSprintImage(f32 fontSize) { return m_Sizes[fontSize].m_Image; }
 		void CacheSize(f32 fontSize) const;
+
+		std::shared_ptr<SubImage> Convert(const char c, float fontSize);
 
 	private:
 
@@ -31,7 +33,7 @@ namespace Poole::Rendering
 		struct RasterInfo
 		{
 			TT_BakedChar* m_CharMaps = nullptr;
-			Image* m_Image = nullptr;
+			std::shared_ptr<Image> m_Image = nullptr;
 		};
 
 		mutable std::unordered_map<float, RasterInfo> m_Sizes;
