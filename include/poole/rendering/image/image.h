@@ -31,7 +31,6 @@ namespace Poole::Rendering
 		const bool IsValid() const { return m_Bytes != nullptr && m_Id > 0; }
 		operator bool() const { return IsValid(); }
 		const u8* GetBytes() const { return m_Bytes; }
-		const std::vector<u8> YFlipBytes() const;
 		const uvec2& GetSize() const { return m_Size; }
 		u32 GetWidth() const { return m_Size.x; }
 		u32 GetHeight() const { return m_Size.y; }
@@ -149,7 +148,11 @@ namespace Poole::Rendering
 		template<typename TColor>
 		IteratorGenerator<TColor> GetIterDontUnFlip() const		  { return IteratorGenerator<TColor>(m_Bytes, m_Size.x, m_Size.y, false); }
 
+		template<typename TColor>
+		IteratorGenerator<TColor> GetIterFlip() const { return IteratorGenerator<TColor>(m_Bytes, m_Size.x, m_Size.y, true); }
+
 		IteratorGenerator<u8> GetIterPerChannel() const			  { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
 		IteratorGenerator<u8> GetIterPerChannelDontUnFlip() const { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumChannels, m_Size.y, false); }
+		IteratorGenerator<u8> GetIterPerChannelFlip() const { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumChannels, m_Size.y, true); }
 	};
 }

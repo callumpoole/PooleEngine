@@ -150,8 +150,6 @@ namespace Poole::Rendering
 
 	void UnbatchedRenderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
 	{
-		SCOPED_PROFILER();
-
 		s_QuadRenderData.m_VertexArray->Bind();
 
 		m_QuadShader->Bind();
@@ -197,8 +195,6 @@ namespace Poole::Rendering
 	}
 	void UnbatchedRenderer2D::DrawTexturedQuad(const ftransform2D& transform, const Image& image)
 	{
-		SCOPED_PROFILER();
-
 		std::shared_ptr<Texture> texture = GetOrLoadTexture(image);
 
 		s_TextureRenderData.m_VertexArray->Bind();

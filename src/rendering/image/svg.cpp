@@ -14,6 +14,8 @@ namespace Poole::Rendering
 		fread(ttf_buffer, 1, 1 << 20, fopen("c:/windows/fonts/times.ttf", "rb"));
 		stbtt_BakeFontBitmap(ttf_buffer, 0, 70.0, temp_bitmap, 512, 512, 32, 96, cdata); // no guarantee this fits!
 
+		delete[] ttf_buffer;
+
 		return temp_bitmap;
 	}
 }

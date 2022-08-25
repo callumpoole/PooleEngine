@@ -24,5 +24,7 @@ namespace Poole::Rendering
 		static Image* GreyscaleToRGBA(const Image* src);
 
 		static Image* ReplaceBlackWithAlpha(const Image* src);
+
+		static Image* YFlip(const Image* src);
 	};
 }
