@@ -32,34 +32,35 @@ namespace Poole
 #endif
 
 
-#define INTERNAL_LOG_TICK_LITERALS "[{:3}] "
+#define INTERNAL_LOG_TICK_LITERALS "[{:3}]"
 #define INTERNAL_LOG_TICK_PARAMS LoggingGetTickCount() % 1000
 
-#define INTERNAL_LOG_LITERALS INTERNAL_LOG_TICK_LITERALS "[{}] {}:({},{}): "
+#define INTERNAL_LOG_LITERALS INTERNAL_LOG_TICK_LITERALS "[{}]{}:({},{})"
 #define INTERNAL_LOG_PARAMS   INTERNAL_LOG_TICK_PARAMS, \
 							  ShortenFilename(std::source_location::current().file_name()).data(), \
 							  std::source_location::current().function_name(), \
 							  std::source_location::current().line(), \
 							  std::source_location::current().column()
 
-
-
-#define LOG(msg, ...) \
-	std::cout << std::format(INTERNAL_LOG_TICK_LITERALS msg "\n", INTERNAL_LOG_TICK_PARAMS, __VA_ARGS__);
-
-
-
 #define LOG_LINE(msg, ...) \
-	std::cout << std::format("LOG: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
+	std::cout << std::format(INTERNAL_LOG_LITERALS "LOG: " msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
+
+#if 0 //If 1, will convert LOG to LOG_LINE to find those unlocated prints more easily.
+	#define LOG(msg, ...) LOG_LINE(msg, __VA_ARGS__);
+#else
+	#define LOG(msg, ...) \
+		std::cout << std::format(INTERNAL_LOG_TICK_LITERALS " " msg "\n", INTERNAL_LOG_TICK_PARAMS, __VA_ARGS__);
+#endif
 
 #define LOG_WARNING(msg, ...) \
-	std::cout << std::format("WARNING: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
+	std::cout << std::format(INTERNAL_LOG_LITERALS "WARNING: " msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
 
 #define LOG_ERROR(msg, ...) \
-	std::cerr << std::format("ERROR: " INTERNAL_LOG_LITERALS msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
+	std::cerr << std::format(INTERNAL_LOG_LITERALS "ERROR: " msg "\n", INTERNAL_LOG_PARAMS, __VA_ARGS__);
 
 #define LOG_NOT_IMPL() \
-	std::cerr << std::format("ERROR: " INTERNAL_LOG_LITERALS "Hit Not Implemented. \n", INTERNAL_LOG_PARAMS);
+	std::cerr << std::format(INTERNAL_LOG_LITERALS "ERROR NOT IMPLEMENTED. \n", INTERNAL_LOG_PARAMS);
+
 
 #define ASSERT(cond) { if constexpr(!std::is_constant_evaluated()) { __debugbreak(); } assert(cond); }
 

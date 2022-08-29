@@ -13,15 +13,15 @@ namespace Poole::Rendering
 		SvgFontRenderer(const char* fontLocation);
 		void CacheSize(f32 fontSize) const;
 
-		std::shared_ptr<SubImage> Convert(const char c, float fontSize);
-
+		std::shared_ptr<SubImage> Convert(const char c, float fontSize, float& xoff, float& yoff, float& xadvance);
+		std::shared_ptr<Image> GetImageForSize(float fontSize);
 	private:
 
-		static constexpr i32 k_FontBuffer = 1 << 20;
+		static constexpr ivec2 k_Size = { 1024,1024 };
+		static constexpr i32 k_FontBuffer = k_Size.x * k_Size.y;
 		static constexpr i32 k_StartChar = 32;
 		static constexpr i32 k_NumChars = 96;
 		static constexpr i32 k_LastChars = k_StartChar + k_NumChars;
-		static constexpr ivec2 k_Size = { 512,512 };
 
 		//Clone of stbtt_bakedchar
 		struct TT_BakedChar

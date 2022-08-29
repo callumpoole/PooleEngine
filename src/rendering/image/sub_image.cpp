@@ -32,5 +32,18 @@ namespace Poole::Rendering
 		m_TexCoords[1] = { max.x, min.y };
 		m_TexCoords[2] = { max.x, max.y };
 		m_TexCoords[3] = { min.x, max.y };
+
+		m_MinMax = { min, max };
+	}
+
+	fvec2 SubImage::GetSize() const
+	{
+		return { m_MinMax[1].x - m_MinMax[0].x, m_MinMax[1].y - m_MinMax[0].y};
+	}
+
+	float SubImage::GetAspectRatio() const
+	{
+		const fvec2 size = GetSize();
+		return size.x / size.y;
 	}
 }

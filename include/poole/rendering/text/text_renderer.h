@@ -5,6 +5,7 @@
 namespace Poole::Rendering
 {
 	class FontRenderer;
+	class SvgFontRenderer;
 
 	class TextRenderer
 	{
@@ -39,11 +40,14 @@ namespace Poole::Rendering
 		fcolor4 GetShadowColor() const { return m_ShadowTintColor; }
 
 		void RenderText();
-
-
 	private:
+		void RenderText_Monospaced(ftransform2D& trans, fcolor4 col);
+		void RenderText_VariableWidth(ftransform2D& trans, fcolor4 col);
+		bool IsMonospaced() const;
+
 		TextRenderer() = default;
-		std::shared_ptr<FontRenderer> m_Font;
+		std::shared_ptr<FontRenderer> m_MonospacedFont;
+		std::shared_ptr<SvgFontRenderer> m_VariableWidthFont;
 
 		ftransform2D m_Transform;
 		fvec2 m_ShadowOffset = { 0.05f, -0.05f };

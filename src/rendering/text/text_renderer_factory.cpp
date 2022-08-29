@@ -1,29 +1,43 @@
 #include "poole/rendering/text/text_renderer_factory.h"
 
 #include "poole/rendering/image/image.h"
+#include "poole/rendering/text/svg_font_renderer.h"
 #include "poole/rendering/text/font_renderer.h"
 #include "poole/rendering/text/text_renderer.h"
 
 namespace Poole::Rendering
 {
 	/*static*/ std::vector<std::weak_ptr<TextRenderer>> TextRendererFactory::s_TextRenderers;
-	/*static*/ std::shared_ptr<FontRenderer> TextRendererFactory::s_DefaultFont = nullptr;
+	/*static*/ std::shared_ptr<FontRenderer> TextRendererFactory::s_DefaultMonospacedFont = nullptr;
+	/*static*/ std::shared_ptr<SvgFontRenderer> TextRendererFactory::s_DefaultVariableWidthFont = nullptr;
 
 	/*static*/ void TextRendererFactory::Init()
 	{
 #define IMAGE_PATH "../../poole_engine/content/font_atlases/"
-		s_DefaultFont.reset(new FontRenderer());
-		s_DefaultFont->m_ImageAtlas.reset(new Poole::Rendering::Image(IMAGE_PATH "8x8ASCIIBitmapFont.png"));
-		s_DefaultFont->m_GridSize = { 16, 8 };
-		s_DefaultFont->ConvertBlackToAlpha();
-		s_DefaultFont->GenerateSubImages();
+		s_DefaultMonospacedFont.reset(new FontRenderer());
+		s_DefaultMonospacedFont->m_ImageAtlas.reset(new Poole::Rendering::Image(IMAGE_PATH "8x8ASCIIBitmapFont.png"));
+		s_DefaultMonospacedFont->m_GridSize = { 16, 8 };
+		s_DefaultMonospacedFont->ConvertBlackToAlpha();
+		s_DefaultMonospacedFont->GenerateSubImages();
+#undef IMAGE_PATH
+
+#define IMAGE_PATH "c:/windows/fonts/"
+		s_DefaultVariableWidthFont.reset(new SvgFontRenderer(IMAGE_PATH "times.ttf"));
+
 #undef IMAGE_PATH
 	}
 
-	/*static*/ std::shared_ptr<TextRenderer> TextRendererFactory::MakeRenderText()
+	/*static*/ std::shared_ptr<TextRenderer> TextRendererFactory::MakeRenderText(bool Monospaced)
 	{
 		std::shared_ptr<TextRenderer> rt{ new TextRenderer() };
-		rt->m_Font = s_DefaultFont;
+		if (Monospaced)
+		{
+			rt->m_MonospacedFont = s_DefaultMonospacedFont;
+		}
+		else
+		{
+			rt->m_VariableWidthFont = s_DefaultVariableWidthFont;
+		}
 		s_TextRenderers.emplace_back(rt);
 		return rt;
 	}
@@ -45,5 +59,10 @@ namespace Poole::Rendering
 				++it;
 			}
 		}
+	}
+
+	/*static*/ std::shared_ptr<Image> TextRendererFactory::GetVariableFontImage(float fontSize)
+	{
+		return s_DefaultVariableWidthFont->GetImageForSize(fontSize);
 	}
 }
