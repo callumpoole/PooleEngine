@@ -93,8 +93,8 @@ namespace Poole::Rendering
 		switch (src->GetNumChannels())
 		{
 		case 1: InvokeTemplatedLambda<u8>(AddBytes, 
-			[](u8 grey) { return grey == 0; },					   
-			[](u8 grey) { return u8color4{ grey, grey, grey, 255 }; }); 
+			[](u8 grey) { return false; }, //On purpse			   
+			[](u8 grey) { return u8color4{ 255, 255, 255, grey }; }); //Best results with greyscale image (no black fades)
 			break;
 		case 2: InvokeTemplatedLambda<u8color2>(AddBytes, 
 			[](u8color2 rg) { return rg.r + rg.g == 0; },				   
@@ -126,6 +126,6 @@ namespace Poole::Rendering
 			memcpy(newBytes + (y * bytesPerRow), srcBytes + (yRead * bytesPerRow), bytesPerRow);
 		}
 
-		return new Image((u8*)newBytes, src->GetSize(), src->GetNumChannels(), src->WasYFlippedWhenLoaded());
+		return new Image((u8*)newBytes, src->GetSize(), src->GetNumChannels(), !src->WasYFlippedWhenLoaded());
 	}
 }

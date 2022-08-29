@@ -127,30 +127,22 @@ namespace Poole::Rendering
 			const auto prevPos = trans.position;
 			const auto prevScale = trans.scale;
 
-			trans.scale.x *= xadvance / fontSize;
+			trans.scale.x *= (Sub->GetSize().x * 1024) / fontSize;
 			trans.scale.y *= (Sub->GetSize().y * 1024) / fontSize;
 
-			const float downBy = (yoff / 1024.f) / 2;
-			const float rightBy = -(xoff / 1024.f) * xadvance / fontSize;
+			const float downBy = yoff / 1024;
+			const float rightBy = (xoff + xadvance) / 1024;
 			trans.position.x += downBy * sin(-trans.rotation) + rightBy * cos(trans.rotation);
 			trans.position.y += downBy * cos(trans.rotation)  + rightBy * sin(trans.rotation);
 
 			LOG("Letter {} : {} {} {}   y={}", c, xoff, yoff, xadvance, Sub->GetSize().y);
 
-			//const float aspectRatio = Sub->GetAspectRatio();
-
-			//if (aspectRatio > 1)
-			//{
-			//	trans.scale.x *= aspectRatio;
-			//}
-			//else if (aspectRatio < 1)
-			//{
-			//	trans.scale.y = aspectRatio;
-			//}
-
 			Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
 
-			trans.position = prevPos;
+			if (c != ' ')
+			{
+				trans.position = prevPos;
+			}
 
 			//Offset for the next char
 			trans.position.x += trans.scale.x * cos(trans.rotation);// + rightBy * cos(trans.rotation);
