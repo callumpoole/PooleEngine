@@ -4,7 +4,7 @@
 
 namespace Poole::Rendering
 {
-	SubImage::SubImage(std::shared_ptr<Image> image, fvec2 minMax[2])
+	SubImage::SubImage(std::shared_ptr<Image> image, const fvec2 minMax[2])
 		: m_Image(image)
 	{
 		InitTexChoords(minMax[0], minMax[1]);

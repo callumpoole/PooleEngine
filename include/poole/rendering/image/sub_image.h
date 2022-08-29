@@ -11,7 +11,7 @@ namespace Poole::Rendering
 	{
 	public:
 		//Kinda ugly having the array[2], but it's due to overload resolution conflict, and this one is less likely to be used
-		SubImage(std::shared_ptr<Image> image, fvec2 minMax[2]); 
+		SubImage(std::shared_ptr<Image> image, const fvec2 minMax[2]); 
 
 		SubImage(std::shared_ptr<Image> image, fvec2 coords, fvec2 cellSize, fvec2 spriteSize = { 1,1 });
 

@@ -18,3 +18,8 @@ fmat4 ftransform2D::MakeTransformMatrix() const
 		shearMat *
 		glm::scale(fmat4(1.0f), fvec3{ scale.x, scale.y, 1.f });
 }
+
+fmat4 ftransform2D::MakeRotationMatrix() const
+{
+	return glm::rotate(fmat4(1.0f), rotation, fvec3{ 0,0,1 });
+}

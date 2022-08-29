@@ -59,20 +59,17 @@ namespace Poole::Rendering
 	void TextRenderer::RenderText()
 	{
 		ftransform2D trans = m_Transform;
-
-		LOG("===============");
+		const fmat4 rotMat = trans.MakeRotationMatrix();
 
 		if (m_ShadowOffset != fvec2{0})
 		{
-			trans.position.x += m_ShadowOffset.x * (trans.scale.x * cos(trans.rotation) + trans.scale.y * sin(trans.rotation));
-			trans.position.y += m_ShadowOffset.y * (trans.scale.x * sin(-trans.rotation) + trans.scale.y * cos(trans.rotation));
+			const fvec3 shadow3 = { m_ShadowOffset.x, m_ShadowOffset.y, 0 };
+			trans.position += shadow3 * fvec3(rotMat * fvec4(trans.scale.x, trans.scale.y, 0, 1));
 
 			IsMonospaced() ? RenderText_Monospaced(trans, m_ShadowTintColor) : RenderText_VariableWidth(trans, m_ShadowTintColor);
 
 			trans = m_Transform;
 		}
-
-		//LOG("===============");
 
 		IsMonospaced() ? RenderText_Monospaced(trans, m_TintColor) : RenderText_VariableWidth(trans, m_TintColor);
 	}
@@ -80,38 +77,39 @@ namespace Poole::Rendering
 	void TextRenderer::RenderText_Monospaced(ftransform2D& trans, fcolor4 col)
 	{
 		fvec3 newLinePos = trans.position;
+		const fmat4 rotMat = trans.MakeRotationMatrix();
 		for (const char c : (m_TextView.empty() ? m_Text : m_TextView))
 		{
 			if (c == '\r')
 				continue;
 			if (c == '\n')
 			{
-				newLinePos.x += -trans.scale.y * sin(-trans.rotation);
-				newLinePos.y += -trans.scale.y * cos(trans.rotation);
+				newLinePos += fvec3(rotMat * fvec4(0, -trans.scale.y, 0, 1));
 				trans.position = newLinePos;
 				continue;
 			}
 
-			std::shared_ptr<SubImage> Sub = m_MonospacedFont->Convert(c);
+			if (std::shared_ptr<SubImage> Sub = m_MonospacedFont->Convert(c))
+			{
+				Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
 
-			Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
-
-			//Offset for the next char
-			trans.position.x += trans.scale.x * cos(trans.rotation);
-			trans.position.y += trans.scale.x * sin(trans.rotation);
+				//Offset for the next char
+				trans.position += fvec3(rotMat * fvec4(trans.scale.x, 0, 0, 1));
+			}
 		}
 	}
 	void TextRenderer::RenderText_VariableWidth(ftransform2D& trans, fcolor4 col)
 	{
 		fvec3 newLinePos = trans.position;
+		const fmat4 rotMat = trans.MakeRotationMatrix();
+
 		for (const char c : (m_TextView.empty() ? m_Text : m_TextView))
 		{
 			if (c == '\r')
 				continue;
 			if (c == '\n')
 			{
-				newLinePos.x += -trans.scale.y * sin(-trans.rotation);
-				newLinePos.y += -trans.scale.y * cos(trans.rotation);
+				newLinePos += fvec3(rotMat * fvec4(0, -trans.scale.y, 0, 1));
 				trans.position = newLinePos;
 				continue;
 			}
@@ -122,34 +120,34 @@ namespace Poole::Rendering
 
 			constexpr float fontSize = 70.f;
 
-			std::shared_ptr<SubImage> Sub = m_VariableWidthFont->Convert(c, fontSize, xoff, yoff, xadvance);
-
-			const auto prevPos = trans.position;
-			const auto prevScale = trans.scale;
-
-			trans.scale.x *= (Sub->GetSize().x * 1024) / fontSize;
-			trans.scale.y *= (Sub->GetSize().y * 1024) / fontSize;
-
-			const float downBy = yoff / 1024;
-			const float rightBy = (xoff + xadvance) / 1024;
-			trans.position.x += downBy * sin(-trans.rotation) + rightBy * cos(trans.rotation);
-			trans.position.y += downBy * cos(trans.rotation)  + rightBy * sin(trans.rotation);
-
-			LOG("Letter {} : {} {} {}   y={}", c, xoff, yoff, xadvance, Sub->GetSize().y);
-
-			Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
-
-			if (c != ' ')
+			if (std::shared_ptr<SubImage> Sub = m_VariableWidthFont->Convert(c, fontSize, xoff, yoff, xadvance))
 			{
-				trans.position = prevPos;
+				const auto prevPos = trans.position;
+				const auto prevScale = trans.scale;
+
+				trans.scale *= Sub->GetSize() * 1024.f / fontSize;
+
+				const float downBy = yoff / 1024;
+				const float rightBy = xoff / 1024;
+				const float advanceBy = xadvance / 1024;
+
+				trans.position += fvec3(rotMat * fvec4(rightBy + advanceBy, downBy, 0, 1));
+
+				//LOG("Letter {} : {} {} {}", c, xoff, yoff, xadvance);
+
+				Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
+
+				if (c != ' ')
+				{
+					trans.position = prevPos;
+				}
+
+				//Offset for the next char
+				trans.position += fvec3(rotMat * fvec4(trans.scale.x, 0, 0, 1));
+
+				//Reset the fixed width
+				trans.scale = prevScale;
 			}
-
-			//Offset for the next char
-			trans.position.x += trans.scale.x * cos(trans.rotation);// + rightBy * cos(trans.rotation);
-			trans.position.y += trans.scale.x * sin(trans.rotation);// + rightBy * sin(trans.rotation);
-
-			//Reset the fixed width
-			trans.scale = prevScale;
 		}
 	}
 

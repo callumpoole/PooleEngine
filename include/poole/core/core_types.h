@@ -70,6 +70,7 @@ struct ftransform2D
 	{}
 
 	fmat4 MakeTransformMatrix() const;
+	fmat4 MakeRotationMatrix() const;
 
 	fvec3 position = fvec3(0.0f);
 	fvec2 scale = fvec2(1.0f);

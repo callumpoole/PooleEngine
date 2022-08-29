@@ -13,18 +13,19 @@ namespace Poole::Rendering
 
 	/*static*/ void TextRendererFactory::Init()
 	{
-#define IMAGE_PATH "../../poole_engine/content/font_atlases/"
+#define FONT_PATH "../../poole_engine/content/font_atlases/"
 		s_DefaultMonospacedFont.reset(new FontRenderer());
-		s_DefaultMonospacedFont->m_ImageAtlas.reset(new Poole::Rendering::Image(IMAGE_PATH "8x8ASCIIBitmapFont.png"));
+		s_DefaultMonospacedFont->m_ImageAtlas.reset(new Poole::Rendering::Image(FONT_PATH "8x8ASCIIBitmapFont.png"));
 		s_DefaultMonospacedFont->m_GridSize = { 16, 8 };
 		s_DefaultMonospacedFont->ConvertBlackToAlpha();
 		s_DefaultMonospacedFont->GenerateSubImages();
-#undef IMAGE_PATH
+#undef FONT_PATH
 
-#define IMAGE_PATH "c:/windows/fonts/"
-		s_DefaultVariableWidthFont.reset(new SvgFontRenderer(IMAGE_PATH "times.ttf"));
-
-#undef IMAGE_PATH
+		//TODO: Fix Windows Path for Mac & Linux
+#define FONT_PATH "c:/windows/fonts/"
+		s_DefaultVariableWidthFont.reset(new SvgFontRenderer(FONT_PATH "times.ttf"));
+		//s_DefaultVariableWidthFont.reset(new SvgFontRenderer(IMAGE_PATH "calibri.ttf"));		
+#undef FONT_PATH
 	}
 
 	/*static*/ std::shared_ptr<TextRenderer> TextRendererFactory::MakeRenderText(bool Monospaced)
