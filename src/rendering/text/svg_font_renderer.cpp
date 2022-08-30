@@ -11,7 +11,21 @@ namespace Poole::Rendering
 	{
 		m_TtfBuffer.resize(k_FontBuffer);
 
-		fread(m_TtfBuffer.data(), 1, k_FontBuffer, fopen(fontLocation, "rb"));
+		FILE* filepoint;
+		errno_t err;
+
+		if ((err = fopen_s(&filepoint, fontLocation, "rb")) == 0) {
+			fread(m_TtfBuffer.data(), 1, k_FontBuffer, filepoint);
+			fclose(filepoint);
+		}
+		else
+		{
+			LOG_ERROR("File {} couldn't be opened! {}", fontLocation, strerror(err));
+
+			//See: https://stackoverflow.com/questions/28691612/how-to-go-from-fopen-to-fopen-s about the strerror_s
+		}
+
+		//fread(m_TtfBuffer.data(), 1, k_FontBuffer, fopen(fontLocation, "rb"));
 	}
 
 	void SvgFontRenderer::CacheSize(f32 fontSize) const

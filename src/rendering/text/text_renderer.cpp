@@ -4,6 +4,8 @@
 #include "poole/rendering/text/svg_font_renderer.h"
 #include "poole/rendering/renderer2D.h"
 
+#include "glm/gtx/string_cast.hpp"
+
 namespace Poole::Rendering
 {
 	void TextRenderer::SetTextView(std::string_view textView)

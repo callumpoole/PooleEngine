@@ -7,6 +7,6 @@ namespace Poole::Rendering
 	class SVG
 	{
 	public:
-		static void* GetBytes();
+		
 	};
 }

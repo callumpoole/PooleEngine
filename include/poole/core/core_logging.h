@@ -62,7 +62,7 @@ namespace Poole
 	std::cerr << std::format(INTERNAL_LOG_LITERALS "ERROR NOT IMPLEMENTED. \n", INTERNAL_LOG_PARAMS);
 
 
-#define ASSERT(cond) { if constexpr(!std::is_constant_evaluated()) { __debugbreak(); } assert(cond); }
+#define ASSERT(cond) { if (!std::is_constant_evaluated()) { __debugbreak(); } assert(cond); }
 
 #define HALT() ASSERT(false);
 
