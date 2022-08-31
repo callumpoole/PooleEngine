@@ -14,18 +14,19 @@ namespace Poole::Rendering
 		FILE* filepoint;
 		errno_t err;
 
-		if ((err = fopen_s(&filepoint, fontLocation, "rb")) == 0) {
+		if ((err = fopen_s(&filepoint, fontLocation, "rb")) == 0) 
+		{
 			fread(m_TtfBuffer.data(), 1, k_FontBuffer, filepoint);
 			fclose(filepoint);
+
+			LOG("Loaded Variable-Width Font: {}", fontLocation);
 		}
 		else
 		{
+#pragma warning( disable : 4996 ) //It's warning about strerror_s but that's only in c compiler
 			LOG_ERROR("File {} couldn't be opened! {}", fontLocation, strerror(err));
-
-			//See: https://stackoverflow.com/questions/28691612/how-to-go-from-fopen-to-fopen-s about the strerror_s
+#pragma warning( default : 4996 )
 		}
-
-		//fread(m_TtfBuffer.data(), 1, k_FontBuffer, fopen(fontLocation, "rb"));
 	}
 
 	void SvgFontRenderer::CacheSize(f32 fontSize) const

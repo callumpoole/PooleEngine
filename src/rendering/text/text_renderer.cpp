@@ -139,10 +139,7 @@ namespace Poole::Rendering
 
 				Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
 
-				if (c != ' ')
-				{
-					trans.position = prevPos;
-				}
+				trans.position = prevPos;
 
 				//Offset for the next char
 				trans.position += fvec3(rotMat * fvec4(trans.scale.x, 0, 0, 1));
