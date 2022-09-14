@@ -49,14 +49,14 @@ namespace Poole::Rendering
 		if (Renderer::s_GraphicsAPI == EGraphicsAPI::OpenGL)
 		{
 			//Flip first, then convert Greyscale to RGBA (whilst replacing black to alpha) to save performance
-			img.reset(ImageUtils::ReplaceBlackWithAlpha(ImageUtils::YFlip(temp)));
+			img.reset(ImageUtils::ReplaceBlackWithAlpha(/*ImageUtils::YFlip*/(temp)));
 
 			for (i32 i = 0; i < k_NumChars; i++)
 			{
-				cdata[i].y0 = (u16)k_Size.y - cdata[i].y0;
-				cdata[i].y1 = (u16)k_Size.y - cdata[i].y1;
-				std::swap(cdata[i].y0, cdata[i].y1);
-				cdata[i].yoff = ((f32)k_Size.y - cdata[i].yoff) - (f32)k_Size.y;
+			//	cdata[i].y0 = (u16)k_Size.y - cdata[i].y0;
+			//	cdata[i].y1 = (u16)k_Size.y - cdata[i].y1;
+			//	std::swap(cdata[i].y0, cdata[i].y1);
+			//	cdata[i].yoff = ((f32)k_Size.y - cdata[i].yoff) - (f32)k_Size.y;
 			}
 		}
 		else
@@ -91,6 +91,30 @@ namespace Poole::Rendering
 		xadvance = map.xadvance;
 
 		return sub;
+	}
+
+	void SvgFontRenderer::Convert2(char c, f32 fontSize, fvec2& pos, std::array<fvec4, 4>& coords, std::array<fvec2, 4>& uv)
+	{
+		if (c < k_StartChar || c - k_StartChar >= k_NumChars)
+		{
+			LOG_WARNING("Character {} ({}) out of bounds ({} to {}).", c, u32(c), k_StartChar, k_StartChar + k_NumChars - 1);
+			return;
+		}
+
+		CacheSize(fontSize);
+		RasterInfo& info = m_Sizes[fontSize];
+
+		stbtt_aligned_quad q;
+		stbtt_GetBakedQuad((const stbtt_bakedchar*)info.m_CharMaps.data(), k_Size.x, k_Size.y, c - k_StartChar, &pos.x, &pos.y, &q, 1); //1=opengl & d3d10+, 0=d3d9
+
+		coords[0] = { q.x0, q.y0, 0, 1 };
+		coords[1] = { q.x1, q.y0, 0, 1 };
+		coords[2] = { q.x1, q.y1, 0, 1 };
+		coords[3] = { q.x0, q.y1, 0, 1 };
+		uv[0] = { q.s0, q.t0 };
+		uv[1] = { q.s1, q.t0 };
+		uv[2] = { q.s1, q.t1 };
+		uv[3] = { q.s0, q.t1 };
 	}
 
 	std::shared_ptr<Image> SvgFontRenderer::GetImageForSize(f32 fontSize)

@@ -149,6 +149,26 @@ namespace Poole::Rendering
 			}
 		}
 	}
+	void TextRenderer::RenderText_VariableWidth2(ftransform2D& trans, fcolor4 col)
+	{
+		constexpr float fontSize = 70.f;
+
+		fvec2 xy{};
+
+		trans.scale /= fontSize;
+
+		std::array<fvec4, 4> coords;
+		std::array<fvec2, 4> uv;
+
+		for (const char c : (m_TextView.empty() ? m_Text : m_TextView))
+		{
+			m_VariableWidthFont->Convert2(c, fontSize, xy, coords, uv);
+
+			Renderer2D::DrawSubTexturedQuad(coords, trans, m_VariableWidthFont->GetImageForSize(fontSize), uv, /*tiling*/ 1, col);
+		}
+
+		trans.scale *= fontSize;
+	}
 
 	bool TextRenderer::IsMonospaced() const
 	{

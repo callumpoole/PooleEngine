@@ -43,12 +43,6 @@ namespace Poole::Rendering
 			static constexpr u32 k_MaxVertices = k_MaxQuads * 4;
 			static constexpr u32 k_MaxIndices = k_MaxQuads * 6;
 			static constexpr u32 k_MaxTextureSlots = 32; //[0] is white texture, so 31 others
-			static constexpr std::array<fvec4, 4> m_QuadAndCircleVertexPositions = {
-				fvec4{ -0.5f, -0.5f, 0.0f, 1.0f },
-				fvec4{ 0.5f, -0.5f, 0.0f, 1.0f },
-				fvec4{ 0.5f,  0.5f, 0.0f, 1.0f },
-				fvec4{ -0.5f,  0.5f, 0.0f, 1.0f }
-			};
 
 			//Texture Stuff
 			std::shared_ptr<Texture> m_WhiteTexture = nullptr;
@@ -249,7 +243,7 @@ namespace Poole::Rendering
 	}
 
 
-	/*static*/ void BatchedRenderer2D::DrawQuad(const ftransform2D& transform, const fcolor4& color)
+	/*static*/ void BatchedRenderer2D::DrawQuad(const std::array<fvec4, 4>& coords, const ftransform2D& transform, const fcolor4& color)
 	{
 		const float textureIndex = 0.0f; // White Texture
 		const float tilingFactor = 1.0f;
@@ -259,7 +253,7 @@ namespace Poole::Rendering
 
 		for (size_t i = 0; i < k_FullTextureCoords.size(); i++)
 		{
-			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
+			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * coords[i];
 			s_Data.m_QuadVertexBufferPtr->Color = color;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = k_FullTextureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
@@ -290,12 +284,12 @@ namespace Poole::Rendering
 		}
 	}
 
-	/*static*/ void BatchedRenderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const SubImage& subImage, float tilingFactor, const fcolor4& tintColor)
+	/*static*/ void BatchedRenderer2D::DrawSubTexturedQuad(const std::array<fvec4, 4>& coords, const ftransform2D& transform, const SubImage& subImage, f32 tilingFactor, const fcolor4& tintColor)
 	{
-		DrawSubTexturedQuad(transform, GetOrLoadTexture(*subImage.GetImage()), subImage.GetTexCoords(), tilingFactor, tintColor);
+		DrawSubTexturedQuad(coords, transform, GetOrLoadTexture(*subImage.GetImage()), subImage.GetTexCoords(), tilingFactor, tintColor);
 	}
 
-	/*static*/ void BatchedRenderer2D::DrawSubTexturedQuad(const ftransform2D& transform, const std::shared_ptr<Texture>& texture, const std::array<fvec2, 4> textureCoords, float tilingFactor, const fcolor4& tintColor)
+	/*static*/ void BatchedRenderer2D::DrawSubTexturedQuad(const std::array<fvec4, 4>& coords, const ftransform2D& transform, const std::shared_ptr<Texture>& texture, const std::array<fvec2, 4>& textureCoords, f32 tilingFactor, const fcolor4& tintColor)
 	{
 		if (s_Data.m_QuadIndexCount >= RenderData2D::k_MaxIndices)
 			NextBatch();
@@ -322,7 +316,7 @@ namespace Poole::Rendering
 
 		for (size_t i = 0; i < textureCoords.size(); i++)
 		{
-			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
+			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * coords[i];
 			s_Data.m_QuadVertexBufferPtr->Color = tintColor;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
@@ -343,8 +337,8 @@ namespace Poole::Rendering
 
 		for (size_t i = 0; i < k_FullTextureCoords.size(); i++)
 		{
-			s_Data.m_CircleVertexBufferPtr->WorldPosition = transform.MakeTransformMatrix() * s_Data.m_QuadAndCircleVertexPositions[i];
-			s_Data.m_CircleVertexBufferPtr->LocalPosition = s_Data.m_QuadAndCircleVertexPositions[i] * 2.f;
+			s_Data.m_CircleVertexBufferPtr->WorldPosition = transform.MakeTransformMatrix() * m_QuadAndCircleVertexPositions[i];
+			s_Data.m_CircleVertexBufferPtr->LocalPosition = m_QuadAndCircleVertexPositions[i] * 2.f;
 			s_Data.m_CircleVertexBufferPtr->Color = color;
 			s_Data.m_CircleVertexBufferPtr->Thickness = thickness;
 			s_Data.m_CircleVertexBufferPtr->Fade = fade;
