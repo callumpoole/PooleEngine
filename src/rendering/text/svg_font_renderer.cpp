@@ -49,14 +49,13 @@ namespace Poole::Rendering
 		if (Renderer::s_GraphicsAPI == EGraphicsAPI::OpenGL)
 		{
 			//Flip first, then convert Greyscale to RGBA (whilst replacing black to alpha) to save performance
-			img.reset(ImageUtils::ReplaceBlackWithAlpha(/*ImageUtils::YFlip*/(temp)));
+			img.reset(ImageUtils::ReplaceBlackWithAlpha(ImageUtils::YFlip(temp)));
 
 			for (i32 i = 0; i < k_NumChars; i++)
 			{
-			//	cdata[i].y0 = (u16)k_Size.y - cdata[i].y0;
-			//	cdata[i].y1 = (u16)k_Size.y - cdata[i].y1;
-			//	std::swap(cdata[i].y0, cdata[i].y1);
-			//	cdata[i].yoff = ((f32)k_Size.y - cdata[i].yoff) - (f32)k_Size.y;
+				cdata[i].y0 = (u16)k_Size.y - cdata[i].y0;
+				cdata[i].y1 = (u16)k_Size.y - cdata[i].y1;
+				cdata[i].yoff = ((f32)k_Size.y - cdata[i].yoff) - (f32)k_Size.y;
 			}
 		}
 		else

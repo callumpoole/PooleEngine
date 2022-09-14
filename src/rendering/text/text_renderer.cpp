@@ -68,12 +68,12 @@ namespace Poole::Rendering
 			const fvec3 shadow3 = { m_ShadowOffset.x, m_ShadowOffset.y, 0 };
 			trans.position += shadow3 * fvec3(rotMat * fvec4(trans.scale.x, trans.scale.y, 0, 1));
 
-			IsMonospaced() ? RenderText_Monospaced(trans, m_ShadowTintColor) : RenderText_VariableWidth2(trans, m_ShadowTintColor);
+			IsMonospaced() ? RenderText_Monospaced(trans, m_ShadowTintColor) : RenderText_VariableWidth(trans, m_ShadowTintColor);
 
 			trans = m_Transform;
 		}
 
-		IsMonospaced() ? RenderText_Monospaced(trans, m_TintColor) : RenderText_VariableWidth2(trans, m_TintColor);
+		IsMonospaced() ? RenderText_Monospaced(trans, m_TintColor) : RenderText_VariableWidth(trans, m_TintColor);
 	}
 
 	void TextRenderer::RenderText_Monospaced(ftransform2D& trans, fcolor4 col)
@@ -102,61 +102,11 @@ namespace Poole::Rendering
 	}
 	void TextRenderer::RenderText_VariableWidth(ftransform2D& trans, fcolor4 col)
 	{
-		fvec3 newLinePos = trans.position;
-		const fmat4 rotMat = trans.MakeRotationMatrix();
-
-		for (const char c : (m_TextView.empty() ? m_Text : m_TextView))
-		{
-			if (c == '\r')
-				continue;
-			if (c == '\n')
-			{
-				newLinePos += fvec3(rotMat * fvec4(0, -trans.scale.y, 0, 1));
-				trans.position = newLinePos;
-				continue;
-			}
-
-			float xoff;
-			float yoff;
-			float xadvance;
-
-			constexpr float fontSize = 70.f;
-
-			if (std::shared_ptr<SubImage> Sub = m_VariableWidthFont->Convert(c, fontSize, xoff, yoff, xadvance))
-			{
-				const auto prevPos = trans.position;
-				const auto prevScale = trans.scale;
-
-				trans.scale *= Sub->GetSize() * 1024.f / fontSize;
-
-				const float downBy = yoff / 1024;
-				const float rightBy = xoff / 1024;
-				const float advanceBy = xadvance / 1024;
-
-				trans.position += fvec3(rotMat * fvec4(rightBy + advanceBy, downBy, 0, 1));
-
-				//LOG("Letter {} : {} {} {}", c, xoff, yoff, xadvance);
-
-				Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
-
-				trans.position = prevPos;
-
-				//Offset for the next char
-				trans.position += fvec3(rotMat * fvec4(trans.scale.x, 0, 0, 1));
-
-				//Reset the fixed width
-				trans.scale = prevScale;
-			}
-		}
-	}
-	void TextRenderer::RenderText_VariableWidth2(ftransform2D& trans, fcolor4 col)
-	{
 		constexpr float fontSize = 70.f;
 
 		fvec2 xy{};
 
 		trans.scale /= fontSize;
-		trans.scale.y *= -1;
 
 		std::array<fvec4, 4> coords;
 		std::array<fvec2, 4> uv;
@@ -168,7 +118,7 @@ namespace Poole::Rendering
 			if (c == '\n')
 			{
 				xy.x = 0;
-				xy.y += fontSize;
+				xy.y -= fontSize;
 				continue;
 			}
 
@@ -177,7 +127,6 @@ namespace Poole::Rendering
 			Renderer2D::DrawSubTexturedQuad(coords, trans, m_VariableWidthFont->GetImageForSize(fontSize), uv, /*tiling*/ 1, col);
 		}
 
-		trans.scale.y *= -1;
 		trans.scale *= fontSize;
 	}
 

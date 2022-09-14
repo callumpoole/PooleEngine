@@ -43,7 +43,6 @@ namespace Poole::Rendering
 	private:
 		void RenderText_Monospaced(ftransform2D& trans, fcolor4 col);
 		void RenderText_VariableWidth(ftransform2D& trans, fcolor4 col);
-		void RenderText_VariableWidth2(ftransform2D& trans, fcolor4 col);
 
 		bool IsMonospaced() const;
 
