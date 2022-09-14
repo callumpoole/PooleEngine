@@ -24,7 +24,7 @@ namespace Poole::Rendering
 		//TODO: Fix Windows Path for Mac & Linux
 #define FONT_PATH "c:/windows/fonts/"
 		s_DefaultVariableWidthFont.reset(new SvgFontRenderer(FONT_PATH "times.ttf"));
-		//s_DefaultVariableWidthFont.reset(new SvgFontRenderer(IMAGE_PATH "calibri.ttf"));		
+		//s_DefaultVariableWidthFont.reset(new SvgFontRenderer(FONT_PATH "calibri.ttf"));
 #undef FONT_PATH
 	}
 

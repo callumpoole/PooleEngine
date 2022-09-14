@@ -68,12 +68,12 @@ namespace Poole::Rendering
 			const fvec3 shadow3 = { m_ShadowOffset.x, m_ShadowOffset.y, 0 };
 			trans.position += shadow3 * fvec3(rotMat * fvec4(trans.scale.x, trans.scale.y, 0, 1));
 
-			IsMonospaced() ? RenderText_Monospaced(trans, m_ShadowTintColor) : RenderText_VariableWidth(trans, m_ShadowTintColor);
+			IsMonospaced() ? RenderText_Monospaced(trans, m_ShadowTintColor) : RenderText_VariableWidth2(trans, m_ShadowTintColor);
 
 			trans = m_Transform;
 		}
 
-		IsMonospaced() ? RenderText_Monospaced(trans, m_TintColor) : RenderText_VariableWidth(trans, m_TintColor);
+		IsMonospaced() ? RenderText_Monospaced(trans, m_TintColor) : RenderText_VariableWidth2(trans, m_TintColor);
 	}
 
 	void TextRenderer::RenderText_Monospaced(ftransform2D& trans, fcolor4 col)
@@ -156,17 +156,28 @@ namespace Poole::Rendering
 		fvec2 xy{};
 
 		trans.scale /= fontSize;
+		trans.scale.y *= -1;
 
 		std::array<fvec4, 4> coords;
 		std::array<fvec2, 4> uv;
 
 		for (const char c : (m_TextView.empty() ? m_Text : m_TextView))
 		{
+			if (c == '\r')
+				continue;
+			if (c == '\n')
+			{
+				xy.x = 0;
+				xy.y += fontSize;
+				continue;
+			}
+
 			m_VariableWidthFont->Convert2(c, fontSize, xy, coords, uv);
 
 			Renderer2D::DrawSubTexturedQuad(coords, trans, m_VariableWidthFont->GetImageForSize(fontSize), uv, /*tiling*/ 1, col);
 		}
 
+		trans.scale.y *= -1;
 		trans.scale *= fontSize;
 	}
 
