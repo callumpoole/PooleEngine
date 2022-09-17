@@ -1,8 +1,9 @@
 #include "core/core_logging.h"
 
-#include "core.h"
 #include <filesystem>
-#include <chrono>
+#include <locale.h>
+
+#include "core.h"
 #include "engine.h"
 
 namespace Poole
@@ -49,28 +50,36 @@ namespace Poole
 	}
 
 	
+
+
+
+
+
 #if DO_PROFILE_LOGGING_WITH_AVG
-	/*static*/ u64 ScopedProfiler::m_TotalTicks = 0;
-	/*static*/ u64 ScopedProfiler::m_TickCount = 0;
+	/*static*/ std::unordered_map<std::string, ScopedProfiler::OverManyCallsData> ScopedProfiler::s_DataOverManyCalls;
 #endif
 
-	ScopedProfiler::ScopedProfiler(const char* functionName)
-		: m_TicksSinceEpoch(std::chrono::system_clock::now().time_since_epoch().count())
-		, m_FunctionName(functionName)
-	{		
-	}
+	ScopedProfiler::ScopedProfiler(std::string&& identifier)
+		: m_StartTimePoint(std::chrono::high_resolution_clock::now())
+		, m_Identifier(std::move(identifier))
+	{}
 	ScopedProfiler::~ScopedProfiler()
 	{
-		const u64 newNow = std::chrono::system_clock::now().time_since_epoch().count();
-		const u64 deltaTicks = newNow - m_TicksSinceEpoch;
+		const std::chrono::steady_clock::time_point finish = std::chrono::high_resolution_clock::now();
+		const std::chrono::duration dur = finish - m_StartTimePoint;
+		const long long ns = std::chrono::duration_cast<std::chrono::nanoseconds>(dur).count();
+		const float ms = ns / 1000.f;
 
 #if DO_PROFILE_LOGGING_WITH_AVG
-		m_TotalTicks += deltaTicks;
-		m_TickCount++;
+		ScopedProfiler::OverManyCallsData& OverCalls = s_DataOverManyCalls[m_Identifier];
+		OverCalls.m_AccumulativeNS += ns;
+		OverCalls.m_TickCount++;
 
-		LOG("FUNCTION PROFILER: {} -> {}ticks (average: {}ticks)", m_FunctionName, deltaTicks, m_TotalTicks / (float)m_TickCount);
+		const float avgMS = (OverCalls.m_AccumulativeNS / (float)OverCalls.m_TickCount) / 1000.f;
+
+		LOG("FuncProf: {} -> {:L}ms (average: {:L}ms)", m_Identifier, ms, avgMS);
 #else
-		LOG("FUNCTION PROFILER: {} -> {}ticks", m_FunctionName, deltaTicks);
+		LOG("FuncProf: {} -> {:L}ms", m_Identifier, ms);
 #endif
 	}
 }

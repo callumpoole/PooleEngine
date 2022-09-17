@@ -53,7 +53,6 @@ namespace Poole::Rendering
 		u32 m_NumChannels = 0;
 		u8* m_Bytes = nullptr;
 		bool m_YFlippedWhenLoaded;
-		bool m_AllocatedWithSTBI = false;
 		bool m_OwnsMemory = false;
 
 		static constexpr u8 COLOR_DEPTH = 8;

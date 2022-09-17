@@ -2,44 +2,54 @@
 
 #include "core.h"
 
+#include <locale.h>
+
 namespace Poole
 {
 	u64 LoggingGetTickCount();
 	size_t CharactersToRemoveFromPath();
 	std::string_view ShortenFilename(const char* fullFileName);
+#define GetCurrentFileNameShortened() ShortenFilename(std::source_location::current().file_name())
 
 #define DO_PROFILE_LOGGING 1
 #define DO_PROFILE_LOGGING_WITH_AVG 1
 
 	class ScopedProfiler {
 	public:
-		ScopedProfiler(const char* functionName);
+		ScopedProfiler(std::string&& identifier);
 		~ScopedProfiler();
 	private:
-		u64 m_TicksSinceEpoch = 0;
-		const char* m_FunctionName = nullptr;
+		std::chrono::steady_clock::time_point m_StartTimePoint;
+		std::string m_Identifier;
 #if DO_PROFILE_LOGGING_WITH_AVG
-		static u64 m_TotalTicks;
-		static u64 m_TickCount;
+		struct OverManyCallsData
+		{
+			long long m_AccumulativeNS = 0;
+			u64 m_TickCount = 0;
+		};
+		static std::unordered_map<std::string, OverManyCallsData> s_DataOverManyCalls;
 #endif
 	};
 }
 
 #if DO_PROFILE_LOGGING
-#	define SCOPED_PROFILER() auto __ScopedProf = Poole::ScopedProfiler(std::source_location::current().function_name());
+#	define SCOPED_PROFILER() auto __ScopedProf = Poole::ScopedProfiler(std::format("{}:{}:{} {}()",							\
+																	   Poole::GetCurrentFileNameShortened().data(),			\
+																	   std::source_location::current().line(),				\
+																	   std::source_location::current().column(),			\
+																	   std::source_location::current().function_name()));
 #else
 #	define SCOPED_PROFILER()
 #endif
-
 
 #define INTERNAL_LOG_TICK_LITERALS "[{:3}]"
 #define INTERNAL_LOG_TICK_PARAMS LoggingGetTickCount() % 1000
 
 #define INTERNAL_LOG_LITERALS INTERNAL_LOG_TICK_LITERALS "[{}]{}:({},{})"
-#define INTERNAL_LOG_PARAMS   INTERNAL_LOG_TICK_PARAMS, \
-							  ShortenFilename(std::source_location::current().file_name()).data(), \
-							  std::source_location::current().function_name(), \
-							  std::source_location::current().line(), \
+#define INTERNAL_LOG_PARAMS   INTERNAL_LOG_TICK_PARAMS,							\
+							  Poole::GetCurrentFileNameShortened().data(),		\
+							  std::source_location::current().function_name(),	\
+							  std::source_location::current().line(),			\
 							  std::source_location::current().column()
 
 #define LOG_LINE(msg, ...) \

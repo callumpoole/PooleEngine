@@ -27,6 +27,9 @@ namespace Poole
 
     void Engine::Run()
     {
+        //C++ locale instead of C locale so commas every 3 numbers
+        std::locale::global(std::locale(""));
+
         m_TimeData.m_LaunchSinceEpochNS = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 
         CommandArgs().Apply(*this);

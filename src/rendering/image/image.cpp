@@ -13,8 +13,7 @@ namespace Poole::Rendering
 	bool Image::s_YFlip = false;
 
 	Image::Image(const char* path, bool* out_Successful, bool printLogWhenLoaded)
-		: m_AllocatedWithSTBI(true)
-		, m_OwnsMemory(true)
+		: m_OwnsMemory(true)
 		, m_YFlippedWhenLoaded(s_YFlip)
 		, m_Id(path ? s_IdCounter++ : 0)
 	{
@@ -44,8 +43,7 @@ namespace Poole::Rendering
 	}
 
 	Image::Image(u8* bytes, uvec2 size, u32 channels, bool isYFlipped, bool ownsMemory)
-		: m_AllocatedWithSTBI(false)
-		, m_OwnsMemory(ownsMemory)
+		: m_OwnsMemory(ownsMemory)
 		, m_Bytes(bytes)
 		, m_Size(size)
 		, m_NumChannels(channels)
@@ -54,8 +52,7 @@ namespace Poole::Rendering
 	{ }
 
 	Image::Image(const Image& src)
-		: m_AllocatedWithSTBI(false) //A copy will never need to free from STBI
-		, m_OwnsMemory(true) //It is an owner since it's memcpy'd
+		: m_OwnsMemory(true) //It is an owner since it's memcpy'd
 		, m_Size(src.m_Size)
 		, m_NumChannels(src.m_NumChannels)
 		, m_YFlippedWhenLoaded(src.m_YFlippedWhenLoaded)
@@ -73,19 +70,12 @@ namespace Poole::Rendering
 
 		const u32 NumBytes = rhs.GetNumBytes();
 
-		if (m_OwnsMemory)
+		if (m_OwnsMemory && GetNumBytes() != NumBytes)
 		{
-			if (m_AllocatedWithSTBI)
-			{
-				stbi_image_free(m_Bytes);
-			}
-			else if (GetNumBytes() != NumBytes)
-			{
-				delete[] m_Bytes;
-			}
+			//If STBI free is needed, it's: stbi_image_free(m_Bytes);
+			delete[] m_Bytes;
+			m_Bytes = new u8[NumBytes];	
 		}
-		m_Bytes = new u8[NumBytes];
-		m_AllocatedWithSTBI = false;
 		m_OwnsMemory = true;
 		std::memcpy(m_Bytes, rhs.m_Bytes, NumBytes);
 
@@ -99,15 +89,13 @@ namespace Poole::Rendering
 	}
 	
 	Image::Image(Image&& src)
-		: m_AllocatedWithSTBI(src.m_AllocatedWithSTBI)
-		, m_OwnsMemory(src.m_OwnsMemory)
+		: m_OwnsMemory(src.m_OwnsMemory)
 		, m_Size(src.m_Size)
 		, m_NumChannels(src.m_NumChannels)
 		, m_YFlippedWhenLoaded(src.m_YFlippedWhenLoaded)
 		, m_Bytes(src.m_Bytes)
 		, m_Id(src.m_Id)
 	{ 
-		src.m_AllocatedWithSTBI = false;
 		src.m_OwnsMemory = false;
 		src.m_Size = { 0,0 };
 		src.m_NumChannels = 0;
@@ -122,7 +110,6 @@ namespace Poole::Rendering
 		if (this == &rhs)
 			return *this;
 
-		m_AllocatedWithSTBI = rhs.m_AllocatedWithSTBI;
 		m_OwnsMemory = rhs.m_OwnsMemory;
 		m_Size = rhs.m_Size;
 		m_NumChannels = rhs.m_NumChannels;
@@ -130,7 +117,6 @@ namespace Poole::Rendering
 		m_Bytes = rhs.m_Bytes;
 		m_Id = rhs.m_Id;
 
-		rhs.m_AllocatedWithSTBI = false;
 		rhs.m_OwnsMemory = false;
 		rhs.m_Size = { 0,0 };
 		rhs.m_NumChannels = 0;
@@ -146,14 +132,8 @@ namespace Poole::Rendering
 	{
 		if (m_Bytes && m_OwnsMemory)
 		{
-			if (m_AllocatedWithSTBI)
-			{
-				stbi_image_free(m_Bytes);
-			}
-			else
-			{
-				delete[] m_Bytes;
-			}
+			//If STBI free is needed, it's: stbi_image_free(m_Bytes);
+			delete[] m_Bytes;
 		}
 	}
 	
