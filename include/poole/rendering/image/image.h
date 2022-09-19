@@ -76,17 +76,6 @@ namespace Poole::Rendering
 			}
 		}
 
-		template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
-		decltype(auto) InvokeForFormat(Lambda&& lambda, FunctionParam && ... functionParam) const
-		{
-			switch (m_Format)
-			{
-			case EImageFormat::Bytes:  return std::forward<Lambda>(lambda).template operator() <u8, TemplateParam... > (std::forward<FunctionParam>(functionParam)...);
-			case EImageFormat::Floats: return std::forward<Lambda>(lambda).template operator() <u8, TemplateParam... > (std::forward<FunctionParam>(functionParam)...);
-			default: throw; //TODO: Find a non-throw alternative
-			}
-		}
-
 	private:
 		static u32 s_IdCounter;
 		u32 m_Id = 0;
@@ -218,5 +207,45 @@ namespace Poole::Rendering
 			static constexpr f32 MIN = 0.f;
 			static constexpr f32 MAX = 1.f;
 		};
+
+
+
+
+
+
+
+
+		template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
+		decltype(auto) InvokeForFormat(Lambda&& lambda, FunctionParam && ... functionParam) const
+		{
+			switch (m_Format)
+			{
+			case EImageFormat::Bytes:  return std::forward<Lambda>(lambda).template operator()<u8, TemplateParam...>(std::forward<FunctionParam>(functionParam)...);
+			case EImageFormat::Floats: return std::forward<Lambda>(lambda).template operator()<f32, TemplateParam...>(std::forward<FunctionParam>(functionParam)...);
+			default: throw; //TODO: Find a non-throw alternative
+			}
+		}
+		//Expects first param to be: const Image*
+		template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
+		decltype(auto) InvokeForFormatThis(Lambda&& lambda, FunctionParam && ... functionParam) const
+		{
+			switch (m_Format)
+			{
+			case EImageFormat::Bytes:  return std::forward<Lambda>(lambda).template operator()<u8, TemplateParam...>(this, std::forward<FunctionParam>(functionParam)...);
+			case EImageFormat::Floats: return std::forward<Lambda>(lambda).template operator()<f32, TemplateParam...>(this, std::forward<FunctionParam>(functionParam)...);
+			default: throw; //TODO: Find a non-throw alternative
+			}
+		}
+		//Expects first param to be: Image* or const Image*
+		template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
+		decltype(auto) InvokeForFormatThis(Lambda&& lambda, FunctionParam && ... functionParam) /*mutable*/
+		{
+			switch (m_Format)
+			{
+			case EImageFormat::Bytes:  return std::forward<Lambda>(lambda).template operator()<u8, TemplateParam...>(this, std::forward<FunctionParam>(functionParam)...);
+			case EImageFormat::Floats: return std::forward<Lambda>(lambda).template operator()<f32, TemplateParam...>(this, std::forward<FunctionParam>(functionParam)...);
+			default: throw; //TODO: Find a non-throw alternative
+			}
+		}
 	};
 }

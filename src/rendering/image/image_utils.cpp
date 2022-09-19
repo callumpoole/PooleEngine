@@ -126,18 +126,18 @@ namespace Poole::Rendering
 
 	Image* ImageUtils::ReplaceBlackWithAlpha(const Image* src)
 	{
-		auto ReplaceBlackWithAlpha = []<typename BASE>(const Image* src) -> Image*
+		auto ReplaceBlackWithAlphaImpl = []<typename BASE>(const Image* src) -> Image*
 		{
-			using Types = Image::Types<BASE>;
-			using GREY = Types::GREY;
-			using RG = Types::RG;
-			using RGB = Types::RGB;
-			using RGBA = Types::RGBA;
+			using Types = typename Image::Types<BASE>;
+			using GREY = typename Types::GREY;
+			using RG = typename Types::RG;
+			using RGB = typename Types::RGB;
+			using RGBA = typename Types::RGBA;
 
 			RGBA* newBytes = new RGBA[src->GetBytesForWholeImage()];
 			u32 iter = 0;
 
-			auto AddBytes = [newBytes, &iter, src]<typename GROUP>(bool(*isBlack)(GROUP color), RGBA(*copyColor)(GROUP color))
+			auto AddBytes = [newBytes, &iter, src]<typename GROUP, typename RGBA>(bool(*isBlack)(GROUP color), RGBA(*copyColor)(GROUP color))
 			{
 				for (const GROUP& color : src->GetIterDontUnFlip<GROUP>())
 				{
@@ -147,19 +147,19 @@ namespace Poole::Rendering
 
 			switch (src->GetNumChannels())
 			{
-			case 1: InvokeTemplatedLambda<GREY>(AddBytes,
+			case 1: InvokeTemplatedLambda<GREY, RGBA>(AddBytes,
 				[](GREY) { return false; }, //On purpse			   
 				[](GREY grey) { return RGBA{ Types::MAX, Types::MAX, Types::MAX, grey }; }); //Best results with greyscale image (no black fades)
 				break;
-			case 2: InvokeTemplatedLambda<RG>(AddBytes,
+			case 2: InvokeTemplatedLambda<RG, RGBA>(AddBytes,
 				[](RG rg) { return rg.r + rg.g == Types::MIN; },
 				[](RG rg) { return RGBA{ rg.r, rg.g, Types::MIN, Types::MAX }; });
 				break;
-			case 3: InvokeTemplatedLambda<RGB>(AddBytes,
+			case 3: InvokeTemplatedLambda<RGB, RGBA>(AddBytes,
 				[](RGB rgb) { return rgb.r + rgb.g + rgb.b == Types::MIN; },
 				[](RGB rgb) { return RGBA{ rgb.r, rgb.g, rgb.b, Types::MAX }; });
 				break;
-			case 4: InvokeTemplatedLambda<RGBA>(AddBytes,
+			case 4: InvokeTemplatedLambda<RGBA, RGBA>(AddBytes,
 				[](RGBA rgba) { return rgba.r + rgba.g + rgba.b == Types::MIN; },
 				[](RGBA rgba) { return rgba; });
 				break;
@@ -170,18 +170,7 @@ namespace Poole::Rendering
 			return new Image((BASE*)newBytes, src->GetSize(), 4, src->WasYFlippedWhenLoaded());
 		};
 
-
-		return src->InvokeForFormat(ReplaceBlackWithAlpha, src);
-
-		//switch (src->GetFormat())
-		//{
-		//case Image::EImageFormat::Bytes:
-		//	return ::Poole::Rendering::ReplaceBlackWithAlpha<u8>(src);
-		//case Image::EImageFormat::Floats:
-		//	return ::Poole::Rendering::ReplaceBlackWithAlpha<f32>(src);
-		//default:
-		//	return nullptr;
-		//}
+		return src->InvokeForFormatThis(ReplaceBlackWithAlphaImpl);
 	}
 
 	/*static*/ Image* ImageUtils::YFlip(const Image* src)

@@ -41,9 +41,9 @@
 
 
 template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
-decltype(auto) InvokeTemplatedLambda(Lambda&& lambda, FunctionParam && ... functionParam)
+decltype(auto) InvokeTemplatedLambda(Lambda&& lambda, FunctionParam&& ... functionParam)
 {
-	return std::forward<Lambda>(lambda).template operator() < TemplateParam... > (std::forward<FunctionParam>(functionParam)...);
+	return std::forward<Lambda>(lambda).template operator()<TemplateParam...>(std::forward<FunctionParam>(functionParam)...);
 }
 
 
