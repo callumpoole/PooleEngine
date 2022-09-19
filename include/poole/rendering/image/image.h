@@ -12,13 +12,11 @@ namespace Poole::Rendering
 	public:
 		enum class EImageFormat : u8
 		{
-			None,
 			Bytes,
 			Floats,
 			//sRGB in future...
 		};
 
-		static Image s_Invalid;
 		static Image s_White1x1rgba;
 
 		Image(const char* path, EImageFormat format = EImageFormat::Bytes, bool* out_Successful = nullptr);
@@ -39,21 +37,6 @@ namespace Poole::Rendering
 		u32 GetId() const { return m_Id; }
 		const bool IsValid() const { return m_Data != nullptr && m_Id > 0; }
 		operator bool() const { return IsValid(); }
-
-		template<typename T>
-		bool CheckStorageType() const
-		{
-			switch (m_Format)
-			{
-			case Poole::Rendering::Image::EImageFormat::Bytes:
-				return std::is_same_v(T, u8);
-			case Poole::Rendering::Image::EImageFormat::Floats:
-				return std::is_same_v(T, f32);
-			case Poole::Rendering::Image::EImageFormat::None:
-			default:
-				return false;
-			}
-		}
 
 		const void* GetData() const { return m_Data; }
 		template<typename T>
@@ -81,6 +64,28 @@ namespace Poole::Rendering
 		bool IsPowerOfTwo() const { return Math::IsPowerOfTwo((u64)m_Size.x) && Math::IsPowerOfTwo((u64)m_Size.y); }
 
 		void DebugPrint() const;
+
+		template<typename T>
+		bool CheckStorageType() const
+		{
+			switch (m_Format)
+			{
+			case EImageFormat::Bytes:  return std::is_same_v(T, u8);
+			case EImageFormat::Floats: return std::is_same_v(T, f32);
+			default: return false;
+			}
+		}
+
+		template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
+		decltype(auto) InvokeForFormat(Lambda&& lambda, FunctionParam && ... functionParam) const
+		{
+			switch (m_Format)
+			{
+			case EImageFormat::Bytes:  return std::forward<Lambda>(lambda).template operator() <u8, TemplateParam... > (std::forward<FunctionParam>(functionParam)...);
+			case EImageFormat::Floats: return std::forward<Lambda>(lambda).template operator() <u8, TemplateParam... > (std::forward<FunctionParam>(functionParam)...);
+			default: throw; //TODO: Find a non-throw alternative
+			}
+		}
 
 	private:
 		static u32 s_IdCounter;
@@ -181,19 +186,37 @@ namespace Poole::Rendering
 
 		template<typename T>
 		IteratorGenerator<T> GetIter() const			{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, m_YFlippedWhenLoaded); }
-						  
 		template<typename T>
 		IteratorGenerator<T> GetIterDontUnFlip() const	{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, false); }
-						  
 		template<typename T>
 		IteratorGenerator<T> GetIterFlip() const		{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, true); }
 
-		IteratorGenerator<u8> GetIterPerChannelBytes() const			  { return IteratorGenerator<u8>(m_Data, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
-		IteratorGenerator<u8> GetIterPerChannelBytesDontUnFlip() const	  { return IteratorGenerator<u8>(m_Data, m_Size.x * m_NumChannels, m_Size.y, false); }
-		IteratorGenerator<u8> GetIterPerChannelBytesFlip() const		  { return IteratorGenerator<u8>(m_Data, m_Size.x * m_NumChannels, m_Size.y, true); }
+		template<typename T>
+		IteratorGenerator<T> GetIterPerChannel() const			  { return IteratorGenerator<T>(m_Data, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
+		template<typename T>
+		IteratorGenerator<T> GetIterPerChannelDontUnFlip() const  { return IteratorGenerator<T>(m_Data, m_Size.x * m_NumChannels, m_Size.y, false); }
+		template<typename T>
+		IteratorGenerator<T> GetIterPerChannelFlip() const		  { return IteratorGenerator<T>(m_Data, m_Size.x * m_NumChannels, m_Size.y, true); }
 
-		IteratorGenerator<f32> GetIterPerChannelFloats() const			  { return IteratorGenerator<f32>(m_Data, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
-		IteratorGenerator<f32> GetIterPerChannelFloatsDontUnFlip() const  { return IteratorGenerator<f32>(m_Data, m_Size.x * m_NumChannels, m_Size.y, false); }
-		IteratorGenerator<f32> GetIterPerChannelFloatsFlip() const		  { return IteratorGenerator<f32>(m_Data, m_Size.x * m_NumChannels, m_Size.y, true); }
+		template<typename T>
+		struct Types {};
+		template<> struct Types<u8>
+		{
+			using GREY = u8;
+			using RG = u8color2;
+			using RGB = u8color3;
+			using RGBA = u8color4;
+			static constexpr u8 MIN = 0;
+			static constexpr u8 MAX = 255;
+		};
+		template<> struct Types<f32>
+		{
+			using GREY = f32;
+			using RG = fcolor2;
+			using RGB = fcolor3;
+			using RGBA = fcolor4;
+			static constexpr f32 MIN = 0.f;
+			static constexpr f32 MAX = 1.f;
+		};
 	};
 }

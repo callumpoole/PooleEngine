@@ -35,7 +35,7 @@ namespace Poole::Rendering
 			else
 			{
 				LOG_ERROR("Cannot Convert Image With {} Channels to Greyscale.", src->GetNumChannels());
-				return &Image::s_Invalid;
+				return nullptr;
 			}
 		}
 	}
@@ -47,72 +47,141 @@ namespace Poole::Rendering
 
 	namespace 
 	{
-		template<u32 C>
+		template<u32 CHANNELS>
 		Image* GreyscaleTo(const Image* src)
 		{
-			static_assert(C == 3 || C == 4);
+			static_assert(CHANNELS == 3 || CHANNELS == 4);
 
 			if (src->GetNumChannels() != 1)
 			{
 				LOG_ERROR("Current image is not greyscale, it has {} channels.", src->GetNumChannels());
-				return &Image::s_Invalid;
+				return nullptr;
 			}
 
-			u8* newBytes = new u8[src->GetNumPixels() * C];
+			u8* newBytes = new u8[src->GetNumPixels() * CHANNELS];
 			u32 iter = 0;
-			for (u8 grey : src->GetIterPerChannelBytesDontUnFlip())
+			for (u8 grey : src->GetIterPerChannelDontUnFlip<u8>())
 			{
 				newBytes[iter++] = grey; //R
 				newBytes[iter++] = grey; //G
 				newBytes[iter++] = grey; //B
-				if constexpr (C == 4)
+				if constexpr (CHANNELS == 4)
 				{
 					newBytes[iter++] = 255;  //A
 				}
 			}
-			return new Image(newBytes, src->GetSize(), C, src->WasYFlippedWhenLoaded());
+			return new Image(newBytes, src->GetSize(), CHANNELS, src->WasYFlippedWhenLoaded());
 		}
 	}
 
 	Image* ImageUtils::GreyscaleToRGB(const Image* src)  { return ::Poole::Rendering::GreyscaleTo<3>(src); }
 	Image* ImageUtils::GreyscaleToRGBA(const Image* src) { return ::Poole::Rendering::GreyscaleTo<4>(src); }
 
+	namespace {
+		template<typename BASE>
+		Image* ReplaceBlackWithAlphaUNUSED(const Image* src)
+		{
+			using Types = Image::Types<BASE>;
+			using GREY = Types::GREY;
+			using RG = Types::RG;
+			using RGB = Types::RGB;
+			using RGBA = Types::RGBA;
+
+			RGBA* newBytes = new RGBA[src->GetBytesForWholeImage()];
+			u32 iter = 0;
+
+			auto AddBytes = [newBytes, &iter, src]<typename GROUP>(bool(*isBlack)(GROUP color), RGBA(*copyColor)(GROUP color))
+			{
+				for (const GROUP& color : src->GetIterDontUnFlip<GROUP>())
+				{
+					newBytes[iter++] = isBlack(color) ? RGBA{ 0 } : copyColor(color);
+				}
+			};
+
+			switch (src->GetNumChannels())
+			{
+			case 1: InvokeTemplatedLambda<GREY>(AddBytes,
+				[](GREY) { return false; }, //On purpse			   
+				[](GREY grey) { return RGBA{ Types::MAX, Types::MAX, Types::MAX, grey }; }); //Best results with greyscale image (no black fades)
+				break;
+			case 2: InvokeTemplatedLambda<RG>(AddBytes,
+				[](RG rg) { return rg.r + rg.g == Types::MIN; },
+				[](RG rg) { return RGBA{ rg.r, rg.g, Types::MIN, Types::MAX }; });
+				break;
+			case 3: InvokeTemplatedLambda<RGB>(AddBytes,
+				[](RGB rgb) { return rgb.r + rgb.g + rgb.b == Types::MIN; },
+				[](RGB rgb) { return RGBA{ rgb.r, rgb.g, rgb.b, Types::MAX }; });
+				break;
+			case 4: InvokeTemplatedLambda<RGBA>(AddBytes,
+				[](RGBA rgba) { return rgba.r + rgba.g + rgba.b == Types::MIN; },
+				[](RGBA rgba) { return rgba; });
+				break;
+			default:
+				return nullptr;
+			}
+
+			return new Image((BASE*)newBytes, src->GetSize(), 4, src->WasYFlippedWhenLoaded());
+		}
+	}
+
 	Image* ImageUtils::ReplaceBlackWithAlpha(const Image* src)
 	{
-		u8color4* newBytes = new u8color4[src->GetBytesForWholeImage()];
-		u32 iter = 0;
-
-		auto AddBytes = [newBytes, &iter, src]<typename T>(bool(*isBlack)(T color), u8color4(*copyColor)(T color))
+		auto ReplaceBlackWithAlpha = []<typename BASE>(const Image* src) -> Image*
 		{
-			for (const T& color : src->GetIterDontUnFlip<T>())
+			using Types = Image::Types<BASE>;
+			using GREY = Types::GREY;
+			using RG = Types::RG;
+			using RGB = Types::RGB;
+			using RGBA = Types::RGBA;
+
+			RGBA* newBytes = new RGBA[src->GetBytesForWholeImage()];
+			u32 iter = 0;
+
+			auto AddBytes = [newBytes, &iter, src]<typename GROUP>(bool(*isBlack)(GROUP color), RGBA(*copyColor)(GROUP color))
 			{
-				newBytes[iter++] = isBlack(color) ? u8color4{ 0 } : copyColor(color);
+				for (const GROUP& color : src->GetIterDontUnFlip<GROUP>())
+				{
+					newBytes[iter++] = isBlack(color) ? RGBA{ 0 } : copyColor(color);
+				}
+			};
+
+			switch (src->GetNumChannels())
+			{
+			case 1: InvokeTemplatedLambda<GREY>(AddBytes,
+				[](GREY) { return false; }, //On purpse			   
+				[](GREY grey) { return RGBA{ Types::MAX, Types::MAX, Types::MAX, grey }; }); //Best results with greyscale image (no black fades)
+				break;
+			case 2: InvokeTemplatedLambda<RG>(AddBytes,
+				[](RG rg) { return rg.r + rg.g == Types::MIN; },
+				[](RG rg) { return RGBA{ rg.r, rg.g, Types::MIN, Types::MAX }; });
+				break;
+			case 3: InvokeTemplatedLambda<RGB>(AddBytes,
+				[](RGB rgb) { return rgb.r + rgb.g + rgb.b == Types::MIN; },
+				[](RGB rgb) { return RGBA{ rgb.r, rgb.g, rgb.b, Types::MAX }; });
+				break;
+			case 4: InvokeTemplatedLambda<RGBA>(AddBytes,
+				[](RGBA rgba) { return rgba.r + rgba.g + rgba.b == Types::MIN; },
+				[](RGBA rgba) { return rgba; });
+				break;
+			default:
+				return nullptr;
 			}
+
+			return new Image((BASE*)newBytes, src->GetSize(), 4, src->WasYFlippedWhenLoaded());
 		};
 
-		switch (src->GetNumChannels())
-		{
-		case 1: InvokeTemplatedLambda<u8>(AddBytes, 
-			[](u8     ) { return false; }, //On purpse			   
-			[](u8 grey) { return u8color4{ 255, 255, 255, grey }; }); //Best results with greyscale image (no black fades)
-			break;
-		case 2: InvokeTemplatedLambda<u8color2>(AddBytes, 
-			[](u8color2 rg) { return rg.r + rg.g == 0; },				   
-			[](u8color2 rg) { return u8color4{ rg.r, rg.g, 0, 255 }; }); 
-			break;
-		case 3: InvokeTemplatedLambda<u8color3>(AddBytes, 
-			[](u8color3 rgb) { return rgb.r + rgb.g + rgb.b == 0; },	   
-			[](u8color3 rgb) { return u8color4{ rgb.r, rgb.g, rgb.b, 255 }; }); 
-			break;
-		case 4: InvokeTemplatedLambda<u8color4>(AddBytes, 
-			[](u8color4 rgba) { return rgba.r + rgba.g + rgba.b == 0; }, 
-			[](u8color4 rgba) { return rgba; }); 
-			break;
-		default:
-			return &Image::s_Invalid;
-		}
 
-		return new Image((u8*)newBytes, src->GetSize(), 4, src->WasYFlippedWhenLoaded());
+		return src->InvokeForFormat(ReplaceBlackWithAlpha, src);
+
+		//switch (src->GetFormat())
+		//{
+		//case Image::EImageFormat::Bytes:
+		//	return ::Poole::Rendering::ReplaceBlackWithAlpha<u8>(src);
+		//case Image::EImageFormat::Floats:
+		//	return ::Poole::Rendering::ReplaceBlackWithAlpha<f32>(src);
+		//default:
+		//	return nullptr;
+		//}
 	}
 
 	/*static*/ Image* ImageUtils::YFlip(const Image* src)

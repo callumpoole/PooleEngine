@@ -5,8 +5,6 @@
 
 namespace Poole::Rendering
 {
-	Image Image::s_Invalid = Image((void*)nullptr, fvec2{ 0,0 }, 0, false, false, EImageFormat::None);
-
 	Image Image::s_White1x1rgba = Image(new u8[]{ 255u, 255u, 255u, 255u }, { 1, 1 }, /*rgba*/ 4, /*isYFlipped*/ false, /*ownsMemory*/ true);
 
 	u32 Image::s_IdCounter = 1;
@@ -41,7 +39,6 @@ namespace Poole::Rendering
 			break; //Do nothing
 		case EImageFormat::Floats:
 			break; //TODO
-		case EImageFormat::None:
 		default:
 			if (out_Successful)
 				*out_Successful = false;
@@ -172,7 +169,7 @@ namespace Poole::Rendering
 		switch (m_Format)
 		{
 		case Poole::Rendering::Image::EImageFormat::Bytes:
-			for (const u8 c : GetIterPerChannelBytes())
+			for (const u8 c : GetIterPerChannel<u8>())
 			{
 				out << Math::ToHexStr(c);
 
@@ -190,7 +187,7 @@ namespace Poole::Rendering
 			}
 			break;
 		case Poole::Rendering::Image::EImageFormat::Floats:
-			for (const f32 c : GetIterPerChannelFloats())
+			for (const f32 c : GetIterPerChannel<f32>())
 			{
 				out << std::format("{:.3f}", c);
 
@@ -211,7 +208,6 @@ namespace Poole::Rendering
 				}
 			}
 			break;
-		case Poole::Rendering::Image::EImageFormat::None:
 		default:
 			out << "INVALID";
 			break;
