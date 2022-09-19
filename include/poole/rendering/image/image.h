@@ -187,6 +187,8 @@ namespace Poole::Rendering
 		template<typename T>
 		IteratorGenerator<T> GetIterPerChannelFlip() const		  { return IteratorGenerator<T>(m_Data, m_Size.x * m_NumChannels, m_Size.y, true); }
 
+
+
 		template<typename T>
 		struct Types {};
 		template<> struct Types<u8>
@@ -209,12 +211,27 @@ namespace Poole::Rendering
 		};
 
 
+		//NOT WORKING, LEAVING HERE AS WIP IDEAS
+		//template<typename T, template<typename T> class FUNC>
+		//void InvokeForFormat3(FUNC<T> func) const
+		//{
+		//	func();
+		//}
+		//
+		//template<typename T, typename ... FunctionParam>
+		//decltype(auto) InvokeForFormat2(T(*func)(FunctionParam...), FunctionParam && ... params) const
+		//{
+		//	switch (m_Format)
+		//	{
+		//	case EImageFormat::Bytes:  return func(params...);
+		//	case EImageFormat::Floats: return func(params...);
+		//	default: throw; //TODO: Find a non-throw alternative
+		//	}
+		//}
 
 
 
-
-
-
+		//Executes a lamdba, forwarding the first template arguemnt as either u8 or f32 etc, based upon m_Format
 		template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
 		decltype(auto) InvokeForFormat(Lambda&& lambda, FunctionParam && ... functionParam) const
 		{
@@ -225,7 +242,8 @@ namespace Poole::Rendering
 			default: throw; //TODO: Find a non-throw alternative
 			}
 		}
-		//Expects first param to be: const Image*
+		//Executes a lamdba, forwarding the first template arguemnt as either u8 or f32 etc, and forwarding const this as first param, based upon m_Format
+		//Expects first param function to be: const Image*
 		template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
 		decltype(auto) InvokeForFormatThis(Lambda&& lambda, FunctionParam && ... functionParam) const
 		{
@@ -236,7 +254,8 @@ namespace Poole::Rendering
 			default: throw; //TODO: Find a non-throw alternative
 			}
 		}
-		//Expects first param to be: Image* or const Image*
+		//Executes a lamdba, forwarding the first template arguemnt as either u8 or f32 etc, and forwarding mutable/const this as first param, based upon m_Format
+		//Expects first param function to be: Image* or const Image*
 		template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
 		decltype(auto) InvokeForFormatThis(Lambda&& lambda, FunctionParam && ... functionParam) /*mutable*/
 		{
