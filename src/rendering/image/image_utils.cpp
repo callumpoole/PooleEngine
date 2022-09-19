@@ -60,7 +60,7 @@ namespace Poole::Rendering
 
 			u8* newBytes = new u8[src->GetNumPixels() * C];
 			u32 iter = 0;
-			for (u8 grey : src->GetIterPerChannelDontUnFlip())
+			for (u8 grey : src->GetIterPerChannelBytesDontUnFlip())
 			{
 				newBytes[iter++] = grey; //R
 				newBytes[iter++] = grey; //G
@@ -79,12 +79,12 @@ namespace Poole::Rendering
 
 	Image* ImageUtils::ReplaceBlackWithAlpha(const Image* src)
 	{
-		u8color4* newBytes = new u8color4[src->GetNumBytes()];
+		u8color4* newBytes = new u8color4[src->GetBytesForWholeImage()];
 		u32 iter = 0;
 
 		auto AddBytes = [newBytes, &iter, src]<typename T>(bool(*isBlack)(T color), u8color4(*copyColor)(T color))
 		{
-			for (T color : src->GetIterDontUnFlip<T>())
+			for (const T& color : src->GetIterDontUnFlip<T>())
 			{
 				newBytes[iter++] = isBlack(color) ? u8color4{ 0 } : copyColor(color);
 			}
@@ -117,15 +117,15 @@ namespace Poole::Rendering
 
 	/*static*/ Image* ImageUtils::YFlip(const Image* src)
 	{
-		u8* newBytes = new u8[src->GetNumBytes()];
-		const u8* srcBytes = src->GetBytes();
-		const u32 bytesPerRow = src->GetNumBytesPerRow();
+		u8* newBytes = new u8[src->GetBytesForWholeImage()]; //Okay if actually floats since just copying data
+		const u8* srcBytes = (u8*)src->GetData(); //Can be floats, works in the same way
+		const u32 bytesPerRow = src->GetBytesPerRow();
 		for (u32 y = 0; y < src->GetHeight(); y++)
 		{
 			const u32 yRead = src->GetHeight() - y - 1;
 			memcpy(newBytes + (y * bytesPerRow), srcBytes + (yRead * bytesPerRow), bytesPerRow);
 		}
 
-		return new Image((u8*)newBytes, src->GetSize(), src->GetNumChannels(), !src->WasYFlippedWhenLoaded());
+		return new Image((void*)newBytes, src->GetSize(), src->GetNumChannels(), !src->WasYFlippedWhenLoaded(), /*ownsMemory*/ true, src->GetFormat());
 	}
 }

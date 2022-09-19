@@ -43,7 +43,7 @@ namespace Poole::Rendering
 		//glTexParameterfv(texType, GL_TEXTURE_BORDER_COLOR, flatColor);
 
 		//Assign the image to the opengl texture object
-		glTexImage2D(texType, 0, /*BUG?*/GL_RGBA, image.GetWidth(), image.GetHeight(), 0, format, pixelType, image.GetBytes());
+		glTexImage2D(texType, 0, /*BUG?*/GL_RGBA, image.GetWidth(), image.GetHeight(), 0, format, pixelType, image.GetData());
 
 		//Gen mipMaps
 		glGenerateMipmap(texType);

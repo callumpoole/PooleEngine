@@ -10,35 +10,73 @@ namespace Poole::Rendering
 	class Image
 	{
 	public:
+		enum class EImageFormat : u8
+		{
+			None,
+			Bytes,
+			Floats,
+			//sRGB in future...
+		};
+
 		static Image s_Invalid;
 		static Image s_White1x1rgba;
 
-		Image(const char* path, bool* out_Successful = nullptr, bool printLogWhenLoaded = true);
-		Image(u8* bytes, uvec2 size, u32 channels, bool isYFlipped, bool ownsMemory = true);
-		Image(u8* bytes, u32 width, u32 height, u32 channels, bool isYFlipped, bool ownsMemory = true) : Image(bytes, {width, height}, channels, isYFlipped, ownsMemory) {}
+		Image(const char* path, EImageFormat format = EImageFormat::Bytes, bool* out_Successful = nullptr);
+		Image(void* data, uvec2 size, u32 channels, bool isYFlipped, bool ownsMemory, EImageFormat format);
+		Image(u8* bytes, uvec2 size, u32 channels, bool isYFlipped, bool ownsMemory = true) : Image((void*)bytes, size, channels, isYFlipped, ownsMemory, EImageFormat::Bytes) {}
+		Image(f32* floats, uvec2 size, u32 channels, bool isYFlipped, bool ownsMemory = true) : Image((void*)floats, size, channels, isYFlipped, ownsMemory, EImageFormat::Floats) {}
 		Image(const Image& src);
 		Image& operator=(const Image& rhs);
 		Image(Image&& src);
 		Image& operator=(Image&& rhs);
-		Image() : Image(nullptr, { 0,0 }, 0, false, false) { }
 		~Image();
 	
 		//Stb reads top to bottom, openGL is bottom to top
 		static void SetYFlipBeforeLoad(bool bottomToTop);
 		static bool GetYFlipBeforeLoad() { return s_YFlip; }
-	
+		bool WasYFlippedWhenLoaded() const { return m_YFlippedWhenLoaded; }
+
 		u32 GetId() const { return m_Id; }
-		const bool IsValid() const { return m_Bytes != nullptr && m_Id > 0; }
+		const bool IsValid() const { return m_Data != nullptr && m_Id > 0; }
 		operator bool() const { return IsValid(); }
-		const u8* GetBytes() const { return m_Bytes; }
+
+		template<typename T>
+		bool CheckStorageType() const
+		{
+			switch (m_Format)
+			{
+			case Poole::Rendering::Image::EImageFormat::Bytes:
+				return std::is_same_v(T, u8);
+			case Poole::Rendering::Image::EImageFormat::Floats:
+				return std::is_same_v(T, f32);
+			case Poole::Rendering::Image::EImageFormat::None:
+			default:
+				return false;
+			}
+		}
+
+		const void* GetData() const { return m_Data; }
+		template<typename T>
+		const T* GetData() const { return CheckStorageType<T>() ? (T*)m_Data : nullptr; }
+
+		u8 GetDataElementSizeBytes() const { return m_Format == EImageFormat::Bytes ? 1 : 4; }
+		u8 GetDataElementSizeBits() const { return GetDataElementSizeBytes() * 8; }
+
 		const uvec2& GetSize() const { return m_Size; }
 		u32 GetWidth() const { return m_Size.x; }
 		u32 GetHeight() const { return m_Size.y; }
-		u32 GetNumChannels() const { return m_NumChannels; }
-		u32 GetNumBytesPerRow() const { return m_Size.x * m_NumChannels; }
-		u32 GetNumBytes() const { return GetNumBytesPerRow() * m_Size.y; }
 		u32 GetNumPixels() const { return m_Size.x * m_Size.y; }
-		bool WasYFlippedWhenLoaded() const { return m_YFlippedWhenLoaded; }
+		u32 GetNumChannels() const { return m_NumChannels; }
+		u32 GetNumBytesPerPixel() const { return m_NumChannels * GetDataElementSizeBytes(); }
+		EImageFormat GetFormat() const { return m_Format; }
+
+		u32 GetPixelsByChannelsPerRow() const { return m_Size.x * m_NumChannels; }
+		u32 GetPixelsByChannelsPerColumn() const { return m_Size.y * m_NumChannels; }
+		u32 GetPixelsByChannelsForWholeImage() const { return m_Size.x * m_Size.y * m_NumChannels; }
+
+		u32 GetBytesPerRow() const { return GetPixelsByChannelsPerRow() * GetDataElementSizeBytes(); }
+		u32 GetBytesPerColumn() const { return GetPixelsByChannelsPerColumn() * GetDataElementSizeBytes(); }
+		u32 GetBytesForWholeImage() const { return GetPixelsByChannelsForWholeImage() * GetDataElementSizeBytes(); }
 
 		bool IsPowerOfTwo() const { return Math::IsPowerOfTwo((u64)m_Size.x) && Math::IsPowerOfTwo((u64)m_Size.y); }
 
@@ -49,25 +87,25 @@ namespace Poole::Rendering
 		u32 m_Id = 0;
 
 		static bool s_YFlip;
+		static bool s_PrintWhenLoadedFromFile;
 		uvec2 m_Size = { 0, 0 };
 		u32 m_NumChannels = 0;
-		u8* m_Bytes = nullptr;
+		void* m_Data = nullptr;
 		bool m_YFlippedWhenLoaded;
 		bool m_OwnsMemory = false;
-
-		static constexpr u8 COLOR_DEPTH = 8;
+		EImageFormat m_Format = EImageFormat::Bytes;
 
 	public:
 
 		//Help from: https://www.internalpointers.com/post/writing-custom-iterators-modern-cpp
-		template<typename TColor>
+		template<typename T>
 		struct Iterator
 		{
 			using iterator_category = std::forward_iterator_tag;
 			using difference_type	= std::ptrdiff_t;
-			using value_type		= TColor;
-			using pointer			= TColor*;
-			using reference			= TColor&;
+			using value_type		= T;
+			using pointer			= T*;
+			using reference			= T&;
 
 			Iterator(pointer bytes, u32 width, u32 height, bool flip) : m_Bytes(bytes), m_Width(width), m_Height(height), m_Flip(flip) {}
 
@@ -112,46 +150,50 @@ namespace Poole::Rendering
 			u32 m_HeightCounter = 0;
 		};
 
-		template<typename TColor>
+		template<typename T>
 		struct IteratorGenerator
 		{
-			IteratorGenerator(u8* bytes, u32 width, u32 height, bool flip) : m_Bytes((TColor*)bytes), m_Width(width), m_Height(height), m_Flip(flip) {}
+			IteratorGenerator(void* data, u32 width, u32 height, bool flip) : m_Data((T*)data), m_Width(width), m_Height(height), m_Flip(flip) {}
 
-			using Iter = Iterator<TColor>;
+			using Iter = Iterator<T>;
 
 			Iter begin()
 			{ 
 				if (m_Flip)
 				{
-					return Iter(&m_Bytes[m_Width * (m_Height - 1)], m_Width, m_Height, m_Flip);
+					return Iter(&m_Data[m_Width * (m_Height - 1)], m_Width, m_Height, m_Flip);
 				}
 				else
 				{
-					return Iter(&m_Bytes[0], m_Width, m_Height, m_Flip);
+					return Iter(&m_Data[0], m_Width, m_Height, m_Flip);
 				}
 			}
 			Iter end()
 			{ 
-				return Iter(&m_Bytes[m_Width * m_Height], m_Width, m_Height, m_Flip);
+				return Iter(&m_Data[m_Width * m_Height], m_Width, m_Height, m_Flip);
 			}
 		private:
-			TColor* m_Bytes;
+			T* m_Data;
 			u32 m_Width;
 			u32 m_Height;
 			bool m_Flip;
 		};
 
-		template<typename TColor>
-		IteratorGenerator<TColor> GetIter() const				  { return IteratorGenerator<TColor>(m_Bytes, m_Size.x, m_Size.y, m_YFlippedWhenLoaded); }
+		template<typename T>
+		IteratorGenerator<T> GetIter() const			{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, m_YFlippedWhenLoaded); }
+						  
+		template<typename T>
+		IteratorGenerator<T> GetIterDontUnFlip() const	{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, false); }
+						  
+		template<typename T>
+		IteratorGenerator<T> GetIterFlip() const		{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, true); }
 
-		template<typename TColor>
-		IteratorGenerator<TColor> GetIterDontUnFlip() const		  { return IteratorGenerator<TColor>(m_Bytes, m_Size.x, m_Size.y, false); }
+		IteratorGenerator<u8> GetIterPerChannelBytes() const			  { return IteratorGenerator<u8>(m_Data, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
+		IteratorGenerator<u8> GetIterPerChannelBytesDontUnFlip() const	  { return IteratorGenerator<u8>(m_Data, m_Size.x * m_NumChannels, m_Size.y, false); }
+		IteratorGenerator<u8> GetIterPerChannelBytesFlip() const		  { return IteratorGenerator<u8>(m_Data, m_Size.x * m_NumChannels, m_Size.y, true); }
 
-		template<typename TColor>
-		IteratorGenerator<TColor> GetIterFlip() const { return IteratorGenerator<TColor>(m_Bytes, m_Size.x, m_Size.y, true); }
-
-		IteratorGenerator<u8> GetIterPerChannel() const			  { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
-		IteratorGenerator<u8> GetIterPerChannelDontUnFlip() const { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumChannels, m_Size.y, false); }
-		IteratorGenerator<u8> GetIterPerChannelFlip() const { return IteratorGenerator<u8>(m_Bytes, m_Size.x * m_NumChannels, m_Size.y, true); }
+		IteratorGenerator<f32> GetIterPerChannelFloats() const			  { return IteratorGenerator<f32>(m_Data, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
+		IteratorGenerator<f32> GetIterPerChannelFloatsDontUnFlip() const  { return IteratorGenerator<f32>(m_Data, m_Size.x * m_NumChannels, m_Size.y, false); }
+		IteratorGenerator<f32> GetIterPerChannelFloatsFlip() const		  { return IteratorGenerator<f32>(m_Data, m_Size.x * m_NumChannels, m_Size.y, true); }
 	};
 }

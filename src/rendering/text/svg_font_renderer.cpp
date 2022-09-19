@@ -40,7 +40,7 @@ namespace Poole::Rendering
 
 		stbtt_BakeFontBitmap(m_TtfBuffer.data(), 0, fontSize, temp_bitmap, k_Size.x, k_Size.y, k_StartChar, k_NumChars, cdata.data()); // no guarantee this fits!
 
-		Image* temp = new Image(temp_bitmap, k_Size.x, k_Size.y, 1, false, true);
+		Image* temp = new Image(temp_bitmap, k_Size, 1, /*yFlipped*/ false, /*ownsMemory*/ true);
 
 		std::shared_ptr<Image> img;
 

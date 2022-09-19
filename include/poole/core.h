@@ -28,8 +28,12 @@
 		// See github.com/skypjack/entt/wiki/Frequently-Asked-Questions#warning-c4003-the-min-the-max-and-the-macro
 		#define NOMINMAX
 	#endif
+
+	#define NEWLINE		"\r\n"
 #else
 	#error Other Platforms not supported
+
+	#define NEWLINE		"\n" //Keeping it a const char[] to make it compatible with the same use cases as windows one.
 #endif
 
 #include "core/core_types.h"
