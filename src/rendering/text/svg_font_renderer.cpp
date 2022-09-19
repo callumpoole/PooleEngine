@@ -49,7 +49,7 @@ namespace Poole::Rendering
 		if (Renderer::s_GraphicsAPI == EGraphicsAPI::OpenGL)
 		{
 			//Flip first, then convert Greyscale to RGBA (whilst replacing black to alpha) to save performance
-			img.reset(ImageUtils::ReplaceBlackWithAlpha(ImageUtils::YFlip(temp)));
+			img.reset(ImageUtils::ReplaceBlackWithAlphaInline(ImageUtils::YFlipInline(temp)));
 
 			for (i32 i = 0; i < k_NumChars; i++)
 			{
@@ -60,7 +60,7 @@ namespace Poole::Rendering
 		}
 		else
 		{
-			img.reset(ImageUtils::ReplaceBlackWithAlpha(temp));
+			img.reset(ImageUtils::ReplaceBlackWithAlphaInline(temp));
 		}
 
 		m_Sizes[fontSize] = RasterInfo{ std::move(*(std::vector<TT_BakedChar>*)& cdata), img };

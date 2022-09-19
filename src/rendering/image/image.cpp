@@ -36,9 +36,16 @@ namespace Poole::Rendering
 		switch (format)
 		{
 		case EImageFormat::Bytes:
+			m_TotalBytesAllocated = GetBytesForWholeImage();
+
 			break; //Do nothing
 		case EImageFormat::Floats:
-			break; //TODO
+
+			//TODO
+
+			m_TotalBytesAllocated = GetBytesForWholeImage();
+
+			break; 
 		default:
 			if (out_Successful)
 				*out_Successful = false;

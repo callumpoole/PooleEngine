@@ -23,7 +23,9 @@ namespace Poole::Rendering
 		static Image* GreyscaleToRGB(const Image* src);
 		static Image* GreyscaleToRGBA(const Image* src);
 
+		static void ReplaceBlackWithAlphaImpl(const Image* src, u8* bytes);
 		static Image* ReplaceBlackWithAlpha(const Image* src);
+		static Image* ReplaceBlackWithAlphaInline(Image* src);
 
 		static Image* YFlip(const Image* src, bool bToggleWasYFlippedWhenLoaded = true);
 		static Image* YFlipInline(Image* src, bool bToggleWasYFlippedWhenLoaded = true);

@@ -97,9 +97,9 @@ namespace Poole::Rendering
 	Image* ImageUtils::GreyscaleToRGB(const Image* src)  { return ::Poole::Rendering::GreyscaleTo<3>(src); }
 	Image* ImageUtils::GreyscaleToRGBA(const Image* src) { return ::Poole::Rendering::GreyscaleTo<4>(src); }
 
-	Image* ImageUtils::ReplaceBlackWithAlpha(const Image* src)
+	void ImageUtils::ReplaceBlackWithAlphaImpl(const Image* src, u8* bytes)
 	{
-		auto Impl = [src]<typename BASE>() -> Image*
+		auto Impl = [src, bytes]<typename BASE>()
 		{
 			using Types = Image::Types<BASE>;
 			using GREY = Types::GREY;
@@ -107,15 +107,14 @@ namespace Poole::Rendering
 			using RGB = Types::RGB;
 			using RGBA = Types::RGBA;
 
-			RGBA* newBytes = new RGBA[src->GetBytesForWholeImage()];
-			u32 iter = 0;
+			u32 i = 0;
 
 			//Downside for InvokeForFormat is I need to forward the RGBA, I can't access directly from outer body
-			auto AddBytes = [newBytes, &iter, src]<typename GROUP, typename RGBA>(bool(*isBlack)(GROUP color), RGBA(*copyColor)(GROUP color))
+			auto AddBytes = [&i, src, bytes]<typename GROUP, typename RGBA>(bool(*isBlack)(GROUP color), RGBA(*copyColor)(GROUP color))
 			{
 				for (const GROUP& color : src->GetIterDontUnFlip<GROUP>())
 				{
-					newBytes[iter++] = isBlack(color) ? RGBA{ 0 } : copyColor(color);
+					((RGBA*)bytes)[i++] = isBlack(color) ? RGBA{ 0 } : copyColor(color);
 				}
 			};
 
@@ -140,11 +139,37 @@ namespace Poole::Rendering
 			default:
 				return nullptr;
 			}
-
-			return new Image((BASE*)newBytes, src->GetSize(), 4, src->WasYFlippedWhenLoaded());
 		};
 
-		return src->InvokeForFormat(Impl);
+		src->InvokeForFormat(Impl);
+	}
+
+	/*static*/ Image* ImageUtils::ReplaceBlackWithAlpha(const Image* src)
+	{
+		const u32 bytesNeeded = src->GetNumPixels() * src->GetDataElementSizeBytes() * 4; //RGBA
+		u8* newBytes = new u8[bytesNeeded];
+		ReplaceBlackWithAlphaImpl(src, newBytes);
+		return new Image((void*)newBytes, src->GetSize(), /*RGBA*/ 4, src->WasYFlippedWhenLoaded(), true, src->GetFormat());
+	}
+	/*static*/ Image* ImageUtils::ReplaceBlackWithAlphaInline(Image* src)
+	{
+		const u32 bytesNeeded = src->GetNumPixels() * src->GetDataElementSizeBytes() * 4; //RGBA
+		if (bytesNeeded > src->m_TotalBytesAllocated)
+		{
+			u8* newBytes = new u8[bytesNeeded];
+			ReplaceBlackWithAlphaImpl(src, newBytes);
+
+			//Only after the algo has completed do we delete and swap the memory
+			delete[] (u8*)src->m_Data;
+			src->m_Data = newBytes;
+			src->m_NumChannels = 4; //RGBA
+			src->m_TotalBytesAllocated = bytesNeeded;
+		}
+		else
+		{
+			ReplaceBlackWithAlphaImpl(src, (u8*)src->GetData());
+		}
+		return src;
 	}
 
 	/*static*/ Image* ImageUtils::YFlip(const Image* src, bool bToggleWasYFlippedWhenLoaded)

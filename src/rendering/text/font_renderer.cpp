@@ -10,7 +10,7 @@ namespace Poole::Rendering
 	{
 		if (m_ImageAtlas)
 		{
-			m_ImageAtlas.reset(ImageUtils::ReplaceBlackWithAlpha(m_ImageAtlas.get()));
+			ImageUtils::ReplaceBlackWithAlphaInline(m_ImageAtlas.get());
 		}
 	}
 

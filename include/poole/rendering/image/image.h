@@ -88,6 +88,7 @@ namespace Poole::Rendering
 		uvec2 m_Size = { 0, 0 };
 		u32 m_NumChannels = 0;
 		void* m_Data = nullptr;
+		u32 m_TotalBytesAllocated = 0;
 		bool m_YFlippedWhenLoaded;
 		bool m_OwnsMemory = false;
 		EImageFormat m_Format = EImageFormat::Bytes;
