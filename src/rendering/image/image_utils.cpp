@@ -76,15 +76,15 @@ namespace Poole::Rendering
 			auto Impl = [src]<typename BASE>() -> Image*
 			{
 				BASE* newData = new BASE[src->GetNumPixels() * CHANNELS];
-				u32 iter = 0;
+				u32 i = 0;
 				for (BASE grey : src->GetIterPerChannelDontUnFlip<BASE>())
 				{
-					newData[iter++] = grey; //R
-					newData[iter++] = grey; //G
-					newData[iter++] = grey; //B
+					newData[i++] = grey; //R
+					newData[i++] = grey; //G
+					newData[i++] = grey; //B
 					if constexpr (CHANNELS == 4)
 					{
-						newData[iter++] = Image::Types<BASE>::MAX; 
+						newData[i++] = Image::Types<BASE>::MAX; 
 					}
 				}
 				return new Image(newData, src->GetSize(), CHANNELS, src->WasYFlippedWhenLoaded());
@@ -147,7 +147,7 @@ namespace Poole::Rendering
 		return src->InvokeForFormat(Impl);
 	}
 
-	/*static*/ Image* ImageUtils::YFlip(const Image* src)
+	/*static*/ Image* ImageUtils::YFlip(const Image* src, bool bToggleWasYFlippedWhenLoaded)
 	{
 		u8* newBytes = new u8[src->GetBytesForWholeImage()]; //Okay if actually floats since just copying data
 		const u8* srcBytes = (u8*)src->GetData(); //Can be floats, works in the same way
@@ -155,9 +155,89 @@ namespace Poole::Rendering
 		for (u32 y = 0; y < src->GetHeight(); y++)
 		{
 			const u32 yRead = src->GetHeight() - y - 1;
-			memcpy(newBytes + (y * bytesPerRow), srcBytes + (yRead * bytesPerRow), bytesPerRow);
+			memcpy(newBytes + y * bytesPerRow, srcBytes + yRead * bytesPerRow, bytesPerRow);
 		}
 
-		return new Image((void*)newBytes, src->GetSize(), src->GetNumChannels(), !src->WasYFlippedWhenLoaded(), /*ownsMemory*/ true, src->GetFormat());
+		return new Image(
+			(void*)newBytes, 
+			src->GetSize(), 
+			src->GetNumChannels(), 
+			bToggleWasYFlippedWhenLoaded ? !src->WasYFlippedWhenLoaded() : src->WasYFlippedWhenLoaded(), 
+			/*ownsMemory*/ true, 
+			src->GetFormat());
+	}
+
+	/*static*/ Image* ImageUtils::YFlipInline(Image* src, bool bToggleWasYFlippedWhenLoaded)
+	{
+		u8* srcBytes = (u8*)src->m_Data; //Can be floats, works in the same way
+		const u32 bytesPerRow = src->GetBytesPerRow();
+
+		std::vector<u8> buffer;
+		buffer.resize(bytesPerRow);
+
+		for (u32 yTop = 0, yBottom = src->GetHeight()-1; yTop < src->GetHeight() / 2; yTop++, yBottom--)
+		{
+			//Essentially MemSwap top and bottom by bytesPerRow
+			u8* topRow    = srcBytes + yTop * bytesPerRow;
+			u8* bottomRow = srcBytes + yBottom * bytesPerRow;
+
+			memcpy(buffer.data(), topRow, bytesPerRow);
+			memcpy(topRow, bottomRow, bytesPerRow);
+			memcpy(bottomRow, buffer.data(), bytesPerRow);
+		}
+		if (bToggleWasYFlippedWhenLoaded)
+		{
+			src->m_YFlippedWhenLoaded = !src->m_YFlippedWhenLoaded;
+		}
+		return src;
+	}
+
+	/*static*/ Image* ImageUtils::XFlip(const Image* src)
+	{
+		u8* newBytes = new u8[src->GetBytesForWholeImage()]; //Okay if actually floats since just copying data
+		const u8* srcBytes = (u8*)src->GetData(); //Can be floats, works in the same way
+		const u32 bytesPerRow = src->GetBytesPerRow();
+		const u32 bytesPerPixel = src->GetNumBytesPerPixel();
+
+		for (u32 y = 0; y < src->GetHeight(); y++)
+		{
+			for (u32 x = 0, xWrite = src->GetWidth() - 1; x < src->GetWidth(); x++, xWrite--)
+			{
+				memcpy(newBytes + y * bytesPerRow + xWrite * bytesPerPixel, 
+					   srcBytes + y * bytesPerRow + x      * bytesPerPixel,
+					   bytesPerPixel);
+			}
+		}
+
+		return new Image(
+			(void*)newBytes,
+			src->GetSize(),
+			src->GetNumChannels(),
+			src->WasYFlippedWhenLoaded(),
+			/*ownsMemory*/ true,
+			src->GetFormat());
+	}
+
+	/*static*/ Image* ImageUtils::XFlipInline(Image* src)
+	{
+		u8* srcBytes = (u8*)src->m_Data; //Can be floats, works in the same way
+		const u32 bytesPerRow = src->GetBytesPerRow();
+		const u32 bytesPerPixel = src->GetNumBytesPerPixel();
+
+		std::array<u8, Image::MAX_BYTES_POSSIBLE_PER_PIXEL> buffer; //Cheaper to do this than heap alloc
+
+		for (u32 y = 0; y < src->GetHeight(); y++)
+		{
+			for (u32 xLeft = 0, xRight = src->GetWidth() - 1; xLeft < (src->GetWidth() / 2); xLeft++, xRight--)
+			{
+				//Essentially MemSwap left and right by bytesPerPixel
+				u8* leftSide = srcBytes + y * bytesPerRow + xLeft * bytesPerPixel;
+				u8* rightSide = srcBytes + y * bytesPerRow + xRight * bytesPerPixel;
+				memcpy(&buffer, leftSide, bytesPerPixel);
+				memcpy(leftSide, rightSide, bytesPerPixel);
+				memcpy(rightSide, &buffer, bytesPerPixel);
+			}
+		}
+		return src;
 	}
 }

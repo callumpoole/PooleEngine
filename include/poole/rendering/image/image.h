@@ -9,6 +9,7 @@ namespace Poole::Rendering
 {
 	class Image
 	{
+		friend class ImageUtils;
 	public:
 		enum class EImageFormat : u8
 		{
@@ -40,7 +41,7 @@ namespace Poole::Rendering
 
 		const void* GetData() const { return m_Data; }
 		template<typename T>
-		const T* GetData() const { return CheckStorageType<T>() ? (T*)m_Data : nullptr; }
+		const T* GetData(bool check = true) const { return !check || CheckStorageType<T>() ? (T*)m_Data : nullptr; }
 
 		u8 GetDataElementSizeBytes() const { return m_Format == EImageFormat::Bytes ? 1 : 4; }
 		u8 GetDataElementSizeBits() const { return GetDataElementSizeBytes() * 8; }
@@ -52,6 +53,8 @@ namespace Poole::Rendering
 		u32 GetNumChannels() const { return m_NumChannels; }
 		u32 GetNumBytesPerPixel() const { return m_NumChannels * GetDataElementSizeBytes(); }
 		EImageFormat GetFormat() const { return m_Format; }
+
+		static constexpr u32 MAX_BYTES_POSSIBLE_PER_PIXEL = 4; //For Floats
 
 		u32 GetPixelsByChannelsPerRow() const { return m_Size.x * m_NumChannels; }
 		u32 GetPixelsByChannelsPerColumn() const { return m_Size.y * m_NumChannels; }
@@ -173,20 +176,19 @@ namespace Poole::Rendering
 			bool m_Flip;
 		};
 
-		template<typename T>
-		IteratorGenerator<T> GetIter() const			{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, m_YFlippedWhenLoaded); }
-		template<typename T>
-		IteratorGenerator<T> GetIterDontUnFlip() const	{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, false); }
-		template<typename T>
-		IteratorGenerator<T> GetIterFlip() const		{ return IteratorGenerator<T>(m_Data, m_Size.x, m_Size.y, true); }
+		template<typename GROUP>
+		IteratorGenerator<GROUP> GetIter() const			{ return IteratorGenerator<GROUP>(m_Data, m_Size.x, m_Size.y, m_YFlippedWhenLoaded); }
+		template<typename GROUP>
+		IteratorGenerator<GROUP> GetIterDontUnFlip() const	{ return IteratorGenerator<GROUP>(m_Data, m_Size.x, m_Size.y, false); }
+		template<typename GROUP>
+		IteratorGenerator<GROUP> GetIterFlip() const		{ return IteratorGenerator<GROUP>(m_Data, m_Size.x, m_Size.y, true); }
 
-		template<typename T>
-		IteratorGenerator<T> GetIterPerChannel() const			  { return IteratorGenerator<T>(m_Data, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
-		template<typename T>
-		IteratorGenerator<T> GetIterPerChannelDontUnFlip() const  { return IteratorGenerator<T>(m_Data, m_Size.x * m_NumChannels, m_Size.y, false); }
-		template<typename T>
-		IteratorGenerator<T> GetIterPerChannelFlip() const		  { return IteratorGenerator<T>(m_Data, m_Size.x * m_NumChannels, m_Size.y, true); }
-
+		template<typename BASE>
+		IteratorGenerator<BASE> GetIterPerChannel() const			  { return IteratorGenerator<BASE>(m_Data, m_Size.x * m_NumChannels, m_Size.y, m_YFlippedWhenLoaded); }
+		template<typename BASE>
+		IteratorGenerator<BASE> GetIterPerChannelDontUnFlip() const   { return IteratorGenerator<BASE>(m_Data, m_Size.x * m_NumChannels, m_Size.y, false); }
+		template<typename BASE>
+		IteratorGenerator<BASE> GetIterPerChannelFlip() const		  { return IteratorGenerator<BASE>(m_Data, m_Size.x * m_NumChannels, m_Size.y, true); }
 
 
 		template<typename T>

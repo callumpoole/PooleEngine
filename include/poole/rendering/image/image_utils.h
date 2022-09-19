@@ -25,6 +25,10 @@ namespace Poole::Rendering
 
 		static Image* ReplaceBlackWithAlpha(const Image* src);
 
-		static Image* YFlip(const Image* src);
+		static Image* YFlip(const Image* src, bool bToggleWasYFlippedWhenLoaded = true);
+		static Image* YFlipInline(Image* src, bool bToggleWasYFlippedWhenLoaded = true);
+
+		static Image* XFlip(const Image* src);
+		static Image* XFlipInline(Image* src);
 	};
 }

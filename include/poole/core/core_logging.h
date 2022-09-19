@@ -43,7 +43,7 @@ namespace Poole
 #endif
 
 #define INTERNAL_LOG_TICK_LITERALS "[{:3}]"
-#define INTERNAL_LOG_TICK_PARAMS LoggingGetTickCount() % 1000
+#define INTERNAL_LOG_TICK_PARAMS Poole::LoggingGetTickCount() % 1000
 
 #define INTERNAL_LOG_LITERALS INTERNAL_LOG_TICK_LITERALS "[{}]{}:({},{})"
 #define INTERNAL_LOG_PARAMS   INTERNAL_LOG_TICK_PARAMS,							\
