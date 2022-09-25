@@ -67,15 +67,17 @@ namespace Poole::Rendering
 
 		static constexpr u32 MAX_BYTES_POSSIBLE_PER_PIXEL = 4; //For Floats
 
-		u32 GetPixelsByChannelsPerRow() const { return m_Size.x * m_NumChannels; }
-		u32 GetPixelsByChannelsPerColumn() const { return m_Size.y * m_NumChannels; }
-		u32 GetPixelsByChannelsForWholeImage() const { return m_Size.x * m_Size.y * m_NumChannels; }
+		u32 GetPixelsByChannelsPerRow() const { return GetWidth() * m_NumChannels; }
+		u32 GetPixelsByChannelsPerColumn() const { return GetHeight() * m_NumChannels; }
+		u32 GetPixelsByChannelsForWholeImage() const { return GetNumPixels() * m_NumChannels; }
 
 		u32 GetBytesPerRow() const { return GetPixelsByChannelsPerRow() * GetDataElementSizeBytes(); }
 		u32 GetBytesPerColumn() const { return GetPixelsByChannelsPerColumn() * GetDataElementSizeBytes(); }
 		u32 GetBytesForWholeImage() const { return GetPixelsByChannelsForWholeImage() * GetDataElementSizeBytes(); }
 
-		bool IsPowerOfTwo() const { return Math::IsPowerOfTwo((u64)m_Size.x) && Math::IsPowerOfTwo((u64)m_Size.y); }
+		u32 GetBytesInOneChannelForWholeImage() const { return GetNumPixels() * GetDataElementSizeBytes(); }
+
+		bool IsPowerOfTwo() const { return Math::IsPowerOfTwo((u64)GetWidth()) && Math::IsPowerOfTwo((u64)GetHeight()); }
 
 		void DebugPrint() const;
 
@@ -98,6 +100,8 @@ namespace Poole::Rendering
 		static bool s_PrintWhenLoadedFromFile;
 		uvec2 m_Size = { 0, 0 };
 		u32 m_NumChannels = 0;
+
+		//if I decide to change to std::vector, I will need: https://stackoverflow.com/questions/21917529/is-it-possible-to-initialize-stdvector-over-already-allocated-memory
 		void* m_Data = nullptr;
 		u32 m_TotalBytesAllocated = 0;
 		bool m_YFlippedWhenLoaded;

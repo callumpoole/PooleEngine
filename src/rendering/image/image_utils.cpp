@@ -70,7 +70,7 @@ namespace Poole::Rendering
 				return nullptr;
 			}
 
-			void* data = new u8[src->GetNumPixels() * CHANNELS * src->GetDataElementSizeBytes()];
+			void* data = new u8[src->GetBytesInOneChannelForWholeImage() * CHANNELS];
 			ToGreyscaleImpl<CHANNELS>(src, func, data);
 			return new Image(data, src->GetSize(), CHANNELS, src->WasYFlippedWhenLoaded(), true, src->GetFormat());
 		}
@@ -83,7 +83,7 @@ namespace Poole::Rendering
 				return nullptr;
 			}
 
-			const u32 bytesNeeded = src->GetNumPixels() * CHANNELS * src->GetDataElementSizeBytes();
+			const u32 bytesNeeded = src->GetBytesInOneChannelForWholeImage() * CHANNELS;
 			
 			bool bAllocated;
 			void* data;
@@ -167,7 +167,7 @@ namespace Poole::Rendering
 		{
 			if (void* newData = GreyscaleTo<CHANNELS>(src))
 			{
-				src->GetTotalBytesAllocated() = src->GetNumPixels() * CHANNELS * src->GetDataElementSizeBytes();
+				src->GetTotalBytesAllocated() = src->GetBytesInOneChannelForWholeImage() * CHANNELS;
 				src->GetNumChannels() = CHANNELS;
 				delete[] src->GetData();
 				src->GetData() = newData;
@@ -231,14 +231,14 @@ namespace Poole::Rendering
 
 	/*static*/ Image* ImageUtils::ReplaceBlackWithAlpha(const Image* src)
 	{
-		const u32 bytesNeeded = src->GetNumPixels() * src->GetDataElementSizeBytes() * 4; //RGBA
+		const u32 bytesNeeded = src->GetBytesInOneChannelForWholeImage() * 4; //RGBA
 		u8* newBytes = new u8[bytesNeeded];
 		ReplaceBlackWithAlphaImpl(src, newBytes);
 		return new Image((void*)newBytes, src->GetSize(), /*RGBA*/ 4, src->WasYFlippedWhenLoaded(), true, src->GetFormat());
 	}
 	/*static*/ Image* ImageUtils::ReplaceBlackWithAlphaInline(Image* src)
 	{
-		const u32 bytesNeeded = src->GetNumPixels() * src->GetDataElementSizeBytes() * 4; //RGBA
+		const u32 bytesNeeded = src->GetBytesInOneChannelForWholeImage() * 4; //RGBA
 		if (bytesNeeded > src->m_TotalBytesAllocated)
 		{
 			u8* newBytes = new u8[bytesNeeded];
