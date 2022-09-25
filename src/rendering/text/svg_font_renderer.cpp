@@ -66,33 +66,7 @@ namespace Poole::Rendering
 		m_Sizes[fontSize] = RasterInfo{ std::move(*(std::vector<TT_BakedChar>*)& cdata), img };
 	}
 
-	std::shared_ptr<SubImage> SvgFontRenderer::Convert(const char c, const f32 fontSize, f32& xoff, f32& yoff, f32& xadvance)
-	{
-		if (c < k_StartChar || c - k_StartChar >= k_NumChars)
-		{
-			LOG_WARNING("Character {} ({}) out of bounds ({} to {}).", c, u32(c), k_StartChar, k_StartChar + k_NumChars - 1);
-			return nullptr;
-		}
-
-		CacheSize(fontSize); 
-		RasterInfo& info = m_Sizes[fontSize];
-
-		TT_BakedChar& map = info.m_CharMaps[c - k_StartChar];
-
-		const f32 w = (f32)info.m_Image->GetWidth();
-		const f32 h = (f32)info.m_Image->GetHeight();
-		const fvec2 minMax[2] = { fvec2{map.x0/w, map.y0/h}, fvec2{map.x1/w, map.y1/h} };
-
-		std::shared_ptr<SubImage> sub(new SubImage(info.m_Image, minMax));
-
-		xoff = map.xoff;
-		yoff = map.yoff;
-		xadvance = map.xadvance;
-
-		return sub;
-	}
-
-	void SvgFontRenderer::Convert2(char c, f32 fontSize, fvec2& pos, std::array<fvec4, 4>& coords, std::array<fvec2, 4>& uv)
+	void SvgFontRenderer::Convert(char c, f32 fontSize, fvec2& pos, std::array<fvec4, 4>& coords, std::array<fvec2, 4>& uv)
 	{
 		if (c < k_StartChar || c - k_StartChar >= k_NumChars)
 		{

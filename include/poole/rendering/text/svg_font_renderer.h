@@ -13,8 +13,7 @@ namespace Poole::Rendering
 		SvgFontRenderer(const char* fontLocation);
 		void CacheSize(f32 fontSize) const;
 
-		std::shared_ptr<SubImage> Convert(char c, f32 fontSize, f32& xoff, f32& yoff, f32& xadvance);
-		void Convert2(char c, f32 fontSize, fvec2& pos, std::array<fvec4, 4>& coords, std::array<fvec2, 4>& uv);
+		void Convert(char c, f32 fontSize, fvec2& pos, std::array<fvec4, 4>& coords, std::array<fvec2, 4>& uv);
 		std::shared_ptr<Image> GetImageForSize(f32 fontSize);
 
 	private:

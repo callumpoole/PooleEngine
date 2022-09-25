@@ -122,7 +122,7 @@ namespace Poole::Rendering
 				continue;
 			}
 
-			m_VariableWidthFont->Convert2(c, fontSize, xy, coords, uv);
+			m_VariableWidthFont->Convert(c, fontSize, xy, coords, uv);
 
 			Renderer2D::DrawSubTexturedQuad(coords, trans, m_VariableWidthFont->GetImageForSize(fontSize), uv, /*tiling*/ 1, col);
 		}

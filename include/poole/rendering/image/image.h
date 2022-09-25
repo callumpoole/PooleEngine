@@ -40,6 +40,7 @@ namespace Poole::Rendering
 		operator bool() const { return IsValid(); }
 
 		const void* GetData() const { return m_Data; }
+		void*& GetData() { return m_Data; }
 		template<typename T>
 		const T* GetData(bool check = true) const { return !check || CheckStorageType<T>() ? (T*)m_Data : nullptr; }
 
@@ -47,12 +48,22 @@ namespace Poole::Rendering
 		u8 GetDataElementSizeBits() const { return GetDataElementSizeBytes() * 8; }
 
 		const uvec2& GetSize() const { return m_Size; }
-		u32 GetWidth() const { return m_Size.x; }
-		u32 GetHeight() const { return m_Size.y; }
-		u32 GetNumPixels() const { return m_Size.x * m_Size.y; }
-		u32 GetNumChannels() const { return m_NumChannels; }
-		u32 GetNumBytesPerPixel() const { return m_NumChannels * GetDataElementSizeBytes(); }
-		EImageFormat GetFormat() const { return m_Format; }
+		u32  GetWidth() const  { return m_Size.x; }
+		u32& GetWidth()		   { return m_Size.x; }
+		u32  GetHeight() const { return m_Size.y; }
+		u32& GetHeight()	   { return m_Size.y; }
+		u32  GetNumPixels() const { return m_Size.x * m_Size.y; }
+
+		u32  GetNumChannels() const { return m_NumChannels; }
+		u32& GetNumChannels()		{ return m_NumChannels; }
+
+		u32  GetNumBytesPerPixel() const { return m_NumChannels * GetDataElementSizeBytes(); }
+
+		EImageFormat  GetFormat() const { return m_Format; }
+		EImageFormat& GetFormat()		{ return m_Format; }
+
+		u32  GetTotalBytesAllocated() const { return m_TotalBytesAllocated; }
+		u32& GetTotalBytesAllocated()       { return m_TotalBytesAllocated; }
 
 		static constexpr u32 MAX_BYTES_POSSIBLE_PER_PIXEL = 4; //For Floats
 
