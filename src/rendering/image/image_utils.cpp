@@ -6,18 +6,22 @@ namespace Poole::Rendering
 {
 	namespace 
 	{
-		template<u32 CHANNELS>
-		Image* ToGreyscaleImpl(const Image* src, ImageUtils::GreyScaleFunc func)
+		bool ToGreyscaleCheckSrc(const Image* src)
 		{
-			static_assert(CHANNELS != 0 && CHANNELS <= 4);
-
 			if (src->GetNumChannels() != 3 && src->GetNumChannels() != 4)
 			{
 				LOG_ERROR("Cannot Convert Image With {} Channels to Greyscale.", src->GetNumChannels());
-				return nullptr;
+				return false;
 			}
+			return true;
+		}
 
-			auto Do = [src, &func]<typename BASE, typename GROUP>(BASE* newData) -> Image*
+		template<u32 CHANNELS>
+		void ToGreyscaleImpl(const Image* src, ImageUtils::GreyScaleFunc func, void* data)
+		{
+			static_assert(CHANNELS != 0 && CHANNELS <= 4);
+
+			auto Do = [src, &func]<typename BASE, typename GROUP>(BASE* newData)
 			{
 				u32 i = 0;
 				for (GROUP color : src->GetIterDontUnFlip<GROUP>())
@@ -38,27 +42,82 @@ namespace Poole::Rendering
 						newData[i++] = Image::Types<BASE>::MAX;
 					}
 				}
-				return new Image(newData, src->GetSize(), CHANNELS, src->WasYFlippedWhenLoaded());
 			};
-			auto Impl = [src, Do]<typename BASE>() -> Image*
+			auto Impl = [src, Do, data]<typename BASE>()
 			{
-				BASE* newData = new BASE[src->GetNumPixels() * CHANNELS];
-
 				using Types = Image::Types<BASE>;
 				using RGB = Types::RGB;
 				using RGBA = Types::RGBA;
 
-				return (src->GetNumChannels() == 3) ? InvokeTemplatedLambda<BASE, RGB>(Do, newData) : InvokeTemplatedLambda<BASE, RGBA>(Do, newData);
+				if (src->GetNumChannels() == 3)
+				{
+					InvokeTemplatedLambda<BASE, RGB>(Do, (BASE*)data);
+				}
+				else
+				{
+					InvokeTemplatedLambda<BASE, RGBA>(Do, (BASE*)data);
+				}
 			};
 
-			return src->InvokeForFormat(Impl);
+			src->InvokeForFormat(Impl);
+		}
+
+		template<u32 CHANNELS>
+		Image* ToGreyscaleImplNonInline(const Image* src, ImageUtils::GreyScaleFunc func)
+		{
+			if (!ToGreyscaleCheckSrc(src))
+			{
+				return nullptr;
+			}
+
+			void* data = new u8[src->GetNumPixels() * CHANNELS * src->GetDataElementSizeBytes()];
+			ToGreyscaleImpl<CHANNELS>(src, func, data);
+			return new Image(data, src->GetSize(), CHANNELS, src->WasYFlippedWhenLoaded(), true, src->GetFormat());
+		}
+
+		template<u32 CHANNELS>
+		Image* ToGreyscaleImplInline(Image* src, ImageUtils::GreyScaleFunc func)
+		{
+			if (!ToGreyscaleCheckSrc(src))
+			{
+				return nullptr;
+			}
+
+			const u32 bytesNeeded = src->GetNumPixels() * CHANNELS * src->GetDataElementSizeBytes();
+			
+			bool bAllocated;
+			void* data;
+			if (src->GetTotalBytesAllocated() < bytesNeeded)
+			{
+				data = new u8[bytesNeeded];
+				bAllocated = true;
+			}
+			else
+			{
+				data = src->GetData();
+				bAllocated = false;
+			}
+
+			ToGreyscaleImpl<CHANNELS>(src, func, data);
+			src->GetTotalBytesAllocated() = bytesNeeded;
+			src->GetNumChannels() = CHANNELS;
+			if (bAllocated)
+			{
+				delete[] src->GetData();
+			}
+			src->GetData() = data;
+			return src;
 		}
 	}
 
-	Image* ImageUtils::ToGreyscale(const Image* src, GreyScaleFunc func)	 { return ToGreyscaleImpl<1>(src, func); }
-	Image* ImageUtils::ToGreyscaleRG(const Image* src, GreyScaleFunc func)   { return ToGreyscaleImpl<2>(src, func); }
-	Image* ImageUtils::ToGreyscaleRGB(const Image* src, GreyScaleFunc func)  { return ToGreyscaleImpl<3>(src, func); }
-	Image* ImageUtils::ToGreyscaleRGBA(const Image* src, GreyScaleFunc func) { return ToGreyscaleImpl<4>(src, func); }
+	Image* ImageUtils::ToGreyscale(const Image* src, GreyScaleFunc func)	 { return ToGreyscaleImplNonInline<1>(src, func); }
+	Image* ImageUtils::ToGreyscaleRG(const Image* src, GreyScaleFunc func)   { return ToGreyscaleImplNonInline<2>(src, func); }
+	Image* ImageUtils::ToGreyscaleRGB(const Image* src, GreyScaleFunc func)  { return ToGreyscaleImplNonInline<3>(src, func); }
+	Image* ImageUtils::ToGreyscaleRGBA(const Image* src, GreyScaleFunc func) { return ToGreyscaleImplNonInline<4>(src, func); }
+	Image* ImageUtils::ToGreyscaleInline(Image* src, GreyScaleFunc func)	 { return ToGreyscaleImplInline<1>(src, func); }
+	Image* ImageUtils::ToGreyscaleRGInline(Image* src, GreyScaleFunc func)   { return ToGreyscaleImplInline<2>(src, func); }
+	Image* ImageUtils::ToGreyscaleRGBInline(Image* src, GreyScaleFunc func)  { return ToGreyscaleImplInline<3>(src, func); }
+	Image* ImageUtils::ToGreyscaleRGBAInline(Image* src, GreyScaleFunc func) { return ToGreyscaleImplInline<4>(src, func); }
 
 	namespace 
 	{
@@ -73,7 +132,7 @@ namespace Poole::Rendering
 				return nullptr;
 			}
 
-			auto Impl = [src]<typename BASE>() -> Image*
+			auto Impl = [src]<typename BASE>() -> void*
 			{
 				BASE* newData = new BASE[src->GetNumPixels() * CHANNELS];
 				u32 i = 0;
@@ -87,7 +146,7 @@ namespace Poole::Rendering
 						newData[i++] = Image::Types<BASE>::MAX; 
 					}
 				}
-				return new Image(newData, src->GetSize(), CHANNELS, src->WasYFlippedWhenLoaded());
+				return newData;
 			};
 
 			return src->InvokeForFormat(Impl);
@@ -108,8 +167,9 @@ namespace Poole::Rendering
 		{
 			if (void* newData = GreyscaleTo<CHANNELS>(src))
 			{
-				src->GetTotalBytesAllocated() = src->GetNumPixels() * CHANNELS;
+				src->GetTotalBytesAllocated() = src->GetNumPixels() * CHANNELS * src->GetDataElementSizeBytes();
 				src->GetNumChannels() = CHANNELS;
+				delete[] src->GetData();
 				src->GetData() = newData;
 				return src;
 			}

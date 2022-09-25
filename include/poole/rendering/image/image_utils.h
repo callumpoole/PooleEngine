@@ -19,6 +19,10 @@ namespace Poole::Rendering
 		static Image* ToGreyscaleRG(const Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
 		static Image* ToGreyscaleRGB(const Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
 		static Image* ToGreyscaleRGBA(const Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
+		static Image* ToGreyscaleInline(Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
+		static Image* ToGreyscaleRGInline(Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
+		static Image* ToGreyscaleRGBInline(Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
+		static Image* ToGreyscaleRGBAInline(Image* src, GreyScaleFunc func = &GreyscaleColorAdj);
 
 		static Image* GreyscaleToRGB(const Image* src);
 		static Image* GreyscaleToRGBA(const Image* src);
