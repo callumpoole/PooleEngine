@@ -26,6 +26,7 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"src/rendering/shaders/VertexColor2DTransform.shader"
 	"src/rendering/shaders/Circle2DTransform.shader"
 	"src/rendering/shaders/Circle2DBatchedTransform.shader"
+	"src/rendering/shaders/Line2DBatchedTransform.shader"
 	"src/rendering/shaders/Texture2DTransform.shader"
 	"src/rendering/shaders/Texture2DBatchedTransform.shader"
 	"src/rendering/shaders/Experimental1.shader"

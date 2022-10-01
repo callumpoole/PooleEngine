@@ -37,6 +37,12 @@ namespace Poole::Rendering
 			float Fade;
 		};
 
+		struct LineVertex
+		{
+			fvec3 Position;
+			fvec4 Color;
+		};
+
 		struct RenderData2D
 		{
 			static constexpr u32 k_MaxQuads = 2000;
@@ -66,11 +72,20 @@ namespace Poole::Rendering
 			CircleVertex* m_CircleVertexBufferPtr = nullptr;
 			GLShader* m_CircleShader = nullptr;
 
+			//Line Stuff
+			std::shared_ptr<VertexArray> m_LineVertexArray;
+			std::shared_ptr<VertexBuffer> m_LineVertexBuffer;
+			u32 m_LineVertexCount = 0;
+			LineVertex* m_LineVertexBufferBase = nullptr;
+			LineVertex* m_LineVertexBufferPtr = nullptr;
+			GLShader* m_LineShader;
+
 			//Stats
 			struct {
 				u32 m_DrawCalls = 0;
 				u32 m_QuadCount = 0;
 				u32 m_CircleCount = 0;
+				u32 m_LineCount = 0;
 			} m_Stats;
 		};
 
@@ -113,7 +128,7 @@ namespace Poole::Rendering
 				{ ShaderDataType::Float, "a_Thickness"},
 				{ ShaderDataType::Float, "a_Fade"},
 				//{ ShaderDataType::Int,    "a_EntityID"     }
-				});
+			});
 			s_Data.m_CircleVertexArray->AddVertexBuffer(s_Data.m_CircleVertexBuffer);
 			s_Data.m_CircleVertexBufferBase = new CircleVertex[s_Data.k_MaxVertices];
 		}
@@ -160,6 +175,20 @@ namespace Poole::Rendering
 			s_Data.m_WhiteTexture->SetData(&whiteTextureData, sizeof(u32));
 			s_Data.m_TextureSlots[0] = s_Data.m_WhiteTexture;
 		}
+
+
+		// Lines
+		s_Data.m_LineVertexArray.reset(VertexArray::Create());
+		s_Data.m_LineShader = &Renderer::s_shaderLineBatchedTransform2D;
+			   
+		s_Data.m_LineVertexBuffer.reset(VertexBuffer::Create(s_Data.k_MaxVertices * sizeof(LineVertex)));
+		s_Data.m_LineVertexBuffer->SetLayout({
+			{ ShaderDataType::Float3, "a_Position" },
+			{ ShaderDataType::Float4, "a_Color" },
+			//{ ShaderDataType::Int,    "a_EntityID"     }
+		});
+		s_Data.m_LineVertexArray->AddVertexBuffer(s_Data.m_LineVertexBuffer);
+		s_Data.m_LineVertexBufferBase = new LineVertex[s_Data.k_MaxVertices];
 	}
 	/*static*/ void BatchedRenderer2D::Shutdown()
 	{
@@ -171,6 +200,7 @@ namespace Poole::Rendering
 	{
 		s_Data.m_Stats.m_QuadCount = 0;
 		s_Data.m_Stats.m_CircleCount = 0;
+		s_Data.m_Stats.m_LineCount = 0;
 		s_Data.m_Stats.m_DrawCalls = 0;
 
 		s_Data.m_QuadShader->Bind();
@@ -179,13 +209,20 @@ namespace Poole::Rendering
 		s_Data.m_CircleShader->Bind();
 		s_Data.m_CircleShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
 
+		s_Data.m_LineShader->Bind();
+		s_Data.m_LineShader->SetUniform("u_CameraViewProjection", Renderer::GetCamera().GetViewProjectionMatrix());
+
 		StartBatch();
 	}
 	/*static*/ void BatchedRenderer2D::EndScene()
 	{
 		FlushBatch();
 
-		//LOG("Quads: {}, Circles: {}, DrawCalls: {}", s_Data.m_Stats.m_QuadCount, s_Data.m_Stats.m_CircleCount, s_Data.m_Stats.m_DrawCalls);
+		//LOG("Quads: {}, Circles: {}, Lines: {}, DrawCalls: {}", 
+		//	s_Data.m_Stats.m_QuadCount, 
+		//	s_Data.m_Stats.m_CircleCount, 
+		//	s_Data.m_Stats.m_LineCount,
+		//	s_Data.m_Stats.m_DrawCalls);
 	}
 
 	/*static*/ void BatchedRenderer2D::StartBatch()
@@ -197,6 +234,9 @@ namespace Poole::Rendering
 
 		s_Data.m_CircleIndexCount = 0;
 		s_Data.m_CircleVertexBufferPtr = s_Data.m_CircleVertexBufferBase;
+
+		s_Data.m_LineVertexCount = 0;
+		s_Data.m_LineVertexBufferPtr = s_Data.m_LineVertexBufferBase;
 	}
 	/*static*/ void BatchedRenderer2D::FlushBatch()
 	{
@@ -233,6 +273,17 @@ namespace Poole::Rendering
 			s_Data.m_CircleVertexArray->Bind();
 			GetRendererAPI()->DrawIndexed(s_Data.m_CircleIndexCount);
 
+			s_Data.m_Stats.m_DrawCalls++;
+		}
+
+		//Flush Lines
+		if (s_Data.m_LineVertexCount)
+		{
+			uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.m_LineVertexBufferPtr - (uint8_t*)s_Data.m_LineVertexBufferBase);
+			s_Data.m_LineVertexBuffer->SetData(s_Data.m_LineVertexBufferBase, dataSize);
+
+			s_Data.m_LineShader->Bind();
+			GetRendererAPI()->DrawLines(s_Data.m_LineVertexArray, s_Data.m_LineVertexCount);
 			s_Data.m_Stats.m_DrawCalls++;
 		}
 	}
@@ -349,5 +400,23 @@ namespace Poole::Rendering
 		s_Data.m_CircleIndexCount += 6;
 
 		s_Data.m_Stats.m_CircleCount++;
+	}
+
+	/*static*/ void BatchedRenderer2D::DrawLine(const fvec3& p0, const fvec3& p1, const fvec4& color)
+	{
+		if (s_Data.m_LineVertexCount >= RenderData2D::k_MaxIndices)
+			NextBatch();
+
+		s_Data.m_LineVertexBufferPtr->Position = p0;
+		s_Data.m_LineVertexBufferPtr->Color = color;
+		s_Data.m_LineVertexBufferPtr++;
+
+		s_Data.m_LineVertexBufferPtr->Position = p1;
+		s_Data.m_LineVertexBufferPtr->Color = color;
+		s_Data.m_LineVertexBufferPtr++;
+
+		s_Data.m_LineVertexCount += 2;
+
+		s_Data.m_Stats.m_LineCount++;
 	}
 }

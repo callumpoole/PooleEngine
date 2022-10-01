@@ -1,5 +1,7 @@
 #include "opengl_renderer_api.h"
 
+#include "rendering\graphics_api\vertex_array.h"
+
 namespace Poole::Rendering
 {
 	void OpenGL_RendererAPI::SetClearColor(const fcolor4& color)
@@ -19,5 +21,11 @@ namespace Poole::Rendering
 	void OpenGL_RendererAPI::DrawIndexed(u32 count)
 	{
 		glDrawElements(GL_TRIANGLES, (GLsizei)count, GL_UNSIGNED_INT, 0);
+	}
+
+	void OpenGL_RendererAPI::DrawLines(const std::shared_ptr<VertexArray> vertexArray, uint32_t vertexCount)
+	{
+		vertexArray->Bind();
+		glDrawArrays(GL_LINES, 0, vertexCount);
 	}
 }

@@ -96,5 +96,10 @@ namespace Poole::Rendering
 		{
 			DrawCircle({ pos, scale, rotation, shear }, color, thickness, fade);
 		}
+
+
+		static void DrawLine(const fvec3& p0, const fvec3& p1, const fvec4& color);
+		static f32 GetLineWidth();
+		static void SetLineWidth(f32 width);
 	};
 }

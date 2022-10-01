@@ -13,5 +13,7 @@ namespace Poole::Rendering
 		virtual void SetClearColor(const fcolor4& color) override;
 		virtual void Clear() override;
 		virtual void DrawIndexed(u32 count) override;
+
+		virtual void DrawLines(const std::shared_ptr<VertexArray> vertexArray, uint32_t vertexCount) override;
 	};
 }
