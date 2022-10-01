@@ -8,15 +8,14 @@ namespace Poole::Rendering
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{
-			case EGraphicsAPI::None: assert(false); return nullptr;
+			case EGraphicsAPI::None: HALT(); return nullptr;
 			case EGraphicsAPI::OpenGL: 
 			{
 				static OpenGL_RendererAPI* OpenGL = new OpenGL_RendererAPI();
 				return OpenGL;
 			}
 		}
-
-		assert(false);
+		HALT();
 		return nullptr;
 	}
 }

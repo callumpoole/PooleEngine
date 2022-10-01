@@ -20,19 +20,14 @@ namespace Poole::Rendering
 		
 		//===OLD===
 	public:
-		//Deprecated
 		virtual void Bind() = 0;
-		//Deprecated
 		virtual void Unbind() = 0;
 
 		/// <param name="image">Path</param>
-		/// <param name="texType">GL_TEXTURE_2D</param>
 		/// <param name="slot">GL_TEXTURE0</param>
-		/// <param name="format">GL_RGBA</param>
-		/// <param name="pixelType">GL_UNSIGNED_BYTE</param>
-		static Texture* Create(const char* imagePath, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
+		static Texture* Create(const char* imagePath, GLenum slot);
 
-		static Texture* Create(const Image& image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
+		static Texture* Create(const Image& image, GLenum slot);
 
 		/// <param name="shaderID">shaderProgramID</param>
 		/// <param name="uniform">"tex0"</param>
@@ -42,8 +37,9 @@ namespace Poole::Rendering
 
 		//===NEW===
 	public:
-		static Texture* Create(u32 Width, u32 Height);
+		static Texture* Create(uvec2 size);
 		virtual void SetData(const void* data, u32 size) = 0;
 		virtual void Bind(u32 slot) = 0;
+		virtual void Unbind(u32 slot) = 0;
 	};
 }

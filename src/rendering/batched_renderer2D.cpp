@@ -155,7 +155,7 @@ namespace Poole::Rendering
 
 		//Textures
 		{
-			s_Data.m_WhiteTexture.reset(Texture::Create(1u, 1u));
+			s_Data.m_WhiteTexture.reset(Texture::Create({ 1u, 1u }));
 			const u32 whiteTextureData = 0xffffffff;
 			s_Data.m_WhiteTexture->SetData(&whiteTextureData, sizeof(u32));
 			s_Data.m_TextureSlots[0] = s_Data.m_WhiteTexture;
@@ -278,7 +278,7 @@ namespace Poole::Rendering
 		}
 		else
 		{
-			t.reset(Texture::Create(image, GL_TEXTURE_2D, GL_TEXTURE0, (image.GetNumChannels() == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
+			t.reset(Texture::Create(image, GL_TEXTURE0));
 			s_Data.m_TextureIdMap.insert({ image.GetId(), t });
 			return t;
 		}

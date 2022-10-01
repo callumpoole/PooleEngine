@@ -188,7 +188,7 @@ namespace Poole::Rendering
 		}
 		else
 		{
-			t.reset(Texture::Create(image, GL_TEXTURE_2D, GL_TEXTURE0, (image.GetNumChannels() == 4) ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE));
+			t.reset(Texture::Create(image, GL_TEXTURE0));
 			m_TextureIdMap.insert({ image.GetId(), t });
 			return t;
 		}

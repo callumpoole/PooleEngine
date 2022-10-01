@@ -5,36 +5,36 @@
 
 namespace Poole::Rendering
 {
-	/*static*/ Texture* Texture::Create(const char* imagePath, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
+	/*static*/ Texture* Texture::Create(const char* imagePath, GLenum slot)
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{
-		case EGraphicsAPI::None: assert(false); return nullptr;
-		case EGraphicsAPI::OpenGL: return new OpenGL_Texture(imagePath, texType, slot, format, pixelType);
+		case EGraphicsAPI::None: HALT(); return nullptr;
+		case EGraphicsAPI::OpenGL: return new OpenGL_Texture(imagePath, slot);
 		}
-		assert(false);
+		HALT();
 		return nullptr;
 	}
 
-	/*static*/ Texture* Texture::Create(const Image& image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType)
+	/*static*/ Texture* Texture::Create(const Image& image, GLenum slot)
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{
-		case EGraphicsAPI::None: assert(false); return nullptr;
-		case EGraphicsAPI::OpenGL: return new OpenGL_Texture(image, texType, slot, format, pixelType);
+		case EGraphicsAPI::None: HALT(); return nullptr;
+		case EGraphicsAPI::OpenGL: return new OpenGL_Texture(image, slot);
 		}
-		assert(false);
+		HALT();
 		return nullptr;
 	}
 
-	/*static*/ Texture* Texture::Create(u32 width, u32 height)
+	/*static*/ Texture* Texture::Create(uvec2 size)
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{
-		case EGraphicsAPI::None: assert(false); return nullptr;
-		case EGraphicsAPI::OpenGL: return new OpenGL_Texture(width, height);
+		case EGraphicsAPI::None: HALT(); return nullptr;
+		case EGraphicsAPI::OpenGL: return new OpenGL_Texture(size);
 		}
-		assert(false);
+		HALT();
 		return nullptr;
 	}
 }

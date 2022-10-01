@@ -9,11 +9,10 @@ namespace Poole::Rendering
 	{
 		switch (Renderer::s_GraphicsAPI)
 		{
-		case EGraphicsAPI::None: assert(false); return nullptr;
+		case EGraphicsAPI::None: HALT(); return nullptr;
 		case EGraphicsAPI::OpenGL: return new OpenGL_VertexArray();
 		}
-
-		assert(false);
+		HALT()
 		return nullptr;
 	}
 }
