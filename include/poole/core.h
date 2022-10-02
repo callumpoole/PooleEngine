@@ -39,6 +39,9 @@
 #include "core/core_types.h"
 #include "core/core_logging.h"
 
+static constexpr f32 SMALL_NUMBER = 1.e-6f;
+static constexpr f32 KINDA_SMALL_NUMBER = 1.e-4f;
+static constexpr f32 PI = 3.14159265358979323846f;
 
 template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
 decltype(auto) InvokeTemplatedLambda(Lambda&& lambda, FunctionParam&& ... functionParam)
@@ -46,9 +49,20 @@ decltype(auto) InvokeTemplatedLambda(Lambda&& lambda, FunctionParam&& ... functi
 	return std::forward<Lambda>(lambda).template operator()<TemplateParam...>(std::forward<FunctionParam>(functionParam)...);
 }
 
-
 namespace Poole::Math
 {
+	template<typename T>
+	static constexpr T Abs(T f) //std's Abs is not constexpr!!!
+	{
+		return (f < 0) ? -f : f;
+	}
+
+	static bool IsMultipleOf(f32 a, f32 b, f32 tolerance = KINDA_SMALL_NUMBER)
+	{
+		const f32 modt = std::fmod(a, b);
+		return (Abs(modt) <= tolerance) || (Abs(b - modt) <= tolerance);
+	}
+
 	template<bool incZero = false>
 	static constexpr bool IsPowerOfTwo(u64 n)
 	{
@@ -60,6 +74,16 @@ namespace Poole::Math
 		{
 			return (n > 0 && ((n & (n - 1)) == 0));
 		}
+	}
+
+	static constexpr bool IsNearlyZero(f32 f, f32 tolerance = SMALL_NUMBER)
+	{
+		return Abs(f) < tolerance;
+	}
+
+	static constexpr bool IsNearly(f32 f1, f32 f2, f32 tolerance = SMALL_NUMBER)
+	{
+		return Abs(f1 - f2) < tolerance;
 	}
 
 	static constexpr std::array<char,2> ToHex(const u8 num)

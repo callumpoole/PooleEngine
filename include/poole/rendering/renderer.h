@@ -30,6 +30,8 @@ namespace Poole::Rendering {
 		static void BeginScene();
 		static void EndScene(GLFWwindow* window);
 
+		static void Draw2DAxes();
+
 		static OrthographicCamera& GetCamera() { return s_camera; }
 
 		static GLShader s_shaderUniformColor;

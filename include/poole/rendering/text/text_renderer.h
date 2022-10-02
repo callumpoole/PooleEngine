@@ -51,7 +51,7 @@ namespace Poole::Rendering
 		std::shared_ptr<SvgFontRenderer> m_VariableWidthFont;
 
 		ftransform2D m_Transform;
-		fvec2 m_ShadowOffset = { 0.05f, -0.05f };
+		fvec2 m_ShadowOffset = { 0.02f, -0.02f };
 		EHorizontalAlignment m_HorizontalAlign = EHorizontalAlignment::Left;
 		std::string_view m_TextView;
 		std::string m_Text;
