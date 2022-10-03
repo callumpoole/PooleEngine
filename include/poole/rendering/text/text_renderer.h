@@ -24,25 +24,29 @@ namespace Poole::Rendering
 		const fcolor4& GetColor() const { return m_TintColor; }
 
 		void SetPosition(fvec3 pos);
-		fvec3 GetPosition() const { return m_Transform.position; }
+		const fvec3& GetPosition() const { return m_Transform.position; }
 
-		void SetSize(float size);
-		void SetSize(fvec2 size);
-		fvec2 GetSize() const { return m_Transform.scale; }
+		//Variable Width Fonts Only!
+		void SetFontSize(f32 fontSize);
+		f32 GetFontSize() const { return IsMonospaced() ? -1.f : m_FontSize; }
+
+		void SetScale(f32 scale);
+		void SetScale(fvec2 scale);
+		const fvec2& GetScale() const { return m_Transform.scale; }
 
 		void SetRotationRadians(float radians);
-		float GetRotationRadians() const { return m_Transform.rotation; }
+		f32 GetRotationRadians() const { return m_Transform.rotation; }
 
 		void SetShadowOffset(fvec2 pos);
-		fvec2 GetShadowOffset() const { return m_ShadowOffset; }
+		const fvec2& GetShadowOffset() const { return m_ShadowOffset; }
 
 		void SetShadowColor(fcolor4 col);
-		fcolor4 GetShadowColor() const { return m_ShadowTintColor; }
+		const fcolor4& GetShadowColor() const { return m_ShadowTintColor; }
 
 		void RenderText();
 	private:
-		void RenderText_Monospaced(ftransform2D& trans, fcolor4 col);
-		void RenderText_VariableWidth(ftransform2D& trans, fcolor4 col);
+		void RenderText_Monospaced(ftransform2D& trans, const fcolor4& col);
+		void RenderText_VariableWidth(ftransform2D& trans, const fcolor4& col);
 
 		bool IsMonospaced() const;
 
@@ -57,5 +61,6 @@ namespace Poole::Rendering
 		std::string m_Text;
 		fcolor4 m_TintColor = Colors::White<fcolor4>;
 		fcolor4 m_ShadowTintColor = Colors::Black<fcolor4>;
+		f32 m_FontSize = 70.f;
 	};
 }

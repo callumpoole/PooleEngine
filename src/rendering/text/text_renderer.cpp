@@ -11,7 +11,7 @@ namespace Poole::Rendering
 	void TextRenderer::SetTextView(std::string_view textView)
 	{
 		m_TextView = textView;
-		m_Text.clear();
+		m_Text.clear();;
 	}
 	void TextRenderer::SetText(const std::string& text)
 	{
@@ -34,13 +34,25 @@ namespace Poole::Rendering
 		m_Transform.position = pos;
 	}
 
-	void TextRenderer::SetSize(float size)
+	void TextRenderer::SetFontSize(f32 fontSize)
 	{
-		m_Transform.scale = { size, size };
+		if (IsMonospaced())
+		{
+			LOG_ERROR("Monospaced Fonts can't have a font size, rely on Scale only!");
+		}
+		else
+		{
+			m_FontSize = fontSize;
+		}
 	}
-	void TextRenderer::SetSize(fvec2 size)
+
+	void TextRenderer::SetScale(f32 scale)
 	{
-		m_Transform.scale = size;
+		m_Transform.scale = { scale, scale };
+	}
+	void TextRenderer::SetScale(fvec2 scale)
+	{
+		m_Transform.scale = scale;
 	}
 
 	void TextRenderer::SetRotationRadians(float radians)
@@ -76,10 +88,11 @@ namespace Poole::Rendering
 		IsMonospaced() ? RenderText_Monospaced(trans, m_TintColor) : RenderText_VariableWidth(trans, m_TintColor);
 	}
 
-	void TextRenderer::RenderText_Monospaced(ftransform2D& trans, fcolor4 col)
+	void TextRenderer::RenderText_Monospaced(ftransform2D& trans, const fcolor4& col)
 	{
 		fvec3 newLinePos = trans.position;
 		const fmat4 rotMat = trans.MakeRotationMatrix();
+
 		for (const char c : (m_TextView.empty() ? m_Text : m_TextView))
 		{
 			if (c == '\r')
@@ -100,13 +113,11 @@ namespace Poole::Rendering
 			}
 		}
 	}
-	void TextRenderer::RenderText_VariableWidth(ftransform2D& trans, fcolor4 col)
+	void TextRenderer::RenderText_VariableWidth(ftransform2D& trans, const fcolor4& col)
 	{
-		constexpr float fontSize = 70.f;
-
 		fvec2 xy{};
 
-		trans.scale /= fontSize;
+		trans.scale /= m_FontSize;
 
 		std::array<fvec4, 4> coords;
 		std::array<fvec2, 4> uv;
@@ -118,16 +129,16 @@ namespace Poole::Rendering
 			if (c == '\n')
 			{
 				xy.x = 0;
-				xy.y -= fontSize;
+				xy.y -= m_FontSize;
 				continue;
 			}
 
-			m_VariableWidthFont->Convert(c, fontSize, xy, coords, uv);
+			m_VariableWidthFont->Convert(c, m_FontSize, xy, coords, uv);
 
-			Renderer2D::DrawSubTexturedQuad(coords, trans, m_VariableWidthFont->GetImageForSize(fontSize), uv, /*tiling*/ 1, col);
+			Renderer2D::DrawSubTexturedQuad(coords, trans, m_VariableWidthFont->GetImageForSize(m_FontSize), uv, /*tiling*/ 1, col);
 		}
 
-		trans.scale *= fontSize;
+		trans.scale *= m_FontSize;
 	}
 
 	bool TextRenderer::IsMonospaced() const

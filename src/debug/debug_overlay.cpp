@@ -9,7 +9,7 @@ namespace Poole::Debug
     DebugOverlay::DebugOverlay()
     {
         m_DebugText = Poole::Rendering::TextRendererFactory::MakeRenderText(true);
-        m_DebugText->SetSize(0.05f);
+        m_DebugText->SetScale(0.05f);
         m_DebugText->SetTextView("0fps");
         m_DebugText->SetColor(Colors::Blue<fcolor4>);
         m_DebugText->SetPosition(fvec3{ -1.25f, 0.9f, 0 });

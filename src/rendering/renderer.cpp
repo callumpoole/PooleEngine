@@ -188,7 +188,7 @@ namespace Poole::Rendering
 							{
 								s_AxisNumbers[textIndexCounter] = TextRendererFactory::MakeRenderText(false);
 								s_AxisNumbers[textIndexCounter]->SetPosition(SetInIndex(data.numberOffset, f));
-								s_AxisNumbers[textIndexCounter]->SetSize(0.1f);
+								s_AxisNumbers[textIndexCounter]->SetScale(0.1f);
 								s_AxisNumbers[textIndexCounter]->SetText(std::format("{:.0f}", f));
 								s_AxisNumbers[textIndexCounter]->SetColor(data.col);
 
