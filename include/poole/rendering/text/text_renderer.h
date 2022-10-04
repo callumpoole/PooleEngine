@@ -11,14 +11,10 @@ namespace Poole::Rendering
 	{
 		friend class TextRendererFactory;
 	public:
-		enum class EHorizontalAlignment : u8 {
-			Left, Center, Right
-		};
-
 		void SetTextView(std::string_view textView);
 		void SetText(const std::string& text);
 		void SetText(std::string&& text);
-		std::string_view GetTextOrView() const { return m_TextView; }
+		std::string_view GetTextOrView() const { return (m_TextView.empty() ? m_Text : m_TextView); }
 
 		void SetColor(const fcolor4& tintColor);
 		const fcolor4& GetColor() const { return m_TintColor; }
@@ -43,6 +39,13 @@ namespace Poole::Rendering
 		void SetShadowColor(fcolor4 col);
 		const fcolor4& GetShadowColor() const { return m_ShadowTintColor; }
 
+		void SetHorizontalPivot(EHorizontal h) { m_HorizontalPivot = h; }
+		void SetVerticalPivot(EVertical v) { m_VerticalPivot = v; }
+		void SetPivot(EHorizontal h, EVertical v) { m_HorizontalPivot = h; m_VerticalPivot = v; }
+		EHorizontal GetHorizontalPivot() const { return m_HorizontalPivot; }
+		EVertical GetVerticalPivot() const { return m_VerticalPivot; }
+		std::tuple<EHorizontal, EVertical> GetPivot() const { return { m_HorizontalPivot, m_VerticalPivot }; }
+
 		void RenderText();
 	private:
 		void RenderText_Monospaced(ftransform2D& trans, const fcolor4& col);
@@ -56,11 +59,13 @@ namespace Poole::Rendering
 
 		ftransform2D m_Transform;
 		fvec2 m_ShadowOffset = { 0.02f, -0.02f };
-		EHorizontalAlignment m_HorizontalAlign = EHorizontalAlignment::Left;
+		EHorizontal m_HorizontalPivot = EHorizontal::Left;
+		EVertical m_VerticalPivot = EVertical::Top;
 		std::string_view m_TextView;
 		std::string m_Text;
 		fcolor4 m_TintColor = Colors::White<fcolor4>;
 		fcolor4 m_ShadowTintColor = Colors::Black<fcolor4>;
 		f32 m_FontSize = 70.f;
+		mutable std::optional<fvec2> m_cachedRenderArea;
 	};
 }

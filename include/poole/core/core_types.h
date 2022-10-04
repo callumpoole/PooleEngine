@@ -78,6 +78,13 @@ struct ftransform2D
 	fvec2 shear = fvec2(0.0f);
 };
 
+enum class EHorizontal : u8 {
+	Left, Center, Right
+};
+enum class EVertical : u8 {
+	Bottom, Middle, Top
+};
+
 //Copied from https://youtu.be/INn3xa4pMfg
 template<typename _K, typename _V, size_t _Size>
 struct ConstexprMap

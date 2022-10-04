@@ -11,17 +11,20 @@ namespace Poole::Rendering
 	void TextRenderer::SetTextView(std::string_view textView)
 	{
 		m_TextView = textView;
-		m_Text.clear();;
+		m_Text.clear();
+		m_cachedRenderArea = {};
 	}
 	void TextRenderer::SetText(const std::string& text)
 	{
 		m_TextView = {};
 		m_Text = text;
+		m_cachedRenderArea = {};
 	}
 	void TextRenderer::SetText(std::string&& text)
 	{
 		m_TextView = {};
 		m_Text = std::move(text);
+		m_cachedRenderArea = {};
 	}
 
 	void TextRenderer::SetColor(const fcolor4& tintColor)
@@ -44,6 +47,7 @@ namespace Poole::Rendering
 		{
 			m_FontSize = fontSize;
 		}
+		m_cachedRenderArea = {};
 	}
 
 	void TextRenderer::SetScale(f32 scale)
@@ -91,27 +95,83 @@ namespace Poole::Rendering
 	void TextRenderer::RenderText_Monospaced(ftransform2D& trans, const fcolor4& col)
 	{
 		fvec3 newLinePos = trans.position;
-		const fmat4 rotMat = trans.MakeRotationMatrix();
+		fmat4 rotMat = trans.MakeRotationMatrix();
 
-		for (const char c : (m_TextView.empty() ? m_Text : m_TextView))
+		auto Do = [this, &trans, col, &newLinePos, &rotMat](bool cacheArea)
 		{
-			if (c == '\r')
-				continue;
-			if (c == '\n')
+			if (cacheArea)
 			{
-				newLinePos += fvec3(rotMat * fvec4(0, -trans.scale.y, 0, 1));
-				trans.position = newLinePos;
-				continue;
+				m_cachedRenderArea = { 0,0 };
 			}
-
-			if (std::shared_ptr<SubImage> Sub = m_MonospacedFont->Convert(c))
+			float currentLineLength = 0;
+			for (const char c : GetTextOrView())
 			{
-				Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
+				if (c == '\r')
+					continue;
+				if (c == '\n')
+				{
+					newLinePos += fvec3(rotMat * fvec4(0, -trans.scale.y, 0, 1));
+					trans.position = newLinePos;
 
-				//Offset for the next char
-				trans.position += fvec3(rotMat * fvec4(trans.scale.x, 0, 0, 1));
+					if (cacheArea)
+					{
+						if (currentLineLength > m_cachedRenderArea->x)
+						{
+							m_cachedRenderArea->x = currentLineLength;
+						}
+						m_cachedRenderArea->y += trans.scale.y;
+						currentLineLength = 0;
+					}
+					continue;
+				}
+
+				if (std::shared_ptr<SubImage> Sub = m_MonospacedFont->Convert(c))
+				{
+					if (cacheArea)
+					{
+						currentLineLength += trans.scale.x;
+					}
+					else
+					{
+						Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
+					}
+					//Offset for the next char
+					trans.position += fvec3(rotMat * fvec4(trans.scale.x, 0, 0, 1));
+				}
 			}
+			if (cacheArea && currentLineLength > m_cachedRenderArea->x)
+			{
+				m_cachedRenderArea->x = currentLineLength;
+			}
+		};
+
+		if (!m_cachedRenderArea.has_value())
+		{
+			ftransform2D prevTrans = trans;
+			Do(true);
+			trans = prevTrans;
 		}
+
+		float h = 0, v = 0;
+		switch (m_HorizontalPivot)
+		{
+		case EHorizontal::Left: break;
+		case EHorizontal::Center: h = m_cachedRenderArea->x / 2.f; break;
+		case EHorizontal::Right:  h = m_cachedRenderArea->x; break;
+		default: return;
+		}
+		switch (m_VerticalPivot)
+		{
+		case EVertical::Top: break;
+		case EVertical::Middle: v = m_cachedRenderArea->y / 2.f; break;
+		case EVertical::Bottom: v = m_cachedRenderArea->y; break;
+		default: return;
+		}
+
+		trans.position -= fvec3(rotMat * fvec4(h, -v, 0, 1));
+		newLinePos = trans.position;
+
+		Do(false);
 	}
 	void TextRenderer::RenderText_VariableWidth(ftransform2D& trans, const fcolor4& col)
 	{
@@ -122,7 +182,7 @@ namespace Poole::Rendering
 		std::array<fvec4, 4> coords;
 		std::array<fvec2, 4> uv;
 
-		for (const char c : (m_TextView.empty() ? m_Text : m_TextView))
+		for (const char c : GetTextOrView())
 		{
 			if (c == '\r')
 				continue;

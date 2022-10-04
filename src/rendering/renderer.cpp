@@ -186,11 +186,12 @@ namespace Poole::Rendering
 
 							if (numberEachBig && s_FirstExecution)
 							{
-								s_AxisNumbers[textIndexCounter] = TextRendererFactory::MakeRenderText(false);
+								s_AxisNumbers[textIndexCounter] = TextRendererFactory::MakeRenderText(true);
 								s_AxisNumbers[textIndexCounter]->SetPosition(SetInIndex(data.numberOffset, f));
 								s_AxisNumbers[textIndexCounter]->SetScale(0.1f);
 								s_AxisNumbers[textIndexCounter]->SetText(std::format("{:.0f}", f));
 								s_AxisNumbers[textIndexCounter]->SetColor(data.col);
+								//s_AxisNumbers[textIndexCounter]->SetPivot(EHorizontal::Center, EVertical::Middle);
 
 								++textIndexCounter;
 							}
