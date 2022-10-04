@@ -302,9 +302,10 @@ namespace Poole::Rendering
 		if (s_Data.m_QuadIndexCount >= RenderData2D::k_MaxIndices)
 			NextBatch();
 
+		const fmat4 mat = transform.MakeTransformMatrix();
 		for (size_t i = 0; i < k_FullTextureCoords.size(); i++)
 		{
-			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * coords[i];
+			s_Data.m_QuadVertexBufferPtr->Position = mat * coords[i];
 			s_Data.m_QuadVertexBufferPtr->Color = color;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = k_FullTextureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;
@@ -365,9 +366,10 @@ namespace Poole::Rendering
 			s_Data.m_TextureSlotIndex++;
 		}
 
+		const fmat4 mat = transform.MakeTransformMatrix();
 		for (size_t i = 0; i < textureCoords.size(); i++)
 		{
-			s_Data.m_QuadVertexBufferPtr->Position = transform.MakeTransformMatrix() * coords[i];
+			s_Data.m_QuadVertexBufferPtr->Position = mat * coords[i];
 			s_Data.m_QuadVertexBufferPtr->Color = tintColor;
 			s_Data.m_QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.m_QuadVertexBufferPtr->TexIndex = textureIndex;

@@ -94,84 +94,70 @@ namespace Poole::Rendering
 
 	void TextRenderer::RenderText_Monospaced(ftransform2D& trans, const fcolor4& col)
 	{
-		fvec3 newLinePos = trans.position;
-		fmat4 rotMat = trans.MakeRotationMatrix();
-
-		auto Do = [this, &trans, col, &newLinePos, &rotMat](bool cacheArea)
+		//Cache Size (If Needed)
+		if (!m_cachedRenderArea)
 		{
-			if (cacheArea)
-			{
-				m_cachedRenderArea = { 0,0 };
-			}
-			float currentLineLength = 0;
+			m_cachedRenderArea = { 0.f, 0.f };
+			f32 currentLineLength = 0.f;
 			for (const char c : GetTextOrView())
 			{
-				if (c == '\r')
-					continue;
 				if (c == '\n')
 				{
-					newLinePos += fvec3(rotMat * fvec4(0, -trans.scale.y, 0, 1));
-					trans.position = newLinePos;
-
-					if (cacheArea)
-					{
-						if (currentLineLength > m_cachedRenderArea->x)
-						{
-							m_cachedRenderArea->x = currentLineLength;
-						}
-						m_cachedRenderArea->y += trans.scale.y;
-						currentLineLength = 0;
-					}
-					continue;
+					m_cachedRenderArea->x = std::max(m_cachedRenderArea->x, currentLineLength);
+					m_cachedRenderArea->y += trans.scale.y;
+					currentLineLength = 0;
 				}
-
-				if (std::shared_ptr<SubImage> Sub = m_MonospacedFont->Convert(c))
+				else if (c != '\r')
 				{
-					if (cacheArea)
-					{
-						currentLineLength += trans.scale.x;
-					}
-					else
-					{
-						Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
-					}
-					//Offset for the next char
-					trans.position += fvec3(rotMat * fvec4(trans.scale.x, 0, 0, 1));
+					currentLineLength += trans.scale.x;
 				}
 			}
-			if (cacheArea && currentLineLength > m_cachedRenderArea->x)
-			{
-				m_cachedRenderArea->x = currentLineLength;
-			}
-		};
-
-		if (!m_cachedRenderArea.has_value())
-		{
-			ftransform2D prevTrans = trans;
-			Do(true);
-			trans = prevTrans;
+			m_cachedRenderArea->x = std::max(m_cachedRenderArea->x, currentLineLength);
 		}
 
-		float h = 0, v = 0;
+		const fmat4 rotMat = trans.MakeRotationMatrix();
+
+		//Apply Pivot
+		f32 horizontal, vertical;
 		switch (m_HorizontalPivot)
 		{
-		case EHorizontal::Left: break;
-		case EHorizontal::Center: h = m_cachedRenderArea->x / 2.f; break;
-		case EHorizontal::Right:  h = m_cachedRenderArea->x; break;
+		case EHorizontal::Left:	  horizontal = 0.f; break;
+		case EHorizontal::Center: horizontal = m_cachedRenderArea->x / 2.f; break;
+		case EHorizontal::Right:  horizontal = m_cachedRenderArea->x; break;
 		default: return;
 		}
 		switch (m_VerticalPivot)
 		{
-		case EVertical::Top: break;
-		case EVertical::Middle: v = m_cachedRenderArea->y / 2.f; break;
-		case EVertical::Bottom: v = m_cachedRenderArea->y; break;
+		case EVertical::Top:	vertical = 0.f;  break;
+		case EVertical::Middle: vertical = m_cachedRenderArea->y / 2.f; break;
+		case EVertical::Bottom: vertical = m_cachedRenderArea->y; break;
 		default: return;
 		}
+		//Fine to compare floats == in this case, alternatives would be more expensive and defeat the point of the if
+		if (horizontal != 0.f && vertical != 0.f) //Can skip calculation if both are 0.
+		{
+			trans.position -= fvec3(rotMat * fvec4(horizontal, -vertical, 0, 1));
+		}
 
-		trans.position -= fvec3(rotMat * fvec4(h, -v, 0, 1));
-		newLinePos = trans.position;
+		//Draw
+		fvec3 newLinePos = trans.position;
+		for (const char c : GetTextOrView())
+		{
+			if (c == '\r')
+				continue;
+			if (c == '\n')
+			{
+				newLinePos += fvec3(rotMat * fvec4(0, -trans.scale.y, 0, 1));
+				trans.position = newLinePos;
+			}
+			else if (std::shared_ptr<SubImage> Sub = m_MonospacedFont->Convert(c))
+			{
+				Renderer2D::DrawSubTexturedQuad(trans, *Sub, /*tiling*/ 1, col);
 
-		Do(false);
+				//Offset for the next char
+				trans.position += fvec3(rotMat * fvec4(trans.scale.x, 0, 0, 1));
+			}
+		}
 	}
 	void TextRenderer::RenderText_VariableWidth(ftransform2D& trans, const fcolor4& col)
 	{
