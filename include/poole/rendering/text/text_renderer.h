@@ -51,6 +51,9 @@ namespace Poole::Rendering
 		void RenderText_Monospaced(ftransform2D& trans, const fcolor4& col);
 		void RenderText_VariableWidth(ftransform2D& trans, const fcolor4& col);
 
+		void DebugShowPivot(fvec3 pos) const;
+		fvec2 GetRealPivotValues() const;
+
 		bool IsMonospaced() const;
 
 		TextRenderer() = default;
@@ -67,5 +70,7 @@ namespace Poole::Rendering
 		fcolor4 m_ShadowTintColor = Colors::Black<fcolor4>;
 		f32 m_FontSize = 70.f;
 		mutable std::optional<fvec2> m_cachedRenderArea;
+		static constexpr f32 s_DebugPivotCrossSize = 0.1f;
+		static constexpr fcolor4 s_DebugPivotColor = Colors::Yellow<fcolor4>;
 	};
 }

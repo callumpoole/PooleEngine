@@ -118,25 +118,15 @@ namespace Poole::Rendering
 		const fmat4 rotMat = trans.MakeRotationMatrix();
 
 		//Apply Pivot
-		f32 horizontal, vertical;
-		switch (m_HorizontalPivot)
-		{
-		case EHorizontal::Left:	  horizontal = 0.f; break;
-		case EHorizontal::Center: horizontal = m_cachedRenderArea->x / 2.f; break;
-		case EHorizontal::Right:  horizontal = m_cachedRenderArea->x; break;
-		default: return;
-		}
-		switch (m_VerticalPivot)
-		{
-		case EVertical::Top:	vertical = 0.f;  break;
-		case EVertical::Middle: vertical = m_cachedRenderArea->y / 2.f; break;
-		case EVertical::Bottom: vertical = m_cachedRenderArea->y; break;
-		default: return;
-		}
+		const fvec2 pivotalOffset = GetRealPivotValues();
+
+		//Debug Draw Pivot
+		DebugShowPivot(trans.position);
+
 		//Fine to compare floats == in this case, alternatives would be more expensive and defeat the point of the if
-		if (horizontal != 0.f && vertical != 0.f) //Can skip calculation if both are 0.
+		if (pivotalOffset.x != 0.f && pivotalOffset.y != 0.f) //Can skip calculation if both are 0.
 		{
-			trans.position -= fvec3(rotMat * fvec4(horizontal, -vertical, 0, 1));
+			trans.position -= fvec3(rotMat * fvec4(pivotalOffset.x, -pivotalOffset.y, 0, 1));
 		}
 
 		//Draw
@@ -161,13 +151,59 @@ namespace Poole::Rendering
 	}
 	void TextRenderer::RenderText_VariableWidth(ftransform2D& trans, const fcolor4& col)
 	{
-		fvec2 xy{};
-
+		//Push Scale Div
 		trans.scale /= m_FontSize;
 
+		fvec2 xy{};
 		std::array<fvec4, 4> coords;
 		std::array<fvec2, 4> uv;
 
+		//Cache Size (If Needed)
+		if (!m_cachedRenderArea)
+		{
+			f32 xOffset = 0;
+			f32 yOffset = 0;
+			m_cachedRenderArea = { 0.f, 0.f };
+			for (const char c : GetTextOrView())
+			{
+				if (c == '\n')
+				{
+					xOffset = xy.x;
+					yOffset += m_FontSize;
+				}
+				else
+				{
+					//TODO: Check with lots of trailing \n 
+					//coords[1] has the highest in both x & y
+					m_cachedRenderArea->x = std::max(m_cachedRenderArea->x, coords[1].x - xOffset);
+					m_cachedRenderArea->y = std::max(m_cachedRenderArea->y, coords[1].y + yOffset);
+
+					m_VariableWidthFont->Convert(c, m_FontSize, xy, coords, uv);
+				}
+			}
+			m_cachedRenderArea->y -= m_FontSize;
+			*m_cachedRenderArea = *m_cachedRenderArea * trans.scale;
+		}
+
+		//Apply Pivot
+		{
+			const fmat4 rotMat = trans.MakeRotationMatrix();
+			const fvec2 pivotalOffset = GetRealPivotValues();
+
+			//Debug Draw Pivot
+			DebugShowPivot(trans.position);
+
+			//Fine to compare floats == in this case, alternatives would be more expensive and defeat the point of the if
+			if (pivotalOffset.x != 0.f && pivotalOffset.y != 0.f) //Can skip calculation if both are 0.
+			{
+				trans.position -= fvec3(rotMat * fvec4(pivotalOffset.x, -pivotalOffset.y, 0, 1));
+			}
+		}
+
+		//Reset XY
+		xy = fvec2{};
+
+		//Draw
 		for (const char c : GetTextOrView())
 		{
 			if (c == '\r')
@@ -184,11 +220,44 @@ namespace Poole::Rendering
 			Renderer2D::DrawSubTexturedQuad(coords, trans, m_VariableWidthFont->GetImageForSize(m_FontSize), uv, /*tiling*/ 1, col);
 		}
 
+		//Pop Scale Div
 		trans.scale *= m_FontSize;
+	}
+
+	fvec2 TextRenderer::GetRealPivotValues() const
+	{
+		fvec2 out; //No need to initalize, will be done below for sure.
+
+		switch (m_HorizontalPivot)
+		{
+		case EHorizontal::Left:	  out.x = 0.f; break;
+		case EHorizontal::Center: out.x = m_cachedRenderArea->x / 2.f; break;
+		case EHorizontal::Right:  out.x = m_cachedRenderArea->x; break;
+		default: return fvec2{};
+		}
+		switch (m_VerticalPivot)
+		{
+		case EVertical::Top:	out.y = 0.f;  break;
+		case EVertical::Middle: out.y = m_cachedRenderArea->y / 2.f; break;
+		case EVertical::Bottom: out.y = m_cachedRenderArea->y; break;
+		default: return fvec2{};
+		}
+
+		return out;
 	}
 
 	bool TextRenderer::IsMonospaced() const
 	{
 		return (bool)m_MonospacedFont.get();
+	}
+
+	void TextRenderer::DebugShowPivot(fvec3 pos) const
+	{
+		if (s_DebugPivotCrossSize > SMALL_NUMBER)
+		{
+			constexpr f32 s = s_DebugPivotCrossSize;
+			Renderer2D::DrawLine(pos - fvec3(s,  s, 0), pos + fvec3(s,  s, 0), s_DebugPivotColor);
+			Renderer2D::DrawLine(pos - fvec3(s, -s, 0), pos + fvec3(s, -s, 0), s_DebugPivotColor);
+		}
 	}
 }
