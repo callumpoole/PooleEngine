@@ -163,6 +163,8 @@ namespace Poole::Rendering
 
 			for (u8 axis = 0; axis < 2; axis++)
 			{
+				const EHorizontal NumberPivotH = axis == 0 ? EHorizontal::Center : EHorizontal::Left;
+				const EVertical NumberPivotV = axis == 0 ? EVertical::Bottom : EVertical::Middle;
 				const AxisData& data = axisData[axis];
 
 				auto SetInIndex = [axis](fvec3 vec, const f32 val) -> fvec3
@@ -186,12 +188,12 @@ namespace Poole::Rendering
 
 							if (numberEachBig && s_FirstExecution)
 							{
-								s_AxisNumbers[textIndexCounter] = TextRendererFactory::MakeRenderText(true);
+								s_AxisNumbers[textIndexCounter] = TextRendererFactory::MakeRenderText(false);
 								s_AxisNumbers[textIndexCounter]->SetPosition(SetInIndex(data.numberOffset, f));
 								s_AxisNumbers[textIndexCounter]->SetScale(0.1f);
 								s_AxisNumbers[textIndexCounter]->SetText(std::format("{:.0f}", f));
 								s_AxisNumbers[textIndexCounter]->SetColor(data.col);
-								//s_AxisNumbers[textIndexCounter]->SetPivot(EHorizontal::Center, EVertical::Middle);
+								s_AxisNumbers[textIndexCounter]->SetPivot(NumberPivotH, NumberPivotV);
 
 								++textIndexCounter;
 							}

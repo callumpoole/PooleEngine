@@ -175,12 +175,12 @@ namespace Poole::Rendering
 				else
 				{
 					m_VariableWidthFont->Convert(c, m_FontSize, xy, coords, uv);
-					//TODO: Check with lots of trailing \n 
-					//coords[1] has the highest in both x & y
-					m_cachedRenderArea->x = std::max(m_cachedRenderArea->x, coords[1].x - xOffset);
-					m_cachedRenderArea->y = std::max(m_cachedRenderArea->y, coords[1].y + yOffset);
-
 				}
+
+				//TODO: Check with lots of trailing \n 
+				//coords[1] has the highest in both x & y
+				m_cachedRenderArea->x = std::max(m_cachedRenderArea->x, coords[1].x - xOffset);
+				m_cachedRenderArea->y = std::max(m_cachedRenderArea->y, coords[1].y + yOffset);
 			}
 			*m_cachedRenderArea = *m_cachedRenderArea * trans.scale;
 		}
