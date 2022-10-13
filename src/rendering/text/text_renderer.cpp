@@ -263,20 +263,23 @@ namespace Poole::Rendering
 
 	void TextRenderer::DebugShowBoundingBox(fvec3 pos) const
 	{
-		if (m_cachedRenderArea)
+		if constexpr (s_DebugBoundingBox)
 		{
-			const fvec2 po = TextRenderer::GetRealPivotValues();
-			pos += fvec3(-po.x, po.y, 0);
+			if (m_cachedRenderArea)
+			{
+				const fvec2 po = TextRenderer::GetRealPivotValues();
+				pos += fvec3(-po.x, po.y, 0);
 
-			const fvec2 a = *m_cachedRenderArea;
-			const fvec3 right		 = pos + fvec3(a.x,    0, 0);
-			const fvec3 down		 = pos + fvec3(  0, -a.y, 0);
-			const fvec3 rightAndDown = pos + fvec3(a.x, -a.y, 0);
+				const fvec2 a = *m_cachedRenderArea;
+				const fvec3 right		 = pos + fvec3(a.x,    0, 0);
+				const fvec3 down		 = pos + fvec3(  0, -a.y, 0);
+				const fvec3 rightAndDown = pos + fvec3(a.x, -a.y, 0);
 
-			Renderer2D::DrawLine(pos, right, m_TintColor);
-			Renderer2D::DrawLine(pos, down, m_TintColor);
-			Renderer2D::DrawLine(right, rightAndDown, m_TintColor);
-			Renderer2D::DrawLine(down, rightAndDown, m_TintColor);
+				Renderer2D::DrawLine(pos, right, m_TintColor);
+				Renderer2D::DrawLine(pos, down, m_TintColor);
+				Renderer2D::DrawLine(right, rightAndDown, m_TintColor);
+				Renderer2D::DrawLine(down, rightAndDown, m_TintColor);
+			}
 		}
 	}
 }

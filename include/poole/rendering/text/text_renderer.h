@@ -71,7 +71,7 @@ namespace Poole::Rendering
 		fcolor4 m_ShadowTintColor = Colors::Black<fcolor4>;
 		f32 m_FontSize = 70.f;
 		mutable std::optional<fvec2> m_cachedRenderArea;
-		static constexpr f32 s_DebugPivotCrossSize = 0.1f;
-		static constexpr fcolor4 s_DebugPivotColor = Colors::Yellow<fcolor4>;
+		static constexpr f32 s_DebugPivotCrossSize = 0.f;
+		static constexpr bool s_DebugBoundingBox = false;
 	};
 }
