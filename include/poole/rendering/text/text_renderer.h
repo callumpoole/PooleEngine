@@ -52,6 +52,7 @@ namespace Poole::Rendering
 		void RenderText_VariableWidth(ftransform2D& trans, const fcolor4& col);
 
 		void DebugShowPivot(fvec3 pos) const;
+		void DebugShowBoundingBox(fvec3 pos) const;
 		fvec2 GetRealPivotValues() const;
 
 		bool IsMonospaced() const;

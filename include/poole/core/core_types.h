@@ -131,6 +131,24 @@ namespace Colors
 	AddColor(White, 1.00f, 1.00f, 1.00f, 1.00f);
 	AddColor(Grey, 0.50f, 0.50f, 0.50f, 1.00f);
 	AddColor(Black, 0.00f, 0.00f, 0.00f, 1.00f);
+
+	//TODO: Find a cleaner solution
+	AddColor(Alpha90, 1.00f, 1.00f, 1.00f, 0.90f);
+	AddColor(Alpha80, 1.00f, 1.00f, 1.00f, 0.80f);
+	AddColor(Alpha75, 1.00f, 1.00f, 1.00f, 0.75f);
+	AddColor(Alpha70, 1.00f, 1.00f, 1.00f, 0.70f);
+	AddColor(Alpha67, 1.00f, 1.00f, 1.00f, 0.67f);
+	AddColor(Alpha60, 1.00f, 1.00f, 1.00f, 0.60f);
+	AddColor(Alpha50, 1.00f, 1.00f, 1.00f, 0.50f);
+	AddColor(Alpha40, 1.00f, 1.00f, 1.00f, 0.40f);
+	AddColor(Alpha33, 1.00f, 1.00f, 1.00f, 0.33f);
+	AddColor(Alpha30, 1.00f, 1.00f, 1.00f, 0.30f);
+	AddColor(Alpha25, 1.00f, 1.00f, 1.00f, 0.25f);
+	AddColor(Alpha20, 1.00f, 1.00f, 1.00f, 0.20f);
+	AddColor(Alpha10, 1.00f, 1.00f, 1.00f, 0.10f);
+	AddColor(Alpha5 , 1.00f, 1.00f, 1.00f, 0.05f);
+	AddColor(Alpha1 , 1.00f, 1.00f, 1.00f, 0.01f);
+	AddColor(Alpha0 , 1.00f, 1.00f, 1.00f, 0.00f);
 #undef AddColor
 }
 

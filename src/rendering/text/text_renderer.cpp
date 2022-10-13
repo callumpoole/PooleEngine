@@ -97,7 +97,7 @@ namespace Poole::Rendering
 		//Cache Size (If Needed)
 		if (!m_cachedRenderArea)
 		{
-			m_cachedRenderArea = { 0.f, 0.f };
+			m_cachedRenderArea = { SMALL_NUMBER, SMALL_NUMBER }; //Need SMALL_NUMBER for single characters or single lines
 			f32 currentLineLength = 0.f;
 			for (const char c : GetTextOrView())
 			{
@@ -113,21 +113,22 @@ namespace Poole::Rendering
 				}
 			}
 			m_cachedRenderArea->x = std::max(m_cachedRenderArea->x, currentLineLength);
+
+			m_cachedRenderArea->y += trans.scale.y;
 		}
 
 		const fmat4 rotMat = trans.MakeRotationMatrix();
 
 		//Apply Pivot
-		const fvec2 pivotalOffset = GetRealPivotValues();
+		fvec2 pivotalOffset = GetRealPivotValues(); //Uses m_cachedRenderArea
+		pivotalOffset -= fvec2(trans.scale) / 2.f;
 
 		//Debug Draw Pivot
 		DebugShowPivot(trans.position);
+		DebugShowBoundingBox(trans.position);
 
-		//Fine to compare floats == in this case, alternatives would be more expensive and defeat the point of the if
-		if (pivotalOffset.x != 0.f && pivotalOffset.y != 0.f) //Can skip calculation if both are 0.
-		{
-			trans.position -= fvec3(rotMat * fvec4(pivotalOffset.x, -pivotalOffset.y, 0, 1));
-		}
+		//Offset creation area by pivot offset
+		trans.position -= fvec3(rotMat * fvec4(pivotalOffset.x, -pivotalOffset.y, 0, 1));
 
 		//Draw
 		fvec3 newLinePos = trans.position;
@@ -163,7 +164,7 @@ namespace Poole::Rendering
 		{
 			f32 xOffset = 0;
 			f32 yOffset = 0;
-			m_cachedRenderArea = { 0.f, 0.f };
+			m_cachedRenderArea = { SMALL_NUMBER, SMALL_NUMBER };
 			for (const char c : GetTextOrView())
 			{
 				if (c == '\n')
@@ -173,31 +174,30 @@ namespace Poole::Rendering
 				}
 				else
 				{
+					m_VariableWidthFont->Convert(c, m_FontSize, xy, coords, uv);
 					//TODO: Check with lots of trailing \n 
 					//coords[1] has the highest in both x & y
 					m_cachedRenderArea->x = std::max(m_cachedRenderArea->x, coords[1].x - xOffset);
 					m_cachedRenderArea->y = std::max(m_cachedRenderArea->y, coords[1].y + yOffset);
 
-					m_VariableWidthFont->Convert(c, m_FontSize, xy, coords, uv);
 				}
 			}
-			m_cachedRenderArea->y -= m_FontSize;
 			*m_cachedRenderArea = *m_cachedRenderArea * trans.scale;
 		}
 
 		//Apply Pivot
 		{
 			const fmat4 rotMat = trans.MakeRotationMatrix();
-			const fvec2 pivotalOffset = GetRealPivotValues();
+			fvec2 pivotalOffset = GetRealPivotValues(); //Uses m_cachedRenderArea
+
+			pivotalOffset.y -= m_FontSize * trans.scale.y * 0.625f; //NOT SURE WHY 0.625
 
 			//Debug Draw Pivot
 			DebugShowPivot(trans.position);
+			DebugShowBoundingBox(trans.position);
 
-			//Fine to compare floats == in this case, alternatives would be more expensive and defeat the point of the if
-			if (pivotalOffset.x != 0.f && pivotalOffset.y != 0.f) //Can skip calculation if both are 0.
-			{
-				trans.position -= fvec3(rotMat * fvec4(pivotalOffset.x, -pivotalOffset.y, 0, 1));
-			}
+			//Offset creation area by pivot offset
+			trans.position -= fvec3(rotMat * fvec4(pivotalOffset.x, -pivotalOffset.y, 0, 1));
 		}
 
 		//Reset XY
@@ -253,11 +253,30 @@ namespace Poole::Rendering
 
 	void TextRenderer::DebugShowPivot(fvec3 pos) const
 	{
-		if (s_DebugPivotCrossSize > SMALL_NUMBER)
+		if constexpr (s_DebugPivotCrossSize > SMALL_NUMBER)
 		{
 			constexpr f32 s = s_DebugPivotCrossSize;
-			Renderer2D::DrawLine(pos - fvec3(s,  s, 0), pos + fvec3(s,  s, 0), s_DebugPivotColor);
-			Renderer2D::DrawLine(pos - fvec3(s, -s, 0), pos + fvec3(s, -s, 0), s_DebugPivotColor);
+			Renderer2D::DrawLine(pos - fvec3(s,  s, 0), pos + fvec3(s,  s, 0), m_TintColor);
+			Renderer2D::DrawLine(pos - fvec3(s, -s, 0), pos + fvec3(s, -s, 0), m_TintColor);
+		}
+	}
+
+	void TextRenderer::DebugShowBoundingBox(fvec3 pos) const
+	{
+		if (m_cachedRenderArea)
+		{
+			const fvec2 po = TextRenderer::GetRealPivotValues();
+			pos += fvec3(-po.x, po.y, 0);
+
+			const fvec2 a = *m_cachedRenderArea;
+			const fvec3 right		 = pos + fvec3(a.x,    0, 0);
+			const fvec3 down		 = pos + fvec3(  0, -a.y, 0);
+			const fvec3 rightAndDown = pos + fvec3(a.x, -a.y, 0);
+
+			Renderer2D::DrawLine(pos, right, m_TintColor);
+			Renderer2D::DrawLine(pos, down, m_TintColor);
+			Renderer2D::DrawLine(right, rightAndDown, m_TintColor);
+			Renderer2D::DrawLine(down, rightAndDown, m_TintColor);
 		}
 	}
 }
