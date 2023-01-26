@@ -20,11 +20,12 @@ namespace Poole
 	private:
 		static void TickMouse(GLFWwindow* window, const Engine& e);
 	public:
-		static ivec2 GetMousePosition(bool invertY = false, ECursorClamping clamping = ECursorClamping::Clamp);
-		static uvec2 GetMousePositionUnsigned(bool invertY = false, ECursorClamping clamping = ECursorClamping::Clamp);
-		static fvec2 GetMousePositionFloat(bool invertY = false, ECursorClamping clamping = ECursorClamping::Clamp, ECursorNormalization norm = ECursorNormalization::Absolute);
-		static ivec2 GetMouseDelta(bool invertY = false, bool withinScreen = true);
-		static fvec2 GetMouseDeltaFloat(bool invertY = false, bool withinScreen = true, ECursorNormalization norm = ECursorNormalization::Absolute);
+		static ivec2 GetMousePosition(bool invertY = true, ECursorClamping clamping = ECursorClamping::Clamp);
+		static uvec2 GetMousePositionUnsigned(bool invertY = true, ECursorClamping clamping = ECursorClamping::Clamp);
+		static fvec2 GetMousePositionFloat(bool invertY = true, ECursorClamping clamping = ECursorClamping::Clamp, ECursorNormalization norm = ECursorNormalization::Absolute);
+		static fvec2 GetMousePositionToScene(ECursorClamping clamping = ECursorClamping::Clamp) { return GetMousePositionFloat(true, clamping, ECursorNormalization::CameraNegativeOneToOneAspect); }
+		static ivec2 GetMouseDelta(bool invertY = true, bool withinScreen = true);
+		static fvec2 GetMouseDeltaFloat(bool invertY = true, bool withinScreen = true, ECursorNormalization norm = ECursorNormalization::Absolute);
 	private:
 		static fvec2 GetMouseFloatLogic(ivec2 in, ECursorNormalization norm);
 		friend void ProcessScrollEvent(GLFWwindow* window, double xOffset, double yOffset);

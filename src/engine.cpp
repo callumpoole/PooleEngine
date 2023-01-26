@@ -7,6 +7,7 @@
 #include "window/window.h"
 #include "engine/command_args.h"
 #include "debug/debug_overlay.h"
+#include "physics/collision_2D/collision_manager_2D.h"
 
 namespace Poole 
 {
@@ -82,9 +83,13 @@ namespace Poole
 
             Rendering::Renderer::BeginScene();
 
+            ColliderManager2D::BeginScene();
+
             UpdateApp(m_TimeData.m_DeltaTime);
 
             DebugOverlay.Update(*this);
+
+            ColliderManager2D::EndScene();
 
             Rendering::Renderer::EndScene(window);
 

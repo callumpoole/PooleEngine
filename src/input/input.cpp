@@ -201,10 +201,11 @@ namespace Poole
 		}
 		if ((norm & ECursorNormalization::FLAG_Camera) > 0)
 		{
-			Rendering::OrthographicCamera& Camera = Rendering::Renderer::GetCamera();
-			const fvec3 cameraPos = Camera.GetPosition();
+			Rendering::OrthographicCamera& camera = Rendering::Renderer::GetCamera();
+			const fvec3 cameraPos = camera.GetPosition();
 			out.x += cameraPos.x;
 			out.y += cameraPos.y;
+			out *= *camera.GetZoomScale();
 		}
 		return out;
 	}

@@ -43,6 +43,25 @@ static constexpr f32 SMALL_NUMBER = 1.e-6f;
 static constexpr f32 KINDA_SMALL_NUMBER = 1.e-4f;
 static constexpr f32 PI = 3.14159265358979323846f;
 
+namespace Poole
+{
+	//UNTESTED
+	template<typename T>
+	void eraseAtSwap(T& container, i32 index)
+	{
+		if (container.size() > 1)
+		{
+			std::iter_swap(container.begin() + index, container.end() - 1);
+			container.pop_back();
+		}
+		else
+		{
+			container.clear();
+		}
+	}
+}
+
+
 template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
 decltype(auto) InvokeTemplatedLambda(Lambda&& lambda, FunctionParam&& ... functionParam)
 {
