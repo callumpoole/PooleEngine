@@ -22,7 +22,7 @@ namespace Poole
 			for (size_t j = i + 1; j < Colliders.size(); j++)
 			{
 				//Maybe need to remove in future if we instead keep a list of colliders
-				if (!Colliders[i]->m_Colliding && !Colliders[j]->m_Colliding)
+				if (!Colliders[i]->m_Colliding || !Colliders[j]->m_Colliding)
 				{
 					const bool colliding = TestCollision(*Colliders[i].get(), *Colliders[j].get());
 					Colliders[i]->m_Colliding |= colliding;
