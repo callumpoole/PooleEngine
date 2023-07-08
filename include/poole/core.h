@@ -54,6 +54,10 @@ void swap(T& x, T& y)
 	y = temp;
 }
 
+//Cheaper than std::pow(..., 2);
+static f32 square(f32 a) { return a * a; }
+static f32 cube(f32 a) { return a * a * a; }
+
 namespace Poole
 {
 	//UNTESTED

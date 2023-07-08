@@ -1,6 +1,7 @@
 #include "poole/physics/collision_2D/collision_manager_2D.h"
 
 #include "poole/physics/collision_2D/box_collider_2D.h"
+#include "poole/physics/collision_2D/circle_collider_2D.h"
 
 #include "poole/rendering/renderer2D.h"
 
@@ -13,11 +14,20 @@ namespace Poole
 	{
 		for (size_t i = 0; i < Colliders.size(); i++)
 		{
+			Colliders[i]->m_Colliding = false;
+		}
+
+		for (size_t i = 0; i < Colliders.size(); i++)
+		{
 			for (size_t j = i + 1; j < Colliders.size(); j++)
 			{
-				const bool colliding = TestCollisionBase(*Colliders[i].get(), *Colliders[j].get());
-				Colliders[i]->colliding = colliding;
-				Colliders[j]->colliding = colliding;
+				//Maybe need to remove in future if we instead keep a list of colliders
+				if (!Colliders[i]->m_Colliding && !Colliders[j]->m_Colliding)
+				{
+					const bool colliding = TestCollision(*Colliders[i].get(), *Colliders[j].get());
+					Colliders[i]->m_Colliding |= colliding;
+					Colliders[j]->m_Colliding |= colliding;
+				}
 			}
 		}
 	}
@@ -31,7 +41,7 @@ namespace Poole
 		CollidersToFreeAtEndOfTick.clear();
 	}
 
-	bool ColliderManager2D::TestCollisionBase(const Collider2D& a, const Collider2D& b)
+	bool ColliderManager2D::TestCollision(const Collider2D& a, const Collider2D& b)
 	{
 		const BoxCollider2D* b1 = dynamic_cast<const BoxCollider2D*>(&a);
 		const BoxCollider2D* b2 = dynamic_cast<const BoxCollider2D*>(&b);
@@ -39,8 +49,15 @@ namespace Poole
 		{
 			return TestCollision(*b1, *b2);
 		}
+		const CircleCollider2D* c1 = dynamic_cast<const CircleCollider2D*>(&a);
+		const CircleCollider2D* c2 = dynamic_cast<const CircleCollider2D*>(&b);
+		if (c1 && c2)
+		{
+			return TestCollision(*c1, *c2);
+		}
 		return false;
 	}
+
 	bool ColliderManager2D::TestCollision(const BoxCollider2D& a, const BoxCollider2D& b)
 	{
 		if (a.GetRadians() == 0 && b.GetRadians() == 0) //AABB
@@ -63,19 +80,19 @@ namespace Poole
 			const BoxCollider2D::Corners& b_c = b.GetCorners();
 
 			const std::array<fvec2, 4> axes = { 
-				(a_c.UL - a_c.LL), //A's horizontal axis of projection
-				(a_c.UL - a_c.UR), //A's vertical	axis of projection
-				(b_c.UL - b_c.LL), //B's horizontal	axis of projection
-				(b_c.UL - b_c.UR)  //B's vertical	axis of projection
+				(a_c.TL - a_c.BL), //A's horizontal axis of projection
+				(a_c.TL - a_c.TR), //A's vertical	axis of projection
+				(b_c.TL - b_c.BL), //B's horizontal	axis of projection
+				(b_c.TL - b_c.TR)  //B's vertical	axis of projection
 			};
 
 			auto proj_minmax = [](const BoxCollider2D::Corners& corners, fvec2 axis) {
-				const f32 ul = glm::dot(corners.UL, axis) / glm::length2(axis);
-				const f32 ur = glm::dot(corners.UR, axis) / glm::length2(axis);
-				const f32 ll = glm::dot(corners.LL, axis) / glm::length2(axis);
-				const f32 lr = glm::dot(corners.LR, axis) / glm::length2(axis);
+				const f32 tl = glm::dot(corners.TL, axis) / glm::length2(axis);
+				const f32 tr = glm::dot(corners.TR, axis) / glm::length2(axis);
+				const f32 bl = glm::dot(corners.BL, axis) / glm::length2(axis);
+				const f32 br = glm::dot(corners.BR, axis) / glm::length2(axis);
 
-				return std::pair{ std::min({ul,ur,ll,lr}), std::max({ul,ur,ll,lr}) };
+				return std::pair{ std::min({tl,tr,bl,br}), std::max({tl,tr,bl,br}) };
 			};
 
 			for (fvec2 axis : axes)
@@ -93,5 +110,10 @@ namespace Poole
 			//One resource: https://www.gamedev.net/tutorials/_/technical/game-programming/2d-rotated-rectangle-collision-r2604/
 			//Better resource: https://gamedevelopment.tutsplus.com/collision-detection-using-the-separating-axis-theorem--gamedev-169t
 		}
+	}
+	
+	bool ColliderManager2D::TestCollision(const CircleCollider2D& a, const CircleCollider2D& b)
+	{
+		return glm::length2(a.GetPosition() - b.GetPosition()) < square(a.GetRadius() + b.GetRadius());
 	}
 }

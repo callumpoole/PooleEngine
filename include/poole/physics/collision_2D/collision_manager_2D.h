@@ -2,10 +2,13 @@
 
 #include "poole/core.h"
 
-#include "box_collider_2D.h"
+#include "collider_2D.h"
 
 namespace Poole
 {
+	class BoxCollider2D;
+	class CircleCollider2D;
+
 	class ColliderManager2D
 	{
 	public:
@@ -24,8 +27,9 @@ namespace Poole
 	public:
 		static void BeginScene();
 		static void EndScene();
-	//private:
-		static bool TestCollisionBase(const Collider2D& a, const Collider2D& b);
+	private:
+		static bool TestCollision(const Collider2D& a, const Collider2D& b);
 		static bool TestCollision(const BoxCollider2D& a, const BoxCollider2D& b);
+		static bool TestCollision(const CircleCollider2D& a, const CircleCollider2D& b);
 	};
 }

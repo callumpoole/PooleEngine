@@ -7,20 +7,20 @@ namespace Poole
 	class BoxCollider2D : public Collider2D
 	{
 	public:
-		BoxCollider2D(fvec2 Position = {0, 0}, fvec2 Size = {1, 1}, f32 Radians = 0);
+		BoxCollider2D(fvec2 position = {0, 0}, fvec2 size = {1, 1}, f32 radians = 0);
 
 		struct Corners
 		{
-			fvec2 LL; //Lower Left
-			fvec2 LR; //Lower Right
-			fvec2 UL; //Upper Left
-			fvec2 UR; //Upper Right
+			fvec2 BL; //Bottom Left
+			fvec2 BR; //Bottom Right
+			fvec2 TL; //Top Left
+			fvec2 TR; //Top Right
 		};
 		
-		void SetPosition(fvec2 Position);
-		void SetSize(fvec2 Size);
-		void SetRadians(f32 Radians);
-		void SetValues(fvec2 Position, fvec2 Size, f32 Radians);
+		void SetPosition(fvec2 position);
+		void SetSize(fvec2 size);
+		void SetRadians(f32 radians);
+		void SetValues(fvec2 position, fvec2 size, f32 radians);
 		fvec2 GetPosition() const { return m_Position; }
 		fvec2 GetSize() const { return m_Size; }
 		f32 GetRadians() const { return m_Radians; }
@@ -55,7 +55,7 @@ namespace Poole
 		}
 		inline std::array<fvec2, 2> GetMinMaxUnrotated() const
 		{
-			return { m_CachedCorners.LL, m_CachedCorners.UR };
+			return { m_CachedCorners.BL, m_CachedCorners.TR };
 		}
 
 		virtual void DebugDraw() override;

@@ -4,43 +4,43 @@
 
 namespace Poole
 {
-	BoxCollider2D::BoxCollider2D(fvec2 Position, fvec2 Size, f32 Radians)
-		: m_Position(Position), m_Size(Size), m_Radians(Poole::Math::NormalizeRadiansNegPiAndPi(Radians))
+	BoxCollider2D::BoxCollider2D(fvec2 position, fvec2 size, f32 radians)
+		: m_Position(position), m_Size(size), m_Radians(Poole::Math::NormalizeRadiansNegPiAndPi(radians))
 	{
 		CacheCorners();
 	}
 
-	void BoxCollider2D::SetPosition(fvec2 Position)
+	void BoxCollider2D::SetPosition(fvec2 position)
 	{ 
-		if (m_Position != Position)
+		if (m_Position != position)
 		{
-			m_Position = Position; 
+			m_Position = position; 
 			CacheCorners();
 		}
 	}
-	void BoxCollider2D::SetSize(fvec2 Size) 
+	void BoxCollider2D::SetSize(fvec2 size) 
 	{
-		if (m_Size != Size)
+		if (m_Size != size)
 		{
-			m_Size = Size; 
+			m_Size = size; 
 			CacheCorners(); 
 		}
 	}
-	void BoxCollider2D::SetRadians(f32 Radians) 
+	void BoxCollider2D::SetRadians(f32 radians) 
 	{
-		if (m_Radians != Radians)
+		if (m_Radians != radians)
 		{
-			m_Radians = Poole::Math::NormalizeRadiansNegPiAndPi(Radians);
+			m_Radians = Poole::Math::NormalizeRadiansNegPiAndPi(radians);
 			CacheCorners();
 		}
 	}
-	void BoxCollider2D::SetValues(fvec2 Position, fvec2 Size, f32 Radians)
+	void BoxCollider2D::SetValues(fvec2 position, fvec2 size, f32 radians)
 	{
-		if (m_Position != Position || m_Size != Size || m_Radians != Radians)
+		if (m_Position != position || m_Size != size || m_Radians != radians)
 		{
-			m_Position = Position; 
-			m_Size = Size; 
-			m_Radians = Poole::Math::NormalizeRadiansNegPiAndPi(Radians);
+			m_Position = position; 
+			m_Size = size; 
+			m_Radians = Poole::Math::NormalizeRadiansNegPiAndPi(radians);
 			CacheCorners();
 		}
 	}
@@ -56,35 +56,35 @@ namespace Poole
 
 		Corners out;
 		const fmat2 mat = CalculateRotationMatrix();
-		out.LL = (fvec2{ -m_Size.x, -m_Size.y } / 2.f) * mat + m_Position;
-		out.LR = (fvec2{  m_Size.x, -m_Size.y } / 2.f) * mat + m_Position;
-		out.UR = (fvec2{  m_Size.x,  m_Size.y } / 2.f) * mat + m_Position;
-		out.UL = (fvec2{ -m_Size.x,  m_Size.y } / 2.f) * mat + m_Position;
+		out.BL = (fvec2{ -m_Size.x, -m_Size.y } / 2.f) * mat + m_Position;
+		out.BR = (fvec2{  m_Size.x, -m_Size.y } / 2.f) * mat + m_Position;
+		out.TR = (fvec2{  m_Size.x,  m_Size.y } / 2.f) * mat + m_Position;
+		out.TL = (fvec2{ -m_Size.x,  m_Size.y } / 2.f) * mat + m_Position;
 
 		//Makes sure the names of the corners get swapped when the shape is rotated, probably not needed ever.
 		//const float absRads = abs(m_Radians);
 		//if (absRads > PI * 3 / 4.f)
 		//{
-		//	swap(out.LL, out.UR);
-		//	swap(out.UL, out.LR);
+		//	swap(out.BL, out.TR);
+		//	swap(out.TL, out.BR);
 		//}
 		//else if (absRads > PI / 4)
 		//{
 		//	if (m_Radians > 0.f) 
 		//	{
-		//		const fvec2 temp = out.UL;
-		//		out.UL = out.UR;
-		//		out.UR = out.LR;
-		//		out.LR = out.LL;
-		//		out.LL = temp;
+		//		const fvec2 temp = out.TL;
+		//		out.TL = out.TR;
+		//		out.TR = out.BR;
+		//		out.BR = out.BL;
+		//		out.BL = temp;
 		//	}
 		//	else
 		//	{
-		//		const fvec2 temp = out.LL;
-		//		out.LL = out.LR;
-		//		out.LR = out.UR;
-		//		out.UR = out.UL;
-		//		out.UL = temp;
+		//		const fvec2 temp = out.BL;
+		//		out.BL = out.BR;
+		//		out.BR = out.TR;
+		//		out.TR = out.TL;
+		//		out.TL = temp;
 		//	}
 		//}
 
@@ -93,22 +93,22 @@ namespace Poole
 	auto BoxCollider2D::CalculateCornersUnrotated() const -> Corners
 	{
 		Corners out;
-		out.LL = (fvec2{ -m_Size.x, -m_Size.y } / 2.f) + m_Position;
-		out.LR = (fvec2{  m_Size.x, -m_Size.y } / 2.f) + m_Position;
-		out.UL = (fvec2{ -m_Size.x,  m_Size.y } / 2.f) + m_Position;
-		out.UR = (fvec2{  m_Size.x,  m_Size.y } / 2.f) + m_Position;
+		out.BL = (fvec2{ -m_Size.x, -m_Size.y } / 2.f) + m_Position;
+		out.BR = (fvec2{  m_Size.x, -m_Size.y } / 2.f) + m_Position;
+		out.TL = (fvec2{ -m_Size.x,  m_Size.y } / 2.f) + m_Position;
+		out.TR = (fvec2{  m_Size.x,  m_Size.y } / 2.f) + m_Position;
 		return out;
 	}
 
 	void BoxCollider2D::DebugDraw()
 	{
-		Rendering::Renderer2D::DrawQuad(m_Position, m_Size, colliding ? Colors::Red<fcolor4> : Colors::Green<fcolor4>, m_Radians);
+		Rendering::Renderer2D::DrawQuad(m_Position, m_Size, m_Colliding ? Colors::Red<fcolor4> : Colors::Green<fcolor4>, m_Radians);
 
 		//const Corners c = GetCorners();
 		//
-		//Rendering::Renderer2D::DrawQuad(c.LL,  fvec2{ 0.05f, 0.05f }, Colors::Blue<fcolor4>, m_Radians);
-		//Rendering::Renderer2D::DrawQuad(c.LR, fvec2{ 0.05f, 0.05f }, Colors::Pink<fcolor4>, m_Radians);
-		//Rendering::Renderer2D::DrawQuad(c.UL,  fvec2{ 0.05f, 0.05f }, Colors::Purple<fcolor4>, m_Radians);
-		//Rendering::Renderer2D::DrawQuad(c.UR, fvec2{ 0.05f, 0.05f }, Colors::Cyan<fcolor4>, m_Radians);
+		//Rendering::Renderer2D::DrawQuad(c.BL,  fvec2{ 0.05f, 0.05f }, Colors::Blue<fcolor4>, m_Radians);
+		//Rendering::Renderer2D::DrawQuad(c.BR, fvec2{ 0.05f, 0.05f }, Colors::Pink<fcolor4>, m_Radians);
+		//Rendering::Renderer2D::DrawQuad(c.TL,  fvec2{ 0.05f, 0.05f }, Colors::Purple<fcolor4>, m_Radians);
+		//Rendering::Renderer2D::DrawQuad(c.TR, fvec2{ 0.05f, 0.05f }, Colors::Cyan<fcolor4>, m_Radians);
 	}
 }

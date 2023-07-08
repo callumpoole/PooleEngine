@@ -86,9 +86,11 @@ set (APPLICATION_SRC ${APPLICATION_SRC}
 	"include/poole/physics/collision_2D/collision_manager_2D.h"
 	"include/poole/physics/collision_2D/collider_2D.h"
 	"include/poole/physics/collision_2D/box_collider_2D.h"
+	"include/poole/physics/collision_2D/circle_collider_2D.h"
 	"src/physics/collision_2D/collision_manager_2D.cpp"
 	"src/physics/collision_2D/collider_2D.cpp"
 	"src/physics/collision_2D/box_collider_2D.cpp"
+	"src/physics/collision_2D/circle_collider_2D.cpp"
 	)
 
 # Setup Folder Filters for IDE

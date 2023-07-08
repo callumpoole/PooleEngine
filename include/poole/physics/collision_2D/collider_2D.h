@@ -11,6 +11,6 @@ namespace Poole
 		virtual ~Collider2D();
 		virtual void DebugDraw() = 0;
 
-		bool colliding = false;
+		bool m_Colliding = false;
 	};
 }
