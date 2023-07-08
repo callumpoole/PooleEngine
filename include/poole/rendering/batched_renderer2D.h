@@ -99,6 +99,10 @@ namespace Poole::Rendering
 
 
 		static void DrawLine(const fvec3& p0, const fvec3& p1, const fvec4& color);
+		static void DrawLine(const fvec2& p0, const fvec2& p1, const fvec4& color)
+		{
+			DrawLine(fvec3{ p0.x, p0.y, 0.f }, fvec3{ p1.x, p1.y, 0.f }, color);
+		}
 		static f32 GetLineWidth();
 		static void SetLineWidth(f32 width);
 	};

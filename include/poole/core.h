@@ -19,6 +19,7 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
+#include "glm/gtx/norm.hpp"
 
 //Effectively escapes , in macros
 #define ARG(...) __VA_ARGS__
@@ -42,6 +43,16 @@
 static constexpr f32 SMALL_NUMBER = 1.e-6f;
 static constexpr f32 KINDA_SMALL_NUMBER = 1.e-4f;
 static constexpr f32 PI = 3.14159265358979323846f;
+static constexpr f32 TAU = 2 * PI;
+
+template <class T>
+void swap(T& x, T& y)
+{
+	T temp;
+	temp = x;
+	x = y;
+	y = temp;
+}
 
 namespace Poole
 {
@@ -61,7 +72,6 @@ namespace Poole
 	}
 }
 
-
 template<typename ... TemplateParam, typename Lambda, typename ... FunctionParam>
 decltype(auto) InvokeTemplatedLambda(Lambda&& lambda, FunctionParam&& ... functionParam)
 {
@@ -70,6 +80,30 @@ decltype(auto) InvokeTemplatedLambda(Lambda&& lambda, FunctionParam&& ... functi
 
 namespace Poole::Math
 {
+	template<typename T, T Full>
+	static T NormalizeAnglePositive(T angle) {
+		angle = fmod(angle, Full);  // Take the modulo with tau or 360
+		if (angle < 0.f) {
+			return angle + Full;  // Adjust if negative
+		}
+		return angle;  // Already within the desired range
+	}
+	template<typename T, T Full>
+	static T NormalizeAngleHalfNegHalfPos(T angle) {
+		angle = fmod(angle, Full);  //Take the modulo with tau or 360
+		if (angle <= -Full / 2.f) {
+			return angle + Full;  //Adjust if less than -pi or -180
+		}
+		else if (angle > Full / 2.f) {
+			return angle - Full;  //Adjust if greater than pi or 180
+		}
+		return angle;  //Already within the desired range
+	}
+	template<typename T> static T NormalizeRadiansTau(T radians)		  { return NormalizeAnglePositive<T, TAU>(radians); }
+	template<typename T> static T NormalizeRadiansNegPiAndPi(T radians)   { return NormalizeAngleHalfNegHalfPos<T, TAU>(radians); }
+	template<typename T> static T NormalizeDegrees360(T degrees)		  { return NormalizeAnglePositive<T, 360.f>(degrees); }
+	template<typename T> static T NormalizeDegreesNeg180And180(T degrees) { return NormalizeAngleHalfNegHalfPos<T, 360.f>(degrees); }
+
 	template<typename T>
 	static constexpr T Abs(T f) //std's Abs is not constexpr!!!
 	{

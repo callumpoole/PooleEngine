@@ -4,7 +4,7 @@ namespace Poole
 {
 	Collider2D::Collider2D()
 	{
-		std::cout << "Collider2D()";
+		
 	}
 	Collider2D::~Collider2D()
 	{

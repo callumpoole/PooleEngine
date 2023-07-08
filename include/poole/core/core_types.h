@@ -125,9 +125,9 @@ namespace Colors
 	AddColor(Blue, 0.00f, 0.00f, 1.00f, 1.00f);
 	AddColor(Yellow, 1.00f, 1.00f, 0.00f, 1.00f);
 	AddColor(Cyan, 0.00f, 1.00f, 1.00f, 1.00f);
-	AddColor(Purple, 1.00f, 0.00f, 1.00f, 1.00f);
+	AddColor(Purple, 0.50f, 0.00f, 1.00f, 1.00f);
 	AddColor(Orange, 1.00f, 0.50f, 0.00f, 1.00f);
-	AddColor(Pink, 1.00f, 0.50f, 0.50f, 1.00f);
+	AddColor(Pink, 1.00f, 0.00f, 1.00f, 1.00f);
 	AddColor(White, 1.00f, 1.00f, 1.00f, 1.00f);
 	AddColor(Grey, 0.50f, 0.50f, 0.50f, 1.00f);
 	AddColor(Black, 0.00f, 0.00f, 0.00f, 1.00f);
