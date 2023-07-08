@@ -11,10 +11,15 @@ namespace Poole
 
 		struct Corners
 		{
-			fvec2 BL; //Bottom Left
-			fvec2 BR; //Bottom Right
-			fvec2 TL; //Top Left
-			fvec2 TR; //Top Right
+			union {
+				struct {
+					fvec2 BL; //Bottom Left
+					fvec2 BR; //Bottom Right
+					fvec2 TL; //Top Left
+					fvec2 TR; //Top Right
+				};
+				std::array<fvec2, 4> corners;
+			};
 		};
 		
 		void SetPosition(fvec2 position);

@@ -31,5 +31,6 @@ namespace Poole
 		static bool TestCollision(const Collider2D& a, const Collider2D& b);
 		static bool TestCollision(const BoxCollider2D& a, const BoxCollider2D& b);
 		static bool TestCollision(const CircleCollider2D& a, const CircleCollider2D& b);
+		static bool TestCollision(const BoxCollider2D& a, const CircleCollider2D& b);
 	};
 }
