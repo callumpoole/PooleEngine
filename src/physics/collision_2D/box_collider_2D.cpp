@@ -4,8 +4,8 @@
 
 namespace Poole
 {
-	BoxCollider2D::BoxCollider2D(fvec2 position, fvec2 size, f32 radians)
-		: m_Position(position), m_Size(size), m_Radians(Poole::Math::NormalizeRadiansNegPiAndPi(radians))
+	BoxCollider2D::BoxCollider2D(fvec2 position, fvec2 halfSize, f32 radians)
+		: m_Position(position), m_HalfSize(halfSize), m_Radians(Poole::Math::NormalizeRadiansNegPiAndPi(radians))
 	{
 		CacheCorners();
 	}
@@ -18,11 +18,11 @@ namespace Poole
 			CacheCorners();
 		}
 	}
-	void BoxCollider2D::SetSize(fvec2 size) 
+	void BoxCollider2D::SetHalfSize(fvec2 size) 
 	{
-		if (m_Size != size)
+		if (m_HalfSize != size)
 		{
-			m_Size = size; 
+			m_HalfSize = size; 
 			CacheCorners(); 
 		}
 	}
@@ -34,12 +34,12 @@ namespace Poole
 			CacheCorners();
 		}
 	}
-	void BoxCollider2D::SetValues(fvec2 position, fvec2 size, f32 radians)
+	void BoxCollider2D::SetValues(fvec2 position, fvec2 halfSize, f32 radians)
 	{
-		if (m_Position != position || m_Size != size || m_Radians != radians)
+		if (m_Position != position || m_HalfSize != halfSize || m_Radians != radians)
 		{
 			m_Position = position; 
-			m_Size = size; 
+			m_HalfSize = halfSize; 
 			m_Radians = Poole::Math::NormalizeRadiansNegPiAndPi(radians);
 			CacheCorners();
 		}
@@ -56,10 +56,10 @@ namespace Poole
 
 		Corners out;
 		const fmat2 mat = CalculateRotationMatrix();
-		out.BL = (fvec2{ -m_Size.x, -m_Size.y } / 2.f) * mat + m_Position;
-		out.BR = (fvec2{  m_Size.x, -m_Size.y } / 2.f) * mat + m_Position;
-		out.TR = (fvec2{  m_Size.x,  m_Size.y } / 2.f) * mat + m_Position;
-		out.TL = (fvec2{ -m_Size.x,  m_Size.y } / 2.f) * mat + m_Position;
+		out.BL = fvec2{ -m_HalfSize.x, -m_HalfSize.y } * mat + m_Position;
+		out.BR = fvec2{  m_HalfSize.x, -m_HalfSize.y } * mat + m_Position;
+		out.TR = fvec2{  m_HalfSize.x,  m_HalfSize.y } * mat + m_Position;
+		out.TL = fvec2{ -m_HalfSize.x,  m_HalfSize.y } * mat + m_Position;
 
 		//Makes sure the names of the corners get swapped when the shape is rotated, probably not needed ever.
 		//const float absRads = abs(m_Radians);
@@ -93,16 +93,16 @@ namespace Poole
 	auto BoxCollider2D::CalculateCornersUnrotated() const -> Corners
 	{
 		Corners out;
-		out.BL = (fvec2{ -m_Size.x, -m_Size.y } / 2.f) + m_Position;
-		out.BR = (fvec2{  m_Size.x, -m_Size.y } / 2.f) + m_Position;
-		out.TL = (fvec2{ -m_Size.x,  m_Size.y } / 2.f) + m_Position;
-		out.TR = (fvec2{  m_Size.x,  m_Size.y } / 2.f) + m_Position;
+		out.BL = fvec2{ -m_HalfSize.x, -m_HalfSize.y } + m_Position;
+		out.BR = fvec2{  m_HalfSize.x, -m_HalfSize.y } + m_Position;
+		out.TL = fvec2{ -m_HalfSize.x,  m_HalfSize.y } + m_Position;
+		out.TR = fvec2{  m_HalfSize.x,  m_HalfSize.y } + m_Position;
 		return out;
 	}
 
 	void BoxCollider2D::DebugDraw()
 	{
-		Rendering::Renderer2D::DrawQuad(m_Position, m_Size, m_Colliding ? Colors::Red<fcolor4> : Colors::Green<fcolor4>, m_Radians);
+		Rendering::Renderer2D::DrawQuad(m_Position, m_HalfSize * 2.f, m_Colliding ? Colors::Red<fcolor4> : Colors::Green<fcolor4>, m_Radians);
 
 		//const Corners c = GetCorners();
 		//

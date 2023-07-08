@@ -7,7 +7,7 @@ namespace Poole
 	class BoxCollider2D : public Collider2D
 	{
 	public:
-		BoxCollider2D(fvec2 position = {0, 0}, fvec2 size = {1, 1}, f32 radians = 0);
+		BoxCollider2D(fvec2 position = {0, 0}, fvec2 halfSize = {1, 1}, f32 radians = 0);
 
 		struct Corners
 		{
@@ -18,11 +18,11 @@ namespace Poole
 		};
 		
 		void SetPosition(fvec2 position);
-		void SetSize(fvec2 size);
+		void SetHalfSize(fvec2 halfSize);
 		void SetRadians(f32 radians);
-		void SetValues(fvec2 position, fvec2 size, f32 radians);
+		void SetValues(fvec2 position, fvec2 halfSize, f32 radians);
 		fvec2 GetPosition() const { return m_Position; }
-		fvec2 GetSize() const { return m_Size; }
+		fvec2 GetHalfSize() const { return m_HalfSize; }
 		f32 GetRadians() const { return m_Radians; }
 		const Corners& GetCorners() const { return m_CachedCorners; }
 		inline fmat2 CalculateRotationMatrix() const
@@ -34,7 +34,7 @@ namespace Poole
 
 	private:
 		fvec2 m_Position;
-		fvec2 m_Size;
+		fvec2 m_HalfSize;
 		f32 m_Radians;
 		Corners m_CachedCorners;
 
@@ -49,8 +49,8 @@ namespace Poole
 
 			const fmat2 mat = CalculateRotationMatrix();
 			return {
-				(fvec2{-m_Size.x, -m_Size.y} / 2.f) * mat + m_Position,
-				(fvec2{ m_Size.x,  m_Size.y} / 2.f) * mat + m_Position
+				fvec2{-m_HalfSize.x, -m_HalfSize.y} * mat + m_Position,
+				fvec2{ m_HalfSize.x,  m_HalfSize.y} * mat + m_Position
 			};
 		}
 		inline std::array<fvec2, 2> GetMinMaxUnrotated() const
